@@ -1,14 +1,18 @@
 #!/bin/bash
-#---------------------------------------------------
-# pcsync.sh
-# by Bruno Bischofberger, 19.12.2013
+# ==================================================================
+# FILE     pcsync.sh
+# MACHINE  all
+# INFO     syncs stuff from external HD to local HD and back, using
+#          rsync
 #
-# syncs stuff from external HD to local HD and back
-#---------------------------------------------------
+# DATE     17.12.2013
+# OWNER    Bischofberger
+# ==================================================================
 
 # TODO 
 # - Code in Englisch
 # - Code sauberer machen
+# - SSH Option für direktes synchronisieren über Heimnetzwerk
 
 
 # variables
