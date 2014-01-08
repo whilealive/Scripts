@@ -1,3 +1,4 @@
+#!/bin/bash
 # ==================================================================
 # FILE     musictogo.sh
 # MACHINE  laptop (?) --> where the ogg library is...
