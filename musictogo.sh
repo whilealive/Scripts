@@ -5,7 +5,7 @@
 # INFO     randomly chooses albums from library and copies them to 
 #          mobile player
 #
-# DATE     08.01.2014
+# DATE     09.01.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -24,3 +24,8 @@ sum=0
 # wenn summe mit albumsize addiert grösser als limit, nicht hinzufügen
 # mit Kopieren auf Player fortfahren
 albumsize=`du --block-size=MB -s $album/`
+
+
+# Befehl sucht nach allen directories OHNE subfolders
+# ein Unterordner: "-links 3" usw.
+find . -type d -links 2
