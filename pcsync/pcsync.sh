@@ -5,7 +5,7 @@
 # INFO     syncs stuff from external HD to local HD and back, using
 #          rsync
 #
-# DATE     17.12.2013
+# DATE     10.01.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -55,6 +55,7 @@ if [[ $answer == up ]] ; then
 
 	if [[ $answer2 == j ]] ; then
 		if [[ $dry != "-n" ]] ; then  # dry-run Option behandeln
+			echo "setting correct rights on $stick"
 			sudo chown -R $(hostname):users $stick  # user anpassen für --delete Option
 		fi
 
@@ -70,6 +71,7 @@ elif [[ $answer == down ]] ; then
 
 	if [[ $answer2 == j ]] ; then
 		if [[ $dry != "-n" ]] ; then
+			echo "setting correct rights on $stick"
 			sudo chown -R $(hostname):users $stick
 		fi
 
