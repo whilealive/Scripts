@@ -1,10 +1,16 @@
 #!/bin/bash
 #------------------------------------------
 # mbsync-secure
-# by Bruno Bischofberger, 07.12.2013
+# by Bruno Bischofberger, 10.01.2014
 # runs mbsync periodicly with gpg security
 #------------------------------------------
 
+# TODO:
+# use "sponge" from "moreutils"
+# title change
+
+
+# variables
 period="15"
 let "period_sec = 60 * $period"
 
@@ -28,7 +34,7 @@ do
 	echo "next sync in $period minutes."
 
 	# delete the insecure copy of the rc file again
-	rm ~/.mbsyncrc-temp1 ~/.mbsyncrc-temp2 ~/.mbsyncrc-temp
+	shred -xu ~/.mbsyncrc-temp1 ~/.mbsyncrc-temp2 ~/.mbsyncrc-temp
 
 	# either wait for 15 minutes or check again immediately by pressing Enter
 	echo "to sync mails now, press [Enter]"
