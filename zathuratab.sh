@@ -1,7 +1,9 @@
 # ==================================================================
 # FILE     zathuratab.sh
 # MACHINE  all
-# INFO     open pdfs in zathura within tabbed
+# INFO     - open pdfs in zathura within tabbed
+#          - for use with ranger: add zathuratab in 
+#            ~/.config/ranger/rifle.conf
 #
 # DATE     11.01.2013
 # OWNER    Bischofberger
