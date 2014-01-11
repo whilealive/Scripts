@@ -7,13 +7,14 @@
 # OWNER    Bischofberger
 # ==================================================================
 
-# TODO:
-# if(!exists tabbed.xid)
-#     starte tabbed mit zathura und $1
-# else
-#     redirect zathura mit $1
-#
-# Dann von ranger diesen Befehl aufrufen
+# variables
+tempfile=/tmp/tabbed.xid
 
-$(tabbed -c -d >/tmp/tabbed.xid)
-zathura -e $(</tmp/tabbed.xid)
+
+if [ "$(pidof tabbed)" ]  # tabbed already running
+then
+	zathura -e $(<$tempfile) $1
+else
+	$(tabbed -c -d >$tempfile)
+	zathura -e $(<$tempfile) $1
+fi
