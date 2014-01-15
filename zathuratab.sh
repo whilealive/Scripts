@@ -5,7 +5,7 @@
 #          - for use with ranger: add zathuratab in 
 #            ~/.config/ranger/rifle.conf
 #
-# DATE     11.01.2013
+# DATE     14.01.2013
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -15,8 +15,8 @@ tempfile=/tmp/tabbed.xid
 
 if [ "$(pidof tabbed)" ]  # tabbed already running
 then
-	zathura -e $(<$tempfile) $1
+	zathura -e $(<$tempfile) "$1"
 else
 	$(tabbed -c -d >$tempfile)
-	zathura -e $(<$tempfile) $1
+	zathura -e $(<$tempfile) "$1"
 fi
