@@ -1,7 +1,7 @@
 #!/bin/bash
 #------------------------------------------
 # mbsync-secure
-# by Bruno Bischofberger, 10.01.2014
+# by Bruno Bischofberger, 15.01.2014
 # runs mbsync periodicly with gpg security
 #------------------------------------------
 
@@ -11,7 +11,7 @@
 
 
 # variables
-period="15"
+period="10"
 let "period_sec = 60 * $period"
 
 passwd1="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 1p)"
