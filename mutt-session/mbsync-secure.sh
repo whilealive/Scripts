@@ -1,13 +1,14 @@
 #!/bin/bash
 #------------------------------------------
 # mbsync-secure
-# by Bruno Bischofberger, 15.01.2014
+# by Bruno Bischofberger, 17.01.2014
 # runs mbsync periodicly with gpg security
 #------------------------------------------
 
 # TODO:
 # use "sponge" from "moreutils"
 # title change
+# give a total of new messages at the bottom
 
 
 # variables
