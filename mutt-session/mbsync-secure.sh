@@ -45,8 +45,8 @@ do
 	NEW2=`find $INBOX2 -type f | wc -l`
 	NEW3=`find $INBOX3 -type f | wc -l`
 	echo -e "fastmail new:\t $NEW1"
-	echo -e "uzh new:\t $NEW1"
-	echo -e "zhaw new:\t $NEW1"
+	echo -e "uzh new:\t $NEW2"
+	echo -e "zhaw new:\t $NEW3"
 
 	# some information
 	echo -n -e "\nlast sync: "
