@@ -8,7 +8,6 @@
 # TODO:
 # use "sponge" from "moreutils" ?
 # title change
-# give a total of new messages at the bottom
 
 
 # variables
@@ -50,6 +49,6 @@ do
 	echo "next sync in $period minutes."
 
 	# either wait for 15 minutes or check again immediately by pressing Enter
-	echo "to sync mails now, press [Enter]"
+	echo -e "to sync mails now, press [Enter]\n"
 	read -s -t $period_sec input
 done
