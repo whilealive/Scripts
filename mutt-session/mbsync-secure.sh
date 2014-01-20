@@ -1,9 +1,12 @@
 #!/bin/bash
-#------------------------------------------
-# mbsync-secure
-# by Bruno Bischofberger, 17.01.2014
-# runs mbsync periodicly with gpg security
-#------------------------------------------
+# ==================================================================
+# FILE     mbsync-secure
+# MACHINE  all
+# INFO     runs mbsync periodically with gpg security
+#
+# DATE     20.01.2014
+# OWNER    Bischofberger
+# ==================================================================
 
 # TODO:
 # use "sponge" from "moreutils" ?
@@ -25,6 +28,8 @@ passwd2="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 4p)"
 
 while true
 do
+	echo "running mbsync..."
+
 	# copy password into a temporary rc file.
 	# the right position in the rc file is crucial and marked in the original file by the line '#Pass1' etc.
 	sed s/\#Pass1/Pass\ $passwd1/ ~/.mbsyncrc > ~/.mbsyncrc-temp1
