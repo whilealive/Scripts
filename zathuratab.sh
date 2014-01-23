@@ -5,9 +5,12 @@
 #          - for use with ranger: add zathuratab in 
 #            ~/.config/ranger/rifle.conf
 #
-# DATE     14.01.2013
+# DATE     23.01.2013
 # OWNER    Bischofberger
 # ==================================================================
+
+# TODO:
+# handle no argument given
 
 # variables
 tempfile=/tmp/tabbed.xid
