@@ -6,7 +6,7 @@
 #          mobile player
 # DEPENDS  "moreutils"
 #
-# DATE     10.01.2014
+# DATE     23.01.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -33,12 +33,15 @@ touch albumlist.tmp
 find . -type d -links 2 > albumlist.tmp  # search for directories without subdirectories
 nl -w4 --number-separator=": " albumlist.tmp | sponge albumlist.tmp  # add line numbers
 
-# randomly choose a new album from the list, and 
-# check its size
-max=`wc -l albumlist.tmp`
-nextnumbr=`expr $RANDOM % $max`  # evtl innerhalb awk erzeugen, damit eine Linie weiter unten verwendet werden kann. (dort wo jetzt "20" steht)
-nextalbum=`awk -F: '$1 ~ /^20$/ {print $2}' albumlist.tmp`  # suche nach genau "20" in erstem Feld. Wie Variable reinnehmen? Zahlen linksbündig ausrichten.
-albumsize=`du --block-size=MB -s $nextalbum/`
+# randomly choose a new album from the list, and check its size
+max=`wc -l < albumlist.tmp`
+nextnumbr=`expr $RANDOM % $max`
+nextalbum=`awk -F: '$1 ~ /'$nextnumbr'$/ {print $2}' albumlist.tmp`
+
+# ---> bis hier ok
+# die Leerschläge usw. müssen in $nextalbum mit backslash angeführt werden, sonst geht du nicht, oder $nextalbum in "",
+# geht aber irgendwie auch noch nicht
+albumsize=`du --block-size=MB -s $nextalbum | cut -f1`
 
 unset nextnumbr
 unset albumsize
