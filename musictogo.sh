@@ -6,7 +6,7 @@
 #          mobile player
 # DEPENDS  "moreutils"
 #
-# DATE     23.01.2014
+# DATE     24.01.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -30,20 +30,15 @@ cd $library
 
 # list all albums in a temporary file
 touch albumlist.tmp
-find . -type d -links 2 > albumlist.tmp  # search for directories without subdirectories
+find . -type d -links 2 > albumlist.tmp                              # search for directories without subdirectories
 nl -w4 --number-separator=": " albumlist.tmp | sponge albumlist.tmp  # add line numbers
+awk '{$1=$1}1' albumlist.tmp | sponge albumlist.tmp                  # delete all leading spaces
 
 # randomly choose a new album from the list, and check its size
 max=`wc -l < albumlist.tmp`
 nextnumbr=`expr $RANDOM % $max`
-nextalbum=`awk -F: '$1 ~ /'$nextnumbr'$/ {print $2}' albumlist.tmp`
+nextalbum=`awk -F:\  '$1 ~ /^'$nextnumbr'$/ {print $2}' albumlist.tmp`
+albumsize=`du --block-size=MB -s "$nextalbum" | cut -f1`
+echo $albumsize
 
-# ---> bis hier ok
-# die Leerschläge usw. müssen in $nextalbum mit backslash angeführt werden, sonst geht du nicht, oder $nextalbum in "",
-# geht aber irgendwie auch noch nicht
-albumsize=`du --block-size=MB -s $nextalbum | cut -f1`
-
-unset nextnumbr
-unset albumsize
-
-rm albumlist.tmp
+#rm albumlist.tmp
