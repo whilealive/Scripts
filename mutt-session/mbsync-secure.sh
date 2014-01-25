@@ -4,13 +4,11 @@
 # MACHINE  all
 # INFO     runs mbsync periodically with gpg security
 #
-# DATE     20.01.2014
+# DATE     25.01.2014
 # OWNER    Bischofberger
 # ==================================================================
 
 # TODO:
-# use "sponge" from "moreutils" ?
-# title change
 
 
 # variables
