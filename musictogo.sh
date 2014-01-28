@@ -5,7 +5,7 @@
 # INFO     randomly chooses albums from library and copies them to 
 #          mobile player
 #
-# DATE     27.01.2014
+# DATE     28.01.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -17,6 +17,34 @@ library="$HOME/Music"
 player="/run/media/$(hostname)/syncstick"  # after mounting with "udisk_functions"
 sum=0
 
+
+info(){
+    echo "$0: Info: $1" >&2
+}
+
+die(){
+    echo "$0: Error: $1" >&2
+    exit 1
+}
+
+# delete all content on player
+delete_all() {
+    if [ -e $player ] ; then
+        echo -n "Do you really want to delete ALL content on $player? (y/n) "
+        read answer
+        if [[ $answer == y ]] ; then
+            rm -r $player/* || die "Could not delete content."
+            info "Successfully deleted all content."
+        elif [[ $answer == n ]] ; then
+            info "No changes on $player."
+        else
+            die "Invalid answer."
+        fi
+    else
+        die "Please plug in player/card and rerun programme."
+    fi
+}
+
 # check free space on player
 # --> $freespace
 check_free_space() {
@@ -24,8 +52,7 @@ check_free_space() {
         freespace=`df --block-size=1K $player | awk -F'[^0-9]*' 'NR==2 {print $5}'`
         #let "freespace -= 1"  # for safety
     else
-        echo "Please plug in player/card and rerun programme."
-        exit
+        die "Please plug in player/card and rerun programme."
     fi
 }
 
