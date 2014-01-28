@@ -18,10 +18,6 @@ player="/run/media/$(hostname)/syncstick"  # after mounting with "udisk_function
 sum=0
 
 
-info(){
-    echo "$0: Info: $1" >&2
-}
-
 die(){
     echo "$0: Error: $1" >&2
     exit 1
@@ -33,10 +29,12 @@ delete_all() {
         echo -n "Do you really want to delete ALL content on $player? (y/n) "
         read answer
         if [[ $answer == y ]] ; then
-            rm -r $player/* || die "Could not delete content."
-            info "Successfully deleted all content."
+            rm -r $player/* || die "Could not delete content."  # test this
+            echo -e "Successfully deleted all content.\n"
+            sleep 1
         elif [[ $answer == n ]] ; then
-            info "No changes on $player."
+            echo -e "No changes on $player.\n"
+            sleep 1
         else
             die "Invalid answer."
         fi
@@ -46,11 +44,14 @@ delete_all() {
 }
 
 # check free space on player
-# --> $freespace
+# --> $free_space
 check_free_space() {
     if [ -e $player ] ; then
-        freespace=`df --block-size=1K $player | awk -F'[^0-9]*' 'NR==2 {print $5}'`
-        #let "freespace -= 1"  # for safety
+        echo "Checking free space on $player..."
+        free_space=`df --block-size=1K $player | awk -F'[^0-9]*' 'NR==2 {print $5}'`
+        local info_space=`expr $free_space / 1024`
+        echo -e "You have approximately $info_space MB free space on $player.\n"
+        sleep 1
     else
         die "Please plug in player/card and rerun programme."
     fi
@@ -64,7 +65,7 @@ find_albums() {
     find . -type d -links 2 > albumlist2.tmp  # search for directories which have no more subdirectories
     awk '{ printf("%d\t%s\n", NR, $0) }' albumlist2.tmp > albumlist.tmp
     rm albumlist2.tmp
-    echo "done."
+    echo -e "done.\n"
 }
 
 # randomly choose a new album from the list, and check its size
@@ -81,8 +82,8 @@ rand_choose() {
 }
 
 
+delete_all
 check_free_space
-echo freespace = $freespace
 find_albums
 rand_choose
 echo $nextalbum
