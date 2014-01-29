@@ -5,23 +5,54 @@
 # INFO     randomly chooses albums from library and copies them to 
 #          mobile player
 #
-# DATE     28.01.2014
+# DATE     29.01.2014
 # OWNER    Bischofberger
 # ==================================================================
 
 # TODO 
 
 
-# variables
+# paths
 library="$HOME/Music"
-player="/run/media/$(hostname)/syncstick"  # after mounting with "udisk_functions"
-sum=0
+player="/run/media/$(hostname)/syncstick"  # path after mounting
 
 
 die(){
-    echo "$0: Error: $1" >&2
+    echo -e "$0: Error: $1" >&2
     exit 1
 }
+
+# explains usage when giving the "--help" option
+usage() {
+    echo -e "usage: $0 [OPTION]\n\
+Copies whole albums from your local music library to an external player/SD card.\n\
+
+-n, --number=NUMBR  give a maximal number of albums to be exchanged through a random selection
+    --help          shows this help
+    --version       shows version number
+"
+    exit 0
+}
+
+# argument handling
+while [ -n "$1" ]; do
+    case "$1" in
+        "--help")
+            usage
+            ;;
+        "--version")
+            echo "musictogo Version 0.1"
+            exit 0
+            ;;
+#        "-n"|"--number")
+#            exchange_nmbr=$1
+#            shift
+#            ;;
+        *)
+            die "Unknown parameter '$1'.\nGet further information with the \"--help\" option."
+            ;;
+    esac
+done
 
 # delete all content on player
 delete_all() {
@@ -60,7 +91,7 @@ check_free_space() {
 # list all albums in a temporary file called "albumlist.tmp"
 find_albums() {
     echo -n "Collecting music library information..."
-    cd $library
+    cd $library || die "Directory $library not available on this system."
     touch albumlist.tmp albumlist2.tmp
     find . -type d -links 2 > albumlist2.tmp  # search for directories which have no more subdirectories
     awk '{ printf("%d\t%s\n", NR, $0) }' albumlist2.tmp > albumlist.tmp
@@ -81,11 +112,24 @@ rand_choose() {
     albumsize=`du --block-size=1K -s "$nextalbum" | cut -f1 | grep -o '[0-9]\+'`
 }
 
-
+# main()
 delete_all
 check_free_space
 find_albums
-rand_choose
+size_sum=0
+touch copy_list.tmp
+while (( $size_sum < $free_space )) ; do
+    rand_choose
+    if (( $size_sum + $albumsize < $free_space )) ; then
+        let size_sum += $albumsize
+        $nextalbum >> copy_list.tmp
+    else
+        break
+    fi
+done
+    
+
+
 echo $nextalbum
 echo $albumsize
 #rm albumlist.tmp
