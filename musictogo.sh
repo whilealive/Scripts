@@ -12,9 +12,12 @@
 # TODO 
 
 
-# paths
+# global variables
 library="$HOME/Music"
 player="/run/media/$(hostname)/syncstick"  # path after mounting
+free_space=0
+nextalbum=""
+albumsize=0
 
 
 
@@ -34,6 +37,26 @@ Copies whole albums from your local music library to an external player/SD card.
 "
     exit 0
 }
+
+# handle options
+while [ -n "$1" ]; do
+    case "$1" in
+        "--help")
+            usage
+            ;;
+        "--version")
+            echo "musictogo Version 0.1"
+            exit 0
+            ;;
+#        "-n"|"--number")
+#            exchange_nmbr=$1
+#            shift
+#            ;;
+        *)
+            die "Unknown parameter '$1'.\nGet further information with the \"--help\" option."
+            ;;
+    esac
+done
 
 # delete all content on player
 delete_all() {
@@ -55,7 +78,7 @@ delete_all() {
 }
 
 # check free space on player
-# --> $free_space
+# global variables set: $free_space
 check_free_space() {
     if [ -e $player ] ; then
         echo "Checking free space on $player..."
@@ -85,7 +108,7 @@ list_albums() {
 }
 
 # randomly choose a new album from the list, and check its size
-# --> $nextalbum, $albumsize
+# global variables set: $nextalbum, $albumsize
 rand_choose() {
     local max=`wc -l < albumlist.tmp`
     local nextnumbr=0
@@ -121,28 +144,6 @@ copy() {
 }
     
 
-
-# -----------------
-# main starts here:
-# -----------------
-while [ -n "$1" ]; do
-    case "$1" in
-        "--help")
-            usage
-            ;;
-        "--version")
-            echo "musictogo Version 0.1"
-            exit 0
-            ;;
-#        "-n"|"--number")
-#            exchange_nmbr=$1
-#            shift
-#            ;;
-        *)
-            die "Unknown parameter '$1'.\nGet further information with the \"--help\" option."
-            ;;
-    esac
-done
 
 delete_all
 check_free_space
