@@ -5,7 +5,7 @@
 # INFO     randomly chooses albums from library and copies them to 
 #          mobile player
 #
-# DATE     29.01.2014
+# DATE     30.01.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -15,6 +15,7 @@
 # paths
 library="$HOME/Music"
 player="/run/media/$(hostname)/syncstick"  # path after mounting
+
 
 
 die(){
@@ -34,26 +35,6 @@ Copies whole albums from your local music library to an external player/SD card.
     exit 0
 }
 
-# argument handling
-while [ -n "$1" ]; do
-    case "$1" in
-        "--help")
-            usage
-            ;;
-        "--version")
-            echo "musictogo Version 0.1"
-            exit 0
-            ;;
-#        "-n"|"--number")
-#            exchange_nmbr=$1
-#            shift
-#            ;;
-        *)
-            die "Unknown parameter '$1'.\nGet further information with the \"--help\" option."
-            ;;
-    esac
-done
-
 # delete all content on player
 delete_all() {
     if [ -e $player ] ; then
@@ -62,7 +43,6 @@ delete_all() {
         if [[ $answer == y ]] ; then
             rm -r $player/* || die "Could not delete content."  # test this
             echo -e "Successfully deleted all content.\n"
-            sleep 1
         elif [[ $answer == n ]] ; then
             echo -e "No changes on $player.\n"
             sleep 1
@@ -82,14 +62,19 @@ check_free_space() {
         free_space=`df --block-size=1K $player | awk -F'[^0-9]*' 'NR==2 {print $5}'`
         local info_space=`expr $free_space / 1024`
         echo -e "You have approximately $info_space MB free space on $player.\n"
-        sleep 1
+        echo -n "Would you like to proceed? (y/n) "
+        read answer
+        if [[ $answer == n ]]  ; then
+            exit 1
+        fi
+        echo
     else
         die "Please plug in player/card and rerun programme."
     fi
 }
 
 # list all albums in a temporary file called "albumlist.tmp"
-find_albums() {
+list_albums() {
     echo -n "Collecting music library information..."
     cd $library || die "Directory $library not available on this system."
     touch albumlist.tmp albumlist2.tmp
@@ -112,24 +97,58 @@ rand_choose() {
     albumsize=`du --block-size=1K -s "$nextalbum" | cut -f1 | grep -o '[0-9]\+'`
 }
 
-# main()
-delete_all
-check_free_space
-find_albums
-size_sum=0
-touch copy_list.tmp
-while (( $size_sum < $free_space )) ; do
-    rand_choose
-    if (( $size_sum + $albumsize < $free_space )) ; then
-        let size_sum += $albumsize
-        $nextalbum >> copy_list.tmp
-    else
-        break
-    fi
-done
+# randomly choose albums until space is full
+create_copy_list() {
+    echo -n "randomly choosing albums..."
+    local size_sum=0
+    touch copy_list.tmp
+    while (( size_sum < free_space )) ; do
+        rand_choose
+        if (( (size_sum += albumsize) < free_space )) ; then
+            &>>copy_list.tmp echo $nextalbum
+        else
+            break
+        fi
+    done
+    echo -e "done.\n"
+}
+
+# copy everything to player
+copy() {
+    echo -n "Data is being copied..."
+
+    echo "done."
+}
     
 
 
-echo $nextalbum
-echo $albumsize
-#rm albumlist.tmp
+# -----------------
+# main starts here:
+# -----------------
+while [ -n "$1" ]; do
+    case "$1" in
+        "--help")
+            usage
+            ;;
+        "--version")
+            echo "musictogo Version 0.1"
+            exit 0
+            ;;
+#        "-n"|"--number")
+#            exchange_nmbr=$1
+#            shift
+#            ;;
+        *)
+            die "Unknown parameter '$1'.\nGet further information with the \"--help\" option."
+            ;;
+    esac
+done
+
+delete_all
+check_free_space
+list_albums
+create_copy_list
+copy
+
+#rm albumlist.tmp copy_list.tmp
+exit 0
