@@ -5,7 +5,7 @@
 # INFO     randomly chooses albums from library and copies them to 
 #          mobile player
 #
-# DATE     30.01.2014
+# DATE     31.01.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -20,18 +20,18 @@ nextalbum=""
 albumsize=0
 
 
-
 die(){
     echo -e "$0: Error: $1" >&2
     exit 1
 }
 
 # explains usage when giving the "--help" option
+# one more option: -n, --number=NUMBR  give a maximal number of albums to be exchanged through a random selection
 usage() {
     echo -e "usage: $0 [OPTION]\n\
 Copies whole albums from your local music library to an external player/SD card.\n\
 
--n, --number=NUMBR  give a maximal number of albums to be exchanged through a random selection
+-k, --keep-logs     do not remove temporary files (such as albumlist and copylist)
     --help          shows this help
     --version       shows version number
 "
@@ -47,6 +47,10 @@ while [ -n "$1" ]; do
         "--version")
             echo "musictogo Version 0.1"
             exit 0
+            ;;
+        "-k" | "--keep-logs")
+            keep=1
+            shift
             ;;
 #        "-n"|"--number")
 #            exchange_nmbr=$1
@@ -68,7 +72,6 @@ delete_all() {
             echo -e "Successfully deleted all content.\n"
         elif [[ $answer == n ]] ; then
             echo -e "No changes on $player.\n"
-            sleep 1
         else
             die "Invalid answer."
         fi
@@ -122,7 +125,7 @@ rand_choose() {
 
 # randomly choose albums until space is full
 create_copy_list() {
-    echo -n "randomly choosing albums..."
+    echo -n "Randomly choosing albums..."
     local size_sum=0
     touch copy_list.tmp
     while (( size_sum < free_space )) ; do
@@ -151,5 +154,8 @@ list_albums
 create_copy_list
 copy
 
-#rm albumlist.tmp copy_list.tmp
+if [ ! -v keep ] ; then
+    rm albumlist.tmp copy_list.tmp
+fi
+
 exit 0
