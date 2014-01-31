@@ -48,7 +48,7 @@ do
 
 	# some information
 	echo -n -e "\nlast sync: "
-	date --utc +"%H:%M"
+	date +"%H:%M"
 	echo "next sync in $period minutes."
 
 	# either wait for 15 minutes or check again immediately by pressing Enter
