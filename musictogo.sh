@@ -5,11 +5,11 @@
 # INFO     randomly chooses albums from library and copies them to 
 #          mobile player
 #
-# DATE     31.01.2014
+# DATE     01.02.2014
 # OWNER    Bischofberger
 # ==================================================================
 
-# TODO 
+# TODO  - kopiere mit Überordner (Artist)
 
 
 # global variables
@@ -102,7 +102,6 @@ check_free_space() {
 # list all albums in a temporary file called "albumlist.tmp"
 list_albums() {
     echo -n "Collecting music library information..."
-    cd $library || die "Directory $library not available on this system."
     touch albumlist.tmp albumlist2.tmp
     find . -type d -links 2 > albumlist2.tmp  # search for directories which have no more subdirectories
     awk '{ printf("%d\t%s\n", NR, $0) }' albumlist2.tmp > albumlist.tmp
@@ -142,12 +141,16 @@ create_copy_list() {
 # copy everything to player
 copy() {
     echo -n "Data is being copied..."
-
+    while read line ; do
+        cp -r "$line" $player/ || die "Could not copy all content."
+    done < copy_list.tmp
     echo "done."
 }
     
 
 
+### main script starts here ###
+cd $library || die "Directory $library not available on this system."
 delete_all
 check_free_space
 list_albums
@@ -157,5 +160,7 @@ copy
 if [ ! -v keep ] ; then
     rm albumlist.tmp copy_list.tmp
 fi
+
+echo "Enjoy!"
 
 exit 0
