@@ -9,11 +9,12 @@
 # OWNER    Bischofberger
 # ==================================================================
 
-# TODO  - kopiere mit Überordner (Artist)
+# TODO
 
 
 # global variables
-library="$HOME/Music"
+library="$HOME/Music/mp3-snapshot"
+#library="$HOME/Music"
 player="/run/media/$(hostname)/syncstick"  # path after mounting
 free_space=0
 nextalbum=""
@@ -67,8 +68,9 @@ delete_all() {
     if [ -e $player ] ; then
         echo -n "Do you really want to delete ALL content on $player? (y/n) "
         read answer
+
         if [[ $answer == y ]] ; then
-            rm -r $player/* || die "Could not delete content."  # test this
+            rm -r $player/* || die "Could not delete content."
             echo -e "Successfully deleted all content.\n"
         elif [[ $answer == n ]] ; then
             echo -e "No changes on $player.\n"
@@ -84,16 +86,20 @@ delete_all() {
 # global variables set: $free_space
 check_free_space() {
     if [ -e $player ] ; then
-        echo "Checking free space on $player..."
+        echo -n "Checking free space on $player..."
+
         free_space=`df --block-size=1K $player | awk -F'[^0-9]*' 'NR==2 {print $5}'`
         local info_space=`expr $free_space / 1024`
+
+        echo "done."
         echo -e "You have approximately $info_space MB free space on $player.\n"
         echo -n "Would you like to proceed? (y/n) "
         read answer
+
         if [[ $answer == n ]]  ; then
             exit 1
         fi
-        echo
+        echo ""
     else
         die "Please plug in player/card and rerun programme."
     fi
@@ -101,11 +107,17 @@ check_free_space() {
 
 # list all albums in a temporary file called "albumlist.tmp"
 list_albums() {
+    if [ -e albumlist.tmp ] ; then
+        mv albumlist.tmp albumlist_old.tmp
+    fi
+
     echo -n "Collecting music library information..."
+
     touch albumlist.tmp albumlist2.tmp
     find . -type d -links 2 > albumlist2.tmp  # search for directories which have no more subdirectories
-    awk '{ printf("%d\t%s\n", NR, $0) }' albumlist2.tmp > albumlist.tmp
+    awk '{ printf("%d\t%s\n", NR, $0) }' albumlist2.tmp > albumlist.tmp  # add line numbers
     rm albumlist2.tmp
+
     echo -e "done.\n"
 }
 
@@ -124,7 +136,12 @@ rand_choose() {
 
 # randomly choose albums until space is full
 create_copy_list() {
+    if [ -e copy_list.tmp ] ; then
+        mv copy_list.tmp copy_list_old.tmp
+    fi
+
     echo -n "Randomly choosing albums..."
+
     local size_sum=0
     touch copy_list.tmp
     while (( size_sum < free_space )) ; do
@@ -135,16 +152,21 @@ create_copy_list() {
             break
         fi
     done
+
     echo -e "done.\n"
 }
 
 # copy everything to player
 copy() {
     echo -n "Data is being copied..."
+
     while read line ; do
-        cp -r "$line" $player/ || die "Could not copy all content."
+        cp -r --parents "$line" $player/ || die "Could not copy all content."
     done < copy_list.tmp
+
     echo "done."
+    local num=`wc -l < copy_list.tmp`
+    echo "$num albums have been copied."
 }
     
 
@@ -157,10 +179,13 @@ list_albums
 create_copy_list
 copy
 
+# handle logfiles
 if [ ! -v keep ] ; then
     rm albumlist.tmp copy_list.tmp
+else
+    echo "Logfiles can be found in $library."
 fi
 
-echo "Enjoy!"
+echo -e "\nEnjoy!"
 
 exit 0
