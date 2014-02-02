@@ -1,10 +1,10 @@
 #!/bin/bash
 # ==================================================================
 # FILE     dwm-statusbar.sh
-# MACHINE  laptop
+# MACHINE  all
 # INFO     Status script for dwm
 #
-# DATE     17.12.2013
+# DATE     02.02.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -36,4 +36,8 @@ dte(){
 }
 
 # Pipe to status bar
-xsetroot -name "[$(bat)] [$(vol)] $(dte) Uhr "
+if [[ $(hostname) == "laptop" ]] ; then
+    xsetroot -name "[$(bat)] [$(vol)] $(dte) Uhr "
+else
+    xsetroot -name "$(dte) Uhr "
+fi
