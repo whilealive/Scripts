@@ -8,15 +8,12 @@
 #            formatting: cd /run/media/, login as root with su, 
 #            chown -R bruno:users bruno
 #
-# DATE     17.01.2014
+# DATE     03.02.2014
 # OWNER    Bischofberger
 # ==================================================================
 
 # TODO 
-# - Code in Englisch
-# - Code sauberer machen
 # - SSH Option für direktes synchronisieren über Heimnetzwerk
-# - testen, ob rsync korrekt gelaufen, sonst nicht mit "successful" antworten
 
 
 # variables
@@ -56,33 +53,33 @@ echo -n "Syncup (up) or Syncdown (down)? "
 read answer
 
 if [[ $answer == up ]] ; then
-	echo -n "Lokale Daten wirklich auf EXTERNE HD synchronizieren? (j/n) "
+    echo -n "Do you really want to sync local data to EXTERNAL disk? (y/n) "
 	read answer2
 
-	if [[ $answer2 == j ]] ; then
-		if [[ $dry != "-n" ]] ; then  # dry-run Option behandeln
+	if [[ $answer2 == y ]] ; then
+		if [[ $dry != "-n" ]] ; then  # handle dry-run option
 			echo "setting correct rights on $stick"
-			sudo chown -R $(hostname):users $stick  # user anpassen für --delete Option
+			sudo chown -R $(hostname):users $stick  # user handling for rsync --delete
 		fi
-
-		rsync -avu "$dry" --delete --include-from="$includefile" $HOME/ $stick/
-		echo "pcsync (up) successful"
+		rsync -avu "$dry" --delete --include-from="$includefile" $HOME/ $stick/ \
+            || die "rsync error"
+		echo -e "\npcsync (up) successful"
 	else
 		nothing_done
 	fi
 
 elif [[ $answer == down ]] ; then
-	echo -n "Externe Daten wirklich auf diese LOKALE HD synchronisieren? (j/n) "
+    echo -n "Do you really want to sync external disk to this LOCAL disk? (y/n) "
 	read answer2
 
-	if [[ $answer2 == j ]] ; then
+	if [[ $answer2 == y ]] ; then
 		if [[ $dry != "-n" ]] ; then
 			echo "setting correct rights on $stick"
 			sudo chown -R $(hostname):users $stick
 		fi
-
-		rsync -avu "$dry" --delete --include-from="$includefile" $stick/ $HOME/ 
-		echo "pcsync (down) successful"
+		rsync -avu "$dry" --delete --include-from="$includefile" $stick/ $HOME/ \
+            || die "rsync error"
+		echo -e "\npcsync (down) successful"
 	else
 		nothing_done
 	fi
