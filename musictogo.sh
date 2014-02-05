@@ -5,20 +5,18 @@
 # INFO     randomly chooses albums from library and copies them to 
 #          mobile player
 #
-# DATE     01.02.2014
+# DATE     05.02.2014
 # OWNER    Bischofberger
 # ==================================================================
 
-# TODO
+# TODO  - Check all exit status stuff
+#       - implement option -n
 
 
-# global variables
+# paths
 library="$HOME/Music/mp3-snapshot"
 #library="$HOME/Music"
 player="/run/media/$(hostname)/syncstick"  # path after mounting
-free_space=0
-nextalbum=""
-albumsize=0
 
 
 die(){
@@ -27,14 +25,14 @@ die(){
 }
 
 # explains usage when giving the "--help" option
-# one more option: -n, --number=NUMBR  give a maximal number of albums to be exchanged through a random selection
 usage() {
     echo -e "usage: $0 [OPTION]\n\
 Copies whole albums from your local music library to an external player/SD card.\n\
 
--k, --keep-logs     do not remove temporary files (such as albumlist and copylist)
-    --help          shows this help
-    --version       shows version number
+-k, --keep-logs       do not remove temporary files (such as albumlist and copylist)
+-n, --number [NUMBR]  give a maximal number of albums to be exchanged through a random selection
+    --help            shows this help
+    --version         shows version number
 "
     exit 0
 }
@@ -53,10 +51,14 @@ while [ -n "$1" ]; do
             keep=1
             shift
             ;;
-#        "-n"|"--number")
-#            exchange_nmbr=$1
-#            shift
-#            ;;
+        "-n"|"--number")
+            shift
+            exchange_nmbr=$1
+            if [[ ! $exchange_nmbr =~ ^[0-9]+$  || $exchange_nmbr == 0 ]] ; then
+                die "Give a number > 1."
+            fi
+            shift
+            ;;
         *)
             die "Unknown parameter '$1'.\nGet further information with the \"--help\" option."
             ;;
@@ -83,7 +85,7 @@ delete_all() {
 }
 
 # check free space on player
-# global variables set: $free_space
+# variables set: $free_space
 check_free_space() {
     if [ -e $player ] ; then
         echo -n "Checking free space on $player..."
@@ -116,17 +118,17 @@ list_albums() {
     touch albumlist.tmp albumlist2.tmp
     find . -type d -links 2 > albumlist2.tmp  # search for directories which have no more subdirectories
     awk '{ printf("%d\t%s\n", NR, $0) }' albumlist2.tmp > albumlist.tmp  # add line numbers
+    max=`wc -l < albumlist.tmp`  # upper bound for random number generator in rand_choose()
     rm albumlist2.tmp
 
     echo -e "done.\n"
 }
 
 # randomly choose a new album from the list, and check its size
-# global variables set: $nextalbum, $albumsize
+# variables set: $nextalbum, $albumsize, $nextnumbr
 rand_choose() {
-    local max=`wc -l < albumlist.tmp`
-    local nextnumbr=0
     local FLOOR=1
+    nextnumbr=`expr $RANDOM % $max`
     while [ $nextnumbr -lt $FLOOR ] ; do
         nextnumbr=`expr $RANDOM % $max`
     done
@@ -143,9 +145,22 @@ create_copy_list() {
     echo -n "Randomly choosing albums..."
 
     local size_sum=0
+    local again="yes"
+    local chosen[0]=0  # list of already chosen numbers
+
     touch copy_list.tmp
     while (( size_sum < free_space )) ; do
         rand_choose
+        while [[ $again == yes ]] ; do
+            again="no"
+            for i in ${chosen[@]} ; do
+                if (( nextnumbr == i )) ; then  # random number appears twice
+                    rand_choose
+                    again="yes"
+                fi
+            done
+        done
+        chosen=(${chosen[@]} $nextnumbr)
         if (( (size_sum += albumsize) < free_space )) ; then
             &>>copy_list.tmp echo $nextalbum
         else
@@ -177,7 +192,7 @@ delete_all
 check_free_space
 list_albums
 create_copy_list
-copy
+#copy
 
 # handle logfiles
 if [ ! -v keep ] ; then
