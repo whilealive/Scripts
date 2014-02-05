@@ -192,7 +192,7 @@ delete_all
 check_free_space
 list_albums
 create_copy_list
-#copy
+copy
 
 # handle logfiles
 if [ ! -v keep ] ; then
