@@ -5,18 +5,19 @@
 # INFO     randomly chooses albums from library and copies them to 
 #          mobile player
 #
-# DATE     05.02.2014
+# DATE     10.02.2014
 # OWNER    Bischofberger
 # ==================================================================
 
 # TODO  - Check all exit status stuff
-#       - implement option -n
 
 
 # paths
 library="$HOME/Music/mp3-snapshot"
 #library="$HOME/Music"
-player="/run/media/$(hostname)/syncstick"  # path after mounting
+#player="/run/media/$(hostname)/syncstick"  # path after mounting
+player="/run/media/$(hostname)/9016-4EF8"
+exchange_nmbr=99999  # some big number for the -n option
 
 
 die(){
@@ -149,7 +150,7 @@ create_copy_list() {
     local chosen[0]=0  # list of already chosen numbers
 
     touch copy_list.tmp
-    while (( size_sum < free_space )) ; do
+    while (( size_sum < free_space && exchange_nmbr > 0 )) ; do
         rand_choose
         while [[ $again == yes ]] ; do
             again="no"
@@ -163,6 +164,7 @@ create_copy_list() {
         chosen=(${chosen[@]} $nextnumbr)
         if (( (size_sum += albumsize) < free_space )) ; then
             &>>copy_list.tmp echo $nextalbum
+            (( --exchange_nmbr ))
         else
             break
         fi
