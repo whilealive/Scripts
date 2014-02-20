@@ -1,15 +1,13 @@
 #!/bin/bash
 # ==================================================================
 # FILE     musictogo.sh
-# MACHINE  laptop (?) --> where the ogg library is...
+# MACHINE  laptop (?) --> where the music library is...
 # INFO     randomly chooses albums from library and copies them to 
 #          mobile player
 #
-# DATE     10.02.2014
+# DATE     20.02.2014
 # OWNER    Bischofberger
 # ==================================================================
-
-# TODO  - Check all exit status stuff
 
 
 # paths
