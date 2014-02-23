@@ -8,7 +8,7 @@
 #            formatting: cd /run/media/, login as root with su, 
 #            chown -R bruno:users bruno
 #
-# DATE     03.02.2014
+# DATE     23.02.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -59,7 +59,8 @@ if [[ $answer == up ]] ; then
 	if [[ $answer2 == y ]] ; then
 		if [[ $dry != "-n" ]] ; then  # handle dry-run option
 			echo "setting correct rights on $stick"
-			sudo chown -R $(hostname):users $stick  # user handling for rsync --delete
+			sudo chown -R $(hostname):users $stick \  # user handling for rsync --delete
+                || die "chown error"
 		fi
 		rsync -avu "$dry" --delete --include-from="$includefile" $HOME/ $stick/ \
             || die "rsync error"
@@ -75,7 +76,8 @@ elif [[ $answer == down ]] ; then
 	if [[ $answer2 == y ]] ; then
 		if [[ $dry != "-n" ]] ; then
 			echo "setting correct rights on $stick"
-			sudo chown -R $(hostname):users $stick
+			sudo chown -R $(hostname):users $stick \
+                || die "chown error"
 		fi
 		rsync -avu "$dry" --delete --include-from="$includefile" $stick/ $HOME/ \
             || die "rsync error"
