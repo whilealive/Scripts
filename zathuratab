@@ -15,8 +15,7 @@
 tempfile=/tmp/tabbed.xid
 
 
-
-if [ "$(pidof tabbed)" ] ; then  # tabbed already running
+if [ "$(pidof tabbed)" ] && [ "$(pidof zathura)" ] ; then  # tabbed and zathura already running
     if [ -n "$1" ] ; then
         zathura -e $(<$tempfile) "$1"
     else
