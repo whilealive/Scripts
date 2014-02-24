@@ -2,7 +2,9 @@
 # ==================================================================
 # FILE     mailtab
 # MACHINE  all
-# INFO     - opens mutt and mbsync secure in a tabbed environment
+# INFO     opens mutt and mbsync secure in a tabbed environment, 
+#          instead of a tmux session
+# DEPENDS  suckless tabbed
 #
 # DATE     24.02.2014
 # OWNER    Bischofberger
