@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==================================================================
-# FILE     mutttab.sh
+# FILE     mailtab
 # MACHINE  all
 # INFO     - opens mutt and mbsync secure in a tabbed environment
 #
@@ -8,4 +8,4 @@
 # OWNER    Bischofberger
 # ==================================================================
 
-tabbed -c -r 2 st -w '' -t mail -f -*-terminus-medium-r-*-*-16-*-*-*-*-*-*-* -e mutt
+tabbed -c -r 2 st -w '' -t mail -f -*-terminus-medium-r-*-*-16-*-*-*-*-*-*-*
