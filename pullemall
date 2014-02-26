@@ -9,10 +9,11 @@
 # ==================================================================
 
 # my github repositories
+# spare:    "$HOME/Developer/C/dwmstatus/" \
+#           "$HOME/Scripts/" \
 declare -a Repo=(
     "$HOME/Dotfiles/" \
     "$HOME/Build/" \
-    "$HOME/Developer/C/dwmstatus/" \
 )
 
 die(){
