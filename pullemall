@@ -1,17 +1,18 @@
 #!/bin/bash
 # ==================================================================
-# FILE     pullhemall.sh
+# FILE     pullhemall
 # MACHINE  all
 # INFO     pulls all my git repositories at once
 #
-# DATE     07.02.2014
+# DATE     26.02.2014
 # OWNER    Bischofberger
 # ==================================================================
 
 # my github repositories
 declare -a Repo=(
     "$HOME/Dotfiles/" \
-    "$HOME/Build/"\
+    "$HOME/Build/" \
+    "$HOME/Developer/C/dwmstatus/" \
 )
 
 die(){
