@@ -5,16 +5,16 @@
 # INFO     randomly chooses albums from library and copies them to 
 #          mobile player
 #
-# DATE     20.02.2014
+# DATE     05.03.2014
 # OWNER    Bischofberger
 # ==================================================================
 
 
 # paths
-library="$HOME/Music/mp3-snapshot"
-#library="$HOME/Music"
+#library="$HOME/Music/mp3-snapshot"
+library="$HOME/Music"
 #player="/run/media/$(hostname)/syncstick"  # path after mounting
-player="/run/media/$(hostname)/9016-4EF8"
+player="/run/media/$(hostname)/E966-8E42"  # my sd card
 exchange_nmbr=99999  # some big number for the -n option
 
 
@@ -71,7 +71,7 @@ delete_all() {
         read answer
 
         if [[ $answer == y ]] ; then
-            rm -r $player/* || die "Could not delete content."
+            rm -rf $player/* || die "Could not delete content."
             echo -e "Successfully deleted all content.\n"
         elif [[ $answer == n ]] ; then
             echo -e "No changes on $player.\n"
