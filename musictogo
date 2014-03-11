@@ -9,6 +9,9 @@
 # OWNER    Bischofberger
 # ==================================================================
 
+# TODO: bars for showing copying progress
+#       Idee: pipe output cp -v to wc -l and compare with "total_track_nmbr"
+
 
 # paths
 #library="$HOME/Music/mp3-snapshot"
@@ -18,7 +21,7 @@ player="/run/media/$(hostname)/E966-8E42"  # my sd card
 exchange_nmbr=99999  # some big number for the -n option
 
 
-die(){
+die() {
     echo -e "$0: Error: $1" >&2
     exit 1
 }
@@ -117,7 +120,7 @@ list_albums() {
     touch albumlist.tmp albumlist2.tmp
     find . -type d -links 2 > albumlist2.tmp  # search for directories which have no more subdirectories
     awk '{ printf("%d\t%s\n", NR, $0) }' albumlist2.tmp > albumlist.tmp  # add line numbers
-    max=`wc -l < albumlist.tmp`  # upper bound for random number generator in rand_choose()
+    total_track_nmbr=`wc -l < albumlist.tmp`  # upper bound for random number generator in rand_choose()
     rm albumlist2.tmp
 
     echo -e "done.\n"
@@ -127,9 +130,9 @@ list_albums() {
 # variables set: $nextalbum, $albumsize, $nextnumbr
 rand_choose() {
     local FLOOR=1
-    nextnumbr=`expr $RANDOM % $max`
+    nextnumbr=`expr $RANDOM % $total_track_nmbr`
     while [ $nextnumbr -lt $FLOOR ] ; do
-        nextnumbr=`expr $RANDOM % $max`
+        nextnumbr=`expr $RANDOM % $total_track_nmbr`
     done
     nextalbum=`awk -F '\t' '$1 ~ /^'$nextnumbr'$/ {print $2}' albumlist.tmp`
     albumsize=`du --block-size=1K -s "$nextalbum" | cut -f1 | grep -o '[0-9]\+'`
@@ -175,8 +178,16 @@ create_copy_list() {
 copy() {
     echo -n "Data is being copied..."
 
+    # variables for process bar
+    local BARLENGTH=40
+    local CURRENTBAR=0
+    local MAXSTORAGE=xxx  # compute sum of all files to be copied in MB's
+
     while read line ; do
         cp -r --parents "$line" $player/ || die "Could not copy all content."
+
+        # print a process bar
+
     done < copy_list.tmp
 
     echo "done."
