@@ -10,7 +10,8 @@ dwm-statusbar
 
 musictogo
 ---------
-- nice little program that randomly chooses albums
+take your music with you
+- little program that randomly chooses albums
   of your music library and copies them to an SD-card 
   which goes into your phone or player.
 - always copies whole albums either until card is full
