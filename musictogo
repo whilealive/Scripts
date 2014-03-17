@@ -5,19 +5,18 @@
 # INFO     randomly chooses albums from library and copies them to 
 #          mobile player
 #
-# DATE     05.03.2014
+# DATE     17.03.2014
 # OWNER    Bischofberger
 # ==================================================================
 
-# TODO: bars for showing copying progress
-#       Idee: pipe output cp -v to wc -l and compare with "total_track_nmbr"
-
+# TODO: uppercase variables, 
+#       maybe better function variable return management
 
 # paths
-#library="$HOME/Music/mp3-snapshot"
-library="$HOME/Music"
-#player="/run/media/$(hostname)/syncstick"  # path after mounting
-player="/run/media/$(hostname)/E966-8E42"  # my sd card
+library="$HOME/Music/mp3-snapshot"
+#library="$HOME/Music"
+player="/run/media/$(hostname)/syncstick"  # path after mounting
+#player="/run/media/$(hostname)/E966-8E42"  # my sd card
 exchange_nmbr=99999  # some big number for the -n option
 
 
@@ -39,7 +38,6 @@ Copies whole albums from your local music library to an external player/SD card.
     exit 0
 }
 
-# handle options
 while [ -n "$1" ]; do
     case "$1" in
         "--help")
@@ -88,6 +86,7 @@ delete_all() {
 
 # check free space on player
 # variables set: $free_space
+# TODO: return free_space as echoing
 check_free_space() {
     if [ -e $player ] ; then
         echo -n "Checking free space on $player..."
@@ -128,6 +127,7 @@ list_albums() {
 
 # randomly choose a new album from the list, and check its size
 # variables set: $nextalbum, $albumsize, $nextnumbr
+# TODO: return variables... (?)
 rand_choose() {
     local FLOOR=1
     nextnumbr=`expr $RANDOM % $total_track_nmbr`
@@ -139,6 +139,7 @@ rand_choose() {
 }
 
 # randomly choose albums until space is full
+# TODO: give free_space, nextnumbr, albumsize, etc. as argument...  (?)
 create_copy_list() {
     if [ -e copy_list.tmp ] ; then
         mv copy_list.tmp copy_list_old.tmp
@@ -176,23 +177,42 @@ create_copy_list() {
 
 # copy everything to player
 copy() {
-    echo -n "Data is being copied..."
+    echo "Data is being copied..."
 
     # variables for process bar
     local BARLENGTH=40
-    local CURRENTBAR=0
-    local MAXSTORAGE=xxx  # compute sum of all files to be copied in MB's
+    local CURRENTBAR=0        # gets filled up with #'s
+    local DIFFBAR=$BARLENGTH  # gets filled up with -'s
+    local TOTAL=`wc -l < copy_list.tmp`  # total of albums to be copied
+    local COPIED=0
+    local PERCENT=0
+
+    echo -ne "[----------------------------------------] $PERCENT%\r"
 
     while read line ; do
         cp -r --parents "$line" $player/ || die "Could not copy all content."
+        ((COPIED++))
 
-        # print a process bar
+        # print a process bar (uses bash arithmetics, not bourne shell compatible)
+        PERCENT=`echo "scale=2; 100.0 / $TOTAL * $COPIED" | bc`        # floating point...
+        CURRENTBAR=`echo "scale=2; $BARLENGTH / 100 * $PERCENT" | bc`
+        PERCENT=${PERCENT/.*}  # round (to int): only for output
+        CURRENTBAR=${CURRENTBAR/.*}  # for bar drawing
+        ((DIFFBAR = BARLENGTH - CURRENTBAR))
+        echo -n "["
+        while (( CURRENTBAR-- > 0 )) ; do
+            echo -n "#"
+        done
+        while (( DIFFBAR-- > 0 )) ; do
+            echo -n "-"
+        done
+        echo -ne "] $PERCENT%\r"
 
     done < copy_list.tmp
+    echo "[########################################] 100%"
 
     echo "done."
-    local num=`wc -l < copy_list.tmp`
-    echo "$num albums have been copied."
+    echo "$COPIED albums have been copied."
 }
     
 
