@@ -2,22 +2,20 @@
 # ==================================================================
 # FILE     musictogo.sh
 # MACHINE  laptop (?) --> where the music library is...
-# INFO     randomly chooses albums from library and copies them to 
+#library INFO     randomly chooses albums from library and copies them to 
 #          mobile player
 #
-# DATE     17.03.2014
+# DATE     18.03.2014
 # OWNER    Bischofberger
 # ==================================================================
 
-# TODO: uppercase variables, 
-#       maybe better function variable return management
 
 # paths
-library="$HOME/Music/mp3-snapshot"
-#library="$HOME/Music"
-player="/run/media/$(hostname)/syncstick"  # path after mounting
-#player="/run/media/$(hostname)/E966-8E42"  # my sd card
-exchange_nmbr=99999  # some big number for the -n option
+LIBRARY="$HOME/Music/mp3-snapshot"
+#LIBRARY="$HOME/Music"
+PLAYER="/run/media/$(hostname)/syncstick"  # path after mounting
+#PLAYER="/run/media/$(hostname)/E966-8E42"  # my sd card
+EXCHANGE_NMBR=99999  # some big number for the -n option
 
 
 die() {
@@ -25,7 +23,7 @@ die() {
     exit 1
 }
 
-# explains usage when giving the "--help" option
+
 usage() {
     echo -e "usage: $0 [OPTION]\n\
 Copies whole albums from your local music library to an external player/SD card.\n\
@@ -38,6 +36,12 @@ Copies whole albums from your local music library to an external player/SD card.
     exit 0
 }
 
+
+# global vars set here:
+# ---------------------
+# $KEEP
+# $EXCHANGE_NMBR
+# ---------------------
 while [ -n "$1" ]; do
     case "$1" in
         "--help")
@@ -48,13 +52,13 @@ while [ -n "$1" ]; do
             exit 0
             ;;
         "-k" | "--keep-logs")
-            keep=1
+            KEEP=1
             shift
             ;;
         "-n"|"--number")
             shift
-            exchange_nmbr=$1
-            if [[ ! $exchange_nmbr =~ ^[0-9]+$  || $exchange_nmbr == 0 ]] ; then
+            EXCHANGE_NMBR=$1
+            if [[ ! $EXCHANGE_NMBR =~ ^[0-9]+$  || $EXCHANGE_NMBR == 0 ]] ; then
                 die "Give a number > 1."
             fi
             shift
@@ -65,17 +69,17 @@ while [ -n "$1" ]; do
     esac
 done
 
-# delete all content on player
+
 delete_all() {
-    if [ -e $player ] ; then
-        echo -n "Do you really want to delete ALL content on $player? (y/n) "
+    if [ -e $PLAYER ] ; then
+        echo -n "Do you really want to delete ALL content on $PLAYER? (y/n) "
         read answer
 
         if [[ $answer == y ]] ; then
-            rm -rf $player/* || die "Could not delete content."
+            rm -rf $PLAYER/* || die "Could not delete content."
             echo -e "Successfully deleted all content.\n"
         elif [[ $answer == n ]] ; then
-            echo -e "No changes on $player.\n"
+            echo -e "No changes on $PLAYER.\n"
         else
             die "Invalid answer."
         fi
@@ -84,18 +88,20 @@ delete_all() {
     fi
 }
 
-# check free space on player
-# variables set: $free_space
-# TODO: return free_space as echoing
-check_free_space() {
-    if [ -e $player ] ; then
-        echo -n "Checking free space on $player..."
 
-        free_space=`df --block-size=1K $player | awk -F'[^0-9]*' 'NR==2 {print $5}'`
-        local info_space=`expr $free_space / 1024`
+# global vars set here:
+# ---------------------
+# $FREE_SPACE
+# ---------------------
+check_free_space() {
+    if [ -e $PLAYER ] ; then
+        echo -n "Checking free space on $PLAYER..."
+
+        FREE_SPACE=`df --block-size=1K $PLAYER | awk -F'[^0-9]*' 'NR==2 {print $5}'`
+        local info_space=`expr $FREE_SPACE / 1024`
 
         echo "done."
-        echo -e "You have approximately $info_space MB free space on $player.\n"
+        echo -e "You have approximately $info_space MB free space on $PLAYER.\n"
         echo -n "Would you like to proceed? (y/n) "
         read answer
 
@@ -108,7 +114,11 @@ check_free_space() {
     fi
 }
 
-# list all albums in a temporary file called "albumlist.tmp"
+
+# global vars set here:
+# ---------------------
+# $TOTAL_TRACK_NMBR
+# ---------------------
 list_albums() {
     if [ -e albumlist.tmp ] ; then
         mv albumlist.tmp albumlist_old.tmp
@@ -119,27 +129,30 @@ list_albums() {
     touch albumlist.tmp albumlist2.tmp
     find . -type d -links 2 > albumlist2.tmp  # search for directories which have no more subdirectories
     awk '{ printf("%d\t%s\n", NR, $0) }' albumlist2.tmp > albumlist.tmp  # add line numbers
-    total_track_nmbr=`wc -l < albumlist.tmp`  # upper bound for random number generator in rand_choose()
+    TOTAL_TRACK_NMBR=`wc -l < albumlist.tmp`  # upper bound for random number generator in rand_choose()
     rm albumlist2.tmp
 
     echo -e "done.\n"
 }
 
-# randomly choose a new album from the list, and check its size
-# variables set: $nextalbum, $albumsize, $nextnumbr
-# TODO: return variables... (?)
+
+# global vars set here:
+# ---------------------
+# $NEXTNUMBR
+# $NEXTALBUM
+# $ALBUMSIZE
+# ---------------------
 rand_choose() {
-    local FLOOR=1
-    nextnumbr=`expr $RANDOM % $total_track_nmbr`
-    while [ $nextnumbr -lt $FLOOR ] ; do
-        nextnumbr=`expr $RANDOM % $total_track_nmbr`
+    local floor=1
+    NEXTNUMBR=`expr $RANDOM % $TOTAL_TRACK_NMBR`
+    while [ $NEXTNUMBR -lt $floor ] ; do
+        NEXTNUMBR=`expr $RANDOM % $TOTAL_TRACK_NMBR`
     done
-    nextalbum=`awk -F '\t' '$1 ~ /^'$nextnumbr'$/ {print $2}' albumlist.tmp`
-    albumsize=`du --block-size=1K -s "$nextalbum" | cut -f1 | grep -o '[0-9]\+'`
+    NEXTALBUM=`awk -F '\t' '$1 ~ /^'$NEXTNUMBR'$/ {print $2}' albumlist.tmp`
+    ALBUMSIZE=`du --block-size=1K -s "$NEXTALBUM" | cut -f1 | grep -o '[0-9]\+'`
 }
 
-# randomly choose albums until space is full
-# TODO: give free_space, nextnumbr, albumsize, etc. as argument...  (?)
+
 create_copy_list() {
     if [ -e copy_list.tmp ] ; then
         mv copy_list.tmp copy_list_old.tmp
@@ -152,21 +165,21 @@ create_copy_list() {
     local chosen[0]=0  # list of already chosen numbers
 
     touch copy_list.tmp
-    while (( size_sum < free_space && exchange_nmbr > 0 )) ; do
+    while (( size_sum < FREE_SPACE && EXCHANGE_NMBR > 0 )) ; do
         rand_choose
         while [[ $again == yes ]] ; do
             again="no"
             for i in ${chosen[@]} ; do
-                if (( nextnumbr == i )) ; then  # random number appears twice
+                if (( NEXTNUMBR == i )) ; then  # random number appears twice
                     rand_choose
                     again="yes"
                 fi
             done
         done
-        chosen=(${chosen[@]} $nextnumbr)
-        if (( (size_sum += albumsize) < free_space )) ; then
-            &>>copy_list.tmp echo $nextalbum
-            (( --exchange_nmbr ))
+        chosen=(${chosen[@]} $NEXTNUMBR)
+        if (( (size_sum += ALBUMSIZE) < FREE_SPACE )) ; then
+            &>>copy_list.tmp echo $NEXTALBUM
+            (( --EXCHANGE_NMBR ))
         else
             break
         fi
@@ -175,50 +188,50 @@ create_copy_list() {
     echo -e "done.\n"
 }
 
-# copy everything to player
+
 copy() {
     echo "Data is being copied..."
 
     # variables for process bar
-    local BARLENGTH=40
-    local CURRENTBAR=0        # gets filled up with #'s
-    local DIFFBAR=$BARLENGTH  # gets filled up with -'s
-    local TOTAL=`wc -l < copy_list.tmp`  # total of albums to be copied
-    local COPIED=0
-    local PERCENT=0
+    local barlength=40
+    local currentbar=0        # gets filled up with #'s
+    local diffbar=$BARLENGTH  # gets filled up with -'s
+    local total=`wc -l < copy_list.tmp`  # total of albums to be copied
+    local copied=0
+    local percent=0
 
     echo -ne "[----------------------------------------] $PERCENT%\r"
 
     while read line ; do
-        cp -r --parents "$line" $player/ || die "Could not copy all content."
-        ((COPIED++))
+        cp -r --parents "$line" $PLAYER/ || die "Could not copy all content."
+        ((copied++))
 
         # print a process bar (uses bash arithmetics, not bourne shell compatible)
-        PERCENT=`echo "scale=2; 100.0 / $TOTAL * $COPIED" | bc`        # floating point...
-        CURRENTBAR=`echo "scale=2; $BARLENGTH / 100 * $PERCENT" | bc`
-        PERCENT=${PERCENT/.*}  # round (to int): only for output
-        CURRENTBAR=${CURRENTBAR/.*}  # for bar drawing
-        ((DIFFBAR = BARLENGTH - CURRENTBAR))
+        percent=`echo "scale=2; 100.0 / $total * $copied" | bc`        # floating point...
+        currentbar=`echo "scale=2; $barlength / 100 * $percent" | bc`
+        percent=${percent/.*}  # round (to int): only for output
+        currentbar=${currentbar/.*}  # for bar drawing
+        ((diffbar = barlength - currentbar))
         echo -n "["
-        while (( CURRENTBAR-- > 0 )) ; do
+        while (( currentbar-- > 0 )) ; do
             echo -n "#"
         done
-        while (( DIFFBAR-- > 0 )) ; do
+        while (( diffbar-- > 0 )) ; do
             echo -n "-"
         done
-        echo -ne "] $PERCENT%\r"
+        echo -ne "] $percent%\r"
 
     done < copy_list.tmp
     echo "[########################################] 100%"
 
     echo "done."
-    echo "$COPIED albums have been copied."
+    echo "$copied albums have been copied."
 }
     
 
 
 ### main script starts here ###
-cd $library || die "Directory $library not available on this system."
+cd $LIBRARY || die "Directory $LIBRARY not available on this system."
 delete_all
 check_free_space
 list_albums
@@ -226,10 +239,10 @@ create_copy_list
 copy
 
 # handle logfiles
-if [ ! -v keep ] ; then
+if [ ! -v KEEP ] ; then
     rm albumlist.tmp copy_list.tmp
 else
-    echo "Logfiles can be found in $library."
+    echo "Logfiles can be found in $LIBRARY."
 fi
 
 echo -e "\nEnjoy!"
