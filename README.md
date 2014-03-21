@@ -5,6 +5,7 @@ Some shell scripts
 
 dwm-statusbar
 -------------
+- out of order --> see: dwmstatus in C
 - bash version of my statusbar using xsetroot
 - shows battery, volume and date
 
