@@ -1,0 +1,30 @@
+#!/bin/bash
+# ==================================================================
+# FILE     susp
+# MACHINE  all
+# INFO     Stupid pre-/post-suspend script.
+#          Since in systemd .service files "AFTER=suspend.service"
+#          doesn't work reliably in my case, I ended up with this
+#          workaround
+#
+# DATE     21.03.2014
+# OWNER    Bischofberger
+# ==================================================================
+
+
+host=$(hostname)
+
+# PRE:
+# ----
+if [ "$(pidof dwmstatus)" ] ; then  # dwmstatus is running
+    killall dwmstatus
+fi
+
+systemctl suspend
+
+# POST:
+# -----
+sleep 10  # for safety
+dwmstatus --$host &
+
+exit 0
