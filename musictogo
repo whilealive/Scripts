@@ -1,20 +1,20 @@
 #!/bin/bash
 # ==================================================================
 # FILE     musictogo.sh
-# MACHINE  laptop (?) --> where the music library is...
-#library INFO     randomly chooses albums from library and copies them to 
+# MACHINE  desktop (where the music library is)
+# INFO     randomly chooses albums from library and copies them to 
 #          mobile player
 #
-# DATE     18.03.2014
+# DATE     21.03.2014
 # OWNER    Bischofberger
 # ==================================================================
 
 
 # paths
-LIBRARY="$HOME/Music/mp3-snapshot"
-#LIBRARY="$HOME/Music"
-PLAYER="/run/media/$(hostname)/syncstick"  # path after mounting
-#PLAYER="/run/media/$(hostname)/E966-8E42"  # my sd card
+#LIBRARY="$HOME/Music/mp3-snapshot"
+LIBRARY="$HOME/Music"
+#PLAYER="/run/media/$(hostname)/syncstick"  # path after mounting
+PLAYER="/run/media/$(hostname)/E966-8E42"  # my sd card
 EXCHANGE_NMBR=99999  # some big number for the -n option
 
 
