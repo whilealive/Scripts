@@ -1,3 +1,6 @@
+# put it to: /etc/udev/rules.d/50-powersave.rules
+# runs powersave script when booting
+
 SUBSYSTEM=="power_supply", ENV{POWER_SUPPLY_ONLINE}=="0", RUN+="/usr/bin/powersave true"
 SUBSYSTEM=="power_supply", ENV{POWER_SUPPLY_ONLINE}=="1", RUN+="/usr/bin/powersave false"
 
