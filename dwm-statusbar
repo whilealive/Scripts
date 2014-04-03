@@ -3,8 +3,9 @@
 # FILE     dwm-statusbar.sh
 # MACHINE  all
 # INFO     Status script for dwm
+#          clock and date is being shown by tmux on the right bottom
 #
-# DATE     02.02.2014
+# DATE     03.03.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -31,13 +32,17 @@ vol(){
   fi
 }
 
-dte(){
-  date +"%d.%b %Y - %H:%M"
-}
+xsetroot -name "[$(bat)] [$(vol)] "
+
+
+
+#dte(){
+#  date +"%d.%b %Y - %H:%M"
+#}
 
 # Pipe to status bar
-if [[ $(hostname) == "laptop" ]] ; then
-    xsetroot -name "[$(bat)] [$(vol)] $(dte) Uhr "
-else
-    xsetroot -name "$(dte) Uhr "
-fi
+#if [[ $(hostname) == "laptop" ]] ; then
+#    xsetroot -name "[$(bat)] [$(vol)] $(dte) Uhr "
+#else
+#    xsetroot -name "$(dte) Uhr "
+#fi
