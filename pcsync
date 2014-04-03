@@ -35,6 +35,7 @@ die(){
 nothing_done(){
     echo -e "\nEither answered \"no\" or invalid input."
     echo "Nothing will be done."
+    exit 1
 }
 
 create_statusfile(){
@@ -52,7 +53,7 @@ create_statusfile(){
 # ==================================================================
 
 # last action:
-STATUS="init"
+LAST_RUN="init"
 EOF
         echo "done."
     fi
@@ -61,7 +62,7 @@ EOF
 # allowed arguments: "up"/"down"
 update_statusfile(){
     if [ -n "$1" ] ; then
-        sed -i s/^STATUS\=.*/STATUS\=$1/ $STATUSFILE  # reset STATUS variable
+        sed -i s/^LAST_RUN\=.*/LAST_RUN\=$1/ $STATUSFILE  # reset LAST_RUN variable
     fi
 
 }
@@ -85,65 +86,59 @@ done
 # better ask twice...
 echo -n "Syncup (up) or Syncdown (down)? "
 read answer
-
 if [[ $answer == up ]] ; then
+    DIRECTION=up
+    unset answer
     echo -n "Do you really want to sync local data to EXTERNAL disk? (y/n) "
-	read answer2
-
-	if [[ $answer2 == y ]] ; then
-        # extra protection through statusfile
-        create_statusfile
-        source $STATUSFILE
-        if [[ $STATUS == up ]] ; then
-            die "You must sync down since your last sync direction was up.
-                 Use the \"-f\" option to force direction."
-        fi
-        # set correct rights
-		if [[ $DRY != "-n" ]] ; then
-			echo "setting correct rights on $STICK"
-			sudo chown -R $(hostname):users $STICK || die "chown error"  # user handling for rsync --delete
-		fi
-        # sync
-		rsync -avu "$DRY" --delete --include-from="$INCLUDEFILE" $HOME/ $STICK/ \
-            || die "rsync error"
-        # update statusfile
-		if [[ $DRY != "-n" ]] ; then
-            update_statusfile up
-        fi
-		echo -e "\npcsync (up) successful"
-	else
-		nothing_done
-	fi
-
+	read answer
+	if [[ ! $answer == y ]] ; then
+        nothing_done
+    fi
 elif [[ $answer == down ]] ; then
+    DIRECTION=down
+    unset answer
     echo -n "Do you really want to sync external disk to this LOCAL disk? (y/n) "
-	read answer2
-
-	if [[ $answer2 == y ]] ; then
-        # extra protection through statusfile
-        create_statusfile
-        source $STATUSFILE
-        if [[ $STATUS == down ]] ; then
-            die "You must sync up since your last sync direction was down.
-                 Use the \"-f\" option to force direction."
-        fi
-        # set correct rights
-		if [[ $DRY != "-n" ]] ; then
-			echo "setting correct rights on $STICK"
-			sudo chown -R $(hostname):users $STICK || die "chown error"
-		fi
-        # sync
-		rsync -avu "$DRY" --delete --include-from="$INCLUDEFILE" $STICK/ $HOME/ \
-            || die "rsync error"
-        # update statusfile
-		if [[ $DRY != "-n" ]] ; then
-            update_statusfile down
-        fi
-		echo -e "\npcsync (down) successful"
-	else
-		nothing_done
-	fi
-
+	read answer
+	if [[ ! $answer == y ]] ; then
+        nothing_done
+    fi
 else
-	nothing_done
+    nothing_done
 fi
+
+# extra protection through statusfile
+create_statusfile
+source $STATUSFILE
+if [[ $DIRECTION == up && $LAST_RUN == up ]] ; then
+    die "You must sync down since your last sync direction was up.
+         Use the \"-f\" option to force direction."
+fi
+if [[ $DIRECTION == down && $LAST_RUN == down ]] ; then
+    die "You must sync up since your last sync direction was down
+         Use the \"-f\" option to force direction."
+fi
+
+# set correct rights
+if [[ $DRY != "-n" ]] ; then
+    echo "setting correct rights on $STICK"
+    sudo chown -R $(hostname):users $STICK || die "chown error"  # user handling for rsync --delete
+fi
+
+# sync
+if [[ $DIRECTION == up ]] ; then
+    rsync -avu "$DRY" --delete --include-from="$INCLUDEFILE" $HOME/ $STICK/ \
+        || die "rsync error"
+elif [[ $DIRECTION == down ]] ; then
+    rsync -avu "$DRY" --delete --include-from="$INCLUDEFILE" $STICK/ $HOME/ \
+        || die "rsync error"
+else
+    die "direction unknown."
+fi
+
+# update statusfile
+if [[ $DRY != "-n" ]] ; then
+    update_statusfile $DIRECTION
+fi
+
+# end of sync
+echo -e "\npcsync ($DIRECTION) successful"
