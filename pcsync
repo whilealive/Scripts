@@ -109,11 +109,11 @@ fi
 # extra protection through statusfile
 create_statusfile
 source $STATUSFILE
-if [[ $DIRECTION == up && $LAST_RUN == up ]] ; then
+if [[ $DIRECTION == up && $LAST_RUN == up && $FORCE != -f ]] ; then
     die "You must sync down since your last sync direction was up.
          Use the \"-f\" option to force direction."
 fi
-if [[ $DIRECTION == down && $LAST_RUN == down ]] ; then
+if [[ $DIRECTION == down && $LAST_RUN == down && $FORCE != -f ]] ; then
     die "You must sync up since your last sync direction was down
          Use the \"-f\" option to force direction."
 fi
