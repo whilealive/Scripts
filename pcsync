@@ -8,23 +8,26 @@
 #            formatting: cd /run/media/, login as root with su, 
 #            chown -R bruno:users bruno
 #
-# DATE     24.02.2014
+# DATE     03.04.2014
 # OWNER    Bischofberger
 # ==================================================================
 
 # TODO 
 # - SSH Option für direktes synchronisieren über Heimnetzwerk
+# - Verschlüsselung auf stick
 
 
-# variables
-stick="/run/media/$(hostname)/syncstick/home/syncfolder"
-includefile="$HOME/Scripts/pcsync-inclexcl.txt"
-dry=""
+# variables and paths
+STICK="/run/media/$(hostname)/syncstick/home/syncfolder"
+STATUSFILE="/run/media/$(hostname)/syncstick/home/pcsync-statusfile.txt"
+INCLUDEFILE="$HOME/Scripts/pcsync-inclexcl.txt"
+DRY=""
+FORCE=""
 
 
 # helper functions
 die(){
-    echo "$0: Error: $1" >&2
+    echo -e "$0: Error: $1" >&2
     exit 1
 }
 
@@ -34,18 +37,49 @@ nothing_done(){
     echo "Nothing will be done."
 }
 
+create_statusfile(){
+    if [ ! -f $STATUSFILE ] ; then
+        echo -n "There is no statusfile. Creating one..."
+        touch $STATUSFILE
+        cat > "$STATUSFILE" <<'EOF'
+# ==================================================================
+# FILE     pcsync-statusfile
+# MACHINE  all
+# INFO     gives extra protection from synching the wrong way
+#
+# DATE     
+# OWNER    Bischofberger
+# ==================================================================
+
+# last action:
+STATUS="init"
+EOF
+        echo "done."
+    fi
+}
+
+# allowed arguments: "up"/"down"
+update_statusfile(){
+    if [ -n "$1" ] ; then
+        sed -i s/^STATUS\=.*/STATUS\=$1/ $STATUSFILE  # reset STATUS variable
+    fi
+
+}
 
 # handle options
 while [ -n "$1" ]; do
-	case "$1" in
-	"-n"|"--dry-run")
-		dry="-n"
-		shift;;
-	*)
-		echo "usage: $0 [-n|--dry-run]"
-		die "unknown parameter '$1'"
-		;;
-	esac
+    case "$1" in
+        "-n"|"--dry-run")
+            DRY="-n"
+            shift;;
+        "-f"|"--force")
+            FORCE="-f"
+            shift;;
+        *)
+            echo "usage: $0 [-n|--dry-run] [-f|--force]"
+            die "unknown parameter '$1'"
+            ;;
+    esac
 done
 
 # better ask twice...
@@ -57,12 +91,25 @@ if [[ $answer == up ]] ; then
 	read answer2
 
 	if [[ $answer2 == y ]] ; then
-		if [[ $dry != "-n" ]] ; then  # handle dry-run option
-			echo "setting correct rights on $stick"
-			sudo chown -R $(hostname):users $stick || die "chown error"  # user handling for rsync --delete
+        # extra protection through statusfile
+        create_statusfile
+        source $STATUSFILE
+        if [[ $STATUS == up ]] ; then
+            die "You must sync down since your last sync direction was up.
+                 Use the \"-f\" option to force direction."
+        fi
+        # set correct rights
+		if [[ $DRY != "-n" ]] ; then
+			echo "setting correct rights on $STICK"
+			sudo chown -R $(hostname):users $STICK || die "chown error"  # user handling for rsync --delete
 		fi
-		rsync -avu "$dry" --delete --include-from="$includefile" $HOME/ $stick/ \
+        # sync
+		rsync -avu "$DRY" --delete --include-from="$INCLUDEFILE" $HOME/ $STICK/ \
             || die "rsync error"
+        # update statusfile
+		if [[ $DRY != "-n" ]] ; then
+            update_statusfile up
+        fi
 		echo -e "\npcsync (up) successful"
 	else
 		nothing_done
@@ -73,12 +120,25 @@ elif [[ $answer == down ]] ; then
 	read answer2
 
 	if [[ $answer2 == y ]] ; then
-		if [[ $dry != "-n" ]] ; then
-			echo "setting correct rights on $stick"
-			sudo chown -R $(hostname):users $stick || die "chown error"
+        # extra protection through statusfile
+        create_statusfile
+        source $STATUSFILE
+        if [[ $STATUS == down ]] ; then
+            die "You must sync up since your last sync direction was down.
+                 Use the \"-f\" option to force direction."
+        fi
+        # set correct rights
+		if [[ $DRY != "-n" ]] ; then
+			echo "setting correct rights on $STICK"
+			sudo chown -R $(hostname):users $STICK || die "chown error"
 		fi
-		rsync -avu "$dry" --delete --include-from="$includefile" $stick/ $HOME/ \
+        # sync
+		rsync -avu "$DRY" --delete --include-from="$INCLUDEFILE" $STICK/ $HOME/ \
             || die "rsync error"
+        # update statusfile
+		if [[ $DRY != "-n" ]] ; then
+            update_statusfile down
+        fi
 		echo -e "\npcsync (down) successful"
 	else
 		nothing_done
