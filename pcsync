@@ -8,7 +8,7 @@
 #            formatting: cd /run/media/, login as root with su, 
 #            chown -R bruno:users bruno
 #
-# DATE     03.04.2014
+# DATE     08.04.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -82,6 +82,10 @@ while [ -n "$1" ]; do
             ;;
     esac
 done
+
+if [ ! -e $STICK ] ; then
+    die "Please insert stick and rerun program."
+fi
 
 # better ask twice...
 echo -n "Syncup (up) or Syncdown (down)? "
