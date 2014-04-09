@@ -8,17 +8,17 @@
 #            formatting: cd /run/media/, login as root with su, 
 #            chown -R bruno:users bruno
 #
-# DATE     08.04.2014
+# DATE     09.04.2014
 # OWNER    Bischofberger
 # ==================================================================
 
 # TODO 
 # - SSH Option für direktes synchronisieren über Heimnetzwerk
-# - Verschlüsselung auf stick
 
 
 # variables and paths
-STICK="/run/media/$(hostname)/syncstick/home/syncfolder"
+#STICK="/run/media/$(hostname)/syncstick/home/syncfolder"
+STICK="/mnt/truecrypt1"  # truecrypt mount directory
 STATUSFILE="/run/media/$(hostname)/syncstick/home/pcsync-statusfile.txt"
 INCLUDEFILE="$HOME/Scripts/pcsync-inclexcl.txt"
 DRY=""
