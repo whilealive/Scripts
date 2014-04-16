@@ -4,13 +4,13 @@
 # MACHINE  all
 # INFO     runs mbsync periodically with gpg security
 #
-# DATE     14.03.2014
+# DATE     16.04.2014
 # OWNER    Bischofberger
 # ==================================================================
 
 
 # variables
-period="10"
+period="15"
 let "period_sec = 60 * $period"
 
 INBOX1=$HOME/Maildir/fastmail/INBOX/new/
