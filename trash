@@ -1,0 +1,52 @@
+#!/bin/bash
+# ==================================================================
+# FILE     trash
+# MACHINE  all
+# INFO     moves files and folders to ~/.trash instead of 
+#          deleting them
+#
+# DATE     01.05.2014
+# OWNER    Bischofberger
+# ==================================================================
+
+TRASH="$HOME/.trash/"
+
+die() {
+    echo -e "$0: Error: $1" >&2
+    exit 1
+}
+
+if [ -z "$1" ] ; then
+    die "use with arguments."
+fi
+
+# if first argument is "-e", then empty
+if [[ $1 == -e ]] || [[ $1 == --empty ]] ; then
+    echo -n "Do you really want to empty the trash? (y/n) "
+    read answer
+    if [[ $answer == y ]] ; then
+        rm -r $TRASH
+        mkdir $TRASH
+        echo "trash is empty."
+    else
+        echo "Nothing done."
+    fi
+    exit
+fi
+
+# move all arguments to $TRASH if possible
+# let "mv" do the existence of files checking
+while [ -n "$1" ]; do
+    if [[ $1 == -* ]] ; then  # arguments beginning with "-" are invalid
+        echo "invalid argument: $1."
+        shift
+    else
+        if [ -e $TRASH ] ; then
+            mv -v -t $TRASH $1
+        else
+            mkdir $TRASH
+            mv -v -t $TRASH $1
+        fi
+        shift
+    fi
+done
