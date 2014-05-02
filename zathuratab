@@ -2,14 +2,14 @@
 # FILE     zathuratab.sh
 # MACHINE  all
 # INFO     - open pdfs in zathura within tabbed
-#          - for use with ranger: add zathuratab in 
-#            ~/.config/ranger/rifle.conf
+#          - for use with ranger: 
+#            add zathuratab in ~/.config/ranger/rifle.conf
+#          - for use with vim netrw (x command): 
+#            use "xdg-mime default zathuratab.desktop application/pdf"
 #
-# DATE     28.01.2014
+# DATE     02.05.2014
 # OWNER    Bischofberger
 # ==================================================================
-
-# TODO:
 
 # variables
 tempfile=/tmp/tabbed.xid
