@@ -5,11 +5,11 @@
 # INFO     moves files and folders to ~/.trash instead of 
 #          deleting them
 #
-# DATE     01.05.2014
+# DATE     06.05.2014
 # OWNER    Bischofberger
 # ==================================================================
 
-TRASH="$HOME/.trash/"
+TRASH="$HOME/.trash"
 
 die() {
     echo -e "$0: Error: $1" >&2
@@ -35,18 +35,16 @@ if [[ $1 == -e ]] || [[ $1 == --empty ]] ; then
 fi
 
 # move all arguments to $TRASH if possible
-# let "mv" do the existence of files checking
-while [ -n "$1" ]; do
-    if [[ $1 == -* ]] ; then  # arguments beginning with "-" are invalid
-        echo "invalid argument: $1."
-        shift
+mkdir -p $TRASH
+
+for file in "$@" ; do
+    if [[ $file == -* ]] ; then  # arguments beginning with "-" are invalid
+        echo "invalid argument: $file."
+        continue
+    fi
+    if [ -e "$TRASH/$file" ] || [ -d "$TRASH/$file" ] ; then  # file/dir exists, give it a new name
+        mv -v "$file" "$TRASH/_$file"
     else
-        if [ -e $TRASH ] ; then
-            mv -v -t $TRASH $1
-        else
-            mkdir $TRASH
-            mv -v -t $TRASH $1
-        fi
-        shift
+        mv -v "$file" "$TRASH/"
     fi
 done
