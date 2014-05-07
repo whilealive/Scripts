@@ -13,6 +13,8 @@
 period="15"
 let "period_sec = 60 * $period"
 
+channels="-a"  # channels to be synched by mbsync
+
 INBOX1=$HOME/Maildir/fastmail/INBOX/new/
 #INBOX2=$HOME/Maildir/uzh-pseudo/INBOX_uzh/new/
 #INBOX3=$HOME/Maildir/zhaw-pseudo/INBOX_zhaw/new/
@@ -35,7 +37,7 @@ do
 	sed s/\#Pass2/Pass\ $passwd2/ ~/.mbsyncrc-temp2 > ~/.mbsyncrc-temp
 
 	# run mbsync using the temporary rc file and delete it aftwerwards
-	mbsync -c ~/.mbsyncrc-temp -a
+    mbsync -c ~/.mbsyncrc-temp $channels
 	shred -xu ~/.mbsyncrc-temp1 ~/.mbsyncrc-temp2 ~/.mbsyncrc-temp
 
 	# count new messages
@@ -52,6 +54,11 @@ do
 	echo "next sync in $period minutes."
 
 	# either wait for 15 minutes or check again immediately by pressing Enter
-	echo -e "to sync mails now, press [Enter]\n"
+    channels="-a"
+    echo -e "for a short inbox sync, press \"s\"+[Enter]\n"
+    echo -e "for a complete sync, press [Enter]\n"
 	read -s -t $period_sec input
+    if [[ $input == s ]] ; then
+      channels="fastmail_in"
+    fi
 done
