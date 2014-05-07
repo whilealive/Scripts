@@ -55,9 +55,9 @@ do
 
 	# either wait for 15 minutes or check again immediately by pressing Enter
     channels="-a"
-    echo -e "for a short inbox sync, press \"s\"+[Enter]\n"
+    echo -e "for a short inbox sync, press \"s\"+[Enter]"
     echo -e "for a complete sync, press [Enter]\n"
-	read -s -t $period_sec input
+    read -t $period_sec input
     if [[ $input == s ]] ; then
       channels="fastmail_in"
     fi
