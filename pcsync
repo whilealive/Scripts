@@ -8,7 +8,7 @@
 #            formatting: cd /run/media/, login as root with su, 
 #            chown -R bruno:users bruno
 #
-# DATE     09.04.2014
+# DATE     09.05.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -17,10 +17,9 @@
 
 
 # variables and paths
-#STICK="/run/media/$(hostname)/syncstick/home/syncfolder"
 STICK="/mnt/truecrypt1"  # truecrypt mount directory
 STATUSFILE="/run/media/$(hostname)/syncstick/home/pcsync-statusfile.txt"
-INCLUDEFILE="$HOME/Scripts/pcsync-inclexcl.txt"
+INCLUDEFILE="/run/media/desktop/syncstick/home/pcsync-statusfile.txt"
 DRY=""
 FORCE=""
 
@@ -123,7 +122,7 @@ if [[ $DIRECTION == down && $LAST_RUN == down && $FORCE != -f ]] ; then
 fi
 
 # set correct rights
-if [[ $DRY != "-n" ]] ; then
+if [[ $DRY != -n ]] ; then
     echo "setting correct rights on $STICK"
     sudo chown -R $(hostname):users $STICK || die "chown error"  # user handling for rsync --delete
 fi
@@ -140,7 +139,7 @@ else
 fi
 
 # update statusfile
-if [[ $DRY != "-n" ]] ; then
+if [[ $DRY != -n ]] ; then
     update_statusfile $DIRECTION
 fi
 
