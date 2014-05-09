@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 # ==================================================================
 # FILE     pcsync
 # MACHINE  all
@@ -6,20 +6,23 @@
 #          using rsync
 #          - USB stick in ext4-format needs user rights after 
 #            formatting: cd /run/media/, login as root with su, 
-#            chown -R bruno:users bruno
+#            chown -R $(hostname):users $(hostname)
+#          - NOTE: It is assumed that all participating users are 
+#            members of the group "users", otherwhise rsync's --delete 
+#            option doesn't work properly.
 #
 # DATE     09.05.2014
 # OWNER    Bischofberger
 # ==================================================================
 
 # TODO 
-# - SSH Option für direktes synchronisieren über Heimnetzwerk
+# - SSH option for sync over network
 
 
 # variables and paths
 STICK="/mnt/truecrypt1"  # truecrypt mount directory
 STATUSFILE="/run/media/$(hostname)/syncstick/home/pcsync-statusfile.txt"
-INCLUDEFILE="/run/media/desktop/syncstick/home/pcsync-statusfile.txt"
+INCLUDEFILE="/run/media/$(hostname)/syncstick/home/pcsync-inclexcl.txt"
 DRY=""
 FORCE=""
 
@@ -122,17 +125,19 @@ if [[ $DIRECTION == down && $LAST_RUN == down && $FORCE != -f ]] ; then
 fi
 
 # set correct rights
-if [[ $DRY != -n ]] ; then
-    echo "setting correct rights on $STICK"
-    sudo chown -R $(hostname):users $STICK || die "chown error"  # user handling for rsync --delete
-fi
+# NOTE: here, it is assumed that all participating users are member of the group "users",
+#       otherwhise rsync's --delete option doesn't work properly.
+#if [[ $DRY != -n ]] ; then
+#    echo "setting correct rights on $STICK"
+#    sudo chown -R $(hostname):users $STICK || die "chown error"  # user handling for rsync --delete
+#fi
 
 # sync
 if [[ $DIRECTION == up ]] ; then
-    rsync -avu "$DRY" --delete --include-from="$INCLUDEFILE" $HOME/ $STICK/ \
+    rsync -avu $DRY --delete --include-from="$INCLUDEFILE" $HOME/ $STICK/ \
         || die "rsync error"
 elif [[ $DIRECTION == down ]] ; then
-    rsync -avu "$DRY" --delete --include-from="$INCLUDEFILE" $STICK/ $HOME/ \
+    rsync -avu $DRY --delete --include-from="$INCLUDEFILE" $STICK/ $HOME/ \
         || die "rsync error"
 else
     die "direction unknown."
