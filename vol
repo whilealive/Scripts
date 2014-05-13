@@ -1,0 +1,29 @@
+#!/bin/bash
+# ==================================================================
+# FILE     vol
+# MACHINE  all
+# INFO     just some amixer wrapper
+#
+# DATE     13.05.2014
+# OWNER    Bischofberger
+# ==================================================================
+
+if [ -z "$1" ] ; then
+    amixer sget Master
+    exit 0
+fi
+
+# toggle mut and unmute with "t" argument
+if [[ $1 == t ]] ; then
+    amixer -q sset Master toggle
+    exit 0
+fi
+
+# check if argument is a number between 0 and 10
+regex='^[0-9]$'
+if ! [[ $1 =~ $regex ]] && [[ $1 != 10 ]] ; then
+    die "not a (valid) number."
+fi
+
+let "vol = 10 * $1"
+amixer -q sset Master $vol% unmute
