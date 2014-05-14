@@ -19,11 +19,23 @@ if [ -z "$1" ] ; then
     exit 0
 fi
 
-# toggle mute and unmute with "t" argument
-if [[ $1 == t ]] ; then
-    amixer -q sset Master toggle
-    exit 0
-fi
+# toggle mute, increase, decrease
+case "$1" in
+    "t")
+        amixer -q sset Master toggle
+        exit 0
+        ;;
+    "+")
+        amixer -q sset Master 5+
+        exit 0
+        ;;
+    "-")
+        amixer -q sset Master 5-
+        exit 0
+        ;;
+    *)
+        ;;
+esac
 
 # check if argument is not a number between 0 and 10
 regex='^[0-9]$'
