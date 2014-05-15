@@ -5,11 +5,11 @@
 # INFO     moves files and folders to ~/.trash instead of 
 #          deleting them
 #
-# DATE     06.05.2014
+# DATE     15.05.2014
 # OWNER    Bischofberger
 # ==================================================================
 
-TRASH="$HOME/.trash"
+TRASH="/home/$(hostname)/.trash"
 
 die() {
     echo -e "$0: Error: $1" >&2
