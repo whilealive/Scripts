@@ -11,10 +11,13 @@
 
 
 # paths
-#LIBRARY="$HOME/Music/mp3-snapshot"
-LIBRARY="$HOME/Music"
-#PLAYER="/run/media/$(hostname)/syncstick"  # path after mounting
-PLAYER="/run/media/$(hostname)/E966-8E42"  # my sd card
+#LIBRARY="$HOME/Music"
+#PLAYER="/run/media/$(hostname)/E966-8E42"  # my sd card
+
+# paths of testing environment
+LIBRARY="$HOME/Music/mp3-snapshot"
+PLAYER="/run/media/$(hostname)/syncstick"  # path after mounting
+
 EXCHANGE_NMBR=99999  # some big number for the -n option
 
 
@@ -172,18 +175,20 @@ create_copy_list() {
     local chosen[0]=0  # list of already chosen numbers
 
     # COPY_LIST_LENGTH: for later checking if copy_list.tmp is longer than albumlist.tmp
-    if [ -v $INCLUDE ] && [ -e copy_list_old.tmp ] ; then  # --include option handling
+    if [ -v INCLUDE ] && [ -e copy_list_old.tmp ] ; then  # --include option handling
+        echo -e "\nTaking old copylist."
         local COPY_LIST_LENGTH=`wc -l < copy_list_old.tmp`
         cp copy_list_old.tmp copy_list.tmp
-    elif [ -v $INCLUDE ] ; then
-        die "No copy_list_old.tmp. Need to run musictogo -k once first before using the -i option."
+    elif [ -v INCLUDE ] ; then
+        echo ""
+        die "No old copylist found. Need to run musictogo -k once first before using the -i option.\n"
     else
         local COPY_LIST_LENGTH=0
         touch copy_list.tmp
     fi
 
     while (( size_sum < FREE_SPACE && EXCHANGE_NMBR > 0 )) ; do
-        if [[ COPY_LIST_LENGTH >= TOTAL_TRACK_NMBR ]] ; then
+        if (( COPY_LIST_LENGTH >= TOTAL_TRACK_NMBR )) ; then
             echo "There is not enough music left. The player will not be completely filled."
             break
         fi
