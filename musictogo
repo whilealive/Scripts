@@ -31,6 +31,9 @@ usage() {
 Copies whole albums from your local music library to an external player/SD card.\n\
 
 -k, --keep-logs       do not remove temporary files (such as albumlist and copylist)
+-i, --include         include existing copylist, i.e. exclude albums on it.
+                      musictogo must be run at least once before with the -k option
+                      this option can be used to fill more than one SD card such that no doubles occur
 -n, --number [NUMBR]  give a maximal number of albums to be exchanged through a random selection
     --help            shows this help
     --version         shows version number
@@ -55,6 +58,10 @@ while [ -n "$1" ]; do
             ;;
         "-k" | "--keep-logs")
             KEEP=1
+            shift
+            ;;
+        "-i" | "--include")
+            INCLUDE=1
             shift
             ;;
         "-n"|"--number")
@@ -167,7 +174,19 @@ create_copy_list() {
     local chosen[0]=0  # list of already chosen numbers
 
     touch copy_list.tmp
+    
+    # for later checking if copy_list.tmp is longer than albumlist.tmp
+    if [ -v $INCLUDE ] ; then
+        local COPY_LIST_LENGTH=`wc -l < copy_list_old.tmp`  # --include option handling
+    else
+        local COPY_LIST_LENGTH=0
+    fi
+
     while (( size_sum < FREE_SPACE && EXCHANGE_NMBR > 0 )) ; do
+        if [[ COPY_LIST_LENGTH >= TOTAL_TRACK_NMBR ]] ; then
+            echo "There is not enough music left. The player will not be completely filled."
+            break
+        fi
         rand_choose
         while [[ $again == yes ]] ; do
             again="no"
@@ -182,6 +201,7 @@ create_copy_list() {
         if (( (size_sum += ALBUMSIZE) < FREE_SPACE )) ; then
             &>>copy_list.tmp echo $NEXTALBUM
             (( --EXCHANGE_NMBR ))
+            (( ++COPY_LIST_LENGTH ))
         else
             break
         fi
