@@ -173,13 +173,15 @@ create_copy_list() {
     local again="yes"
     local chosen[0]=0  # list of already chosen numbers
 
-    touch copy_list.tmp
-    
-    # for later checking if copy_list.tmp is longer than albumlist.tmp
-    if [ -v $INCLUDE ] ; then
-        local COPY_LIST_LENGTH=`wc -l < copy_list_old.tmp`  # --include option handling
+    # COPY_LIST_LENGTH: for later checking if copy_list.tmp is longer than albumlist.tmp
+    if [ -v $INCLUDE ] && [ -e copy_list_old.tmp ] ; then  # --include option handling
+        local COPY_LIST_LENGTH=`wc -l < copy_list_old.tmp`
+        cp copy_list_old.tmp copy_list.tmp
+    elif [ -v $INCLUDE ] ; then
+        die "No copy_list_old.tmp. Need to run musictogo -k once first before using the -i option."
     else
         local COPY_LIST_LENGTH=0
+        touch copy_list.tmp
     fi
 
     while (( size_sum < FREE_SPACE && EXCHANGE_NMBR > 0 )) ; do
