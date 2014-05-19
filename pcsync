@@ -11,7 +11,7 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     09.05.2014
+# DATE     19.05.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -20,9 +20,10 @@
 
 
 # variables and paths
-STICK="/mnt/truecrypt1"  # truecrypt mount directory
-STATUSFILE="/run/media/$(hostname)/syncstick/home/pcsync-statusfile.txt"
-INCLUDEFILE="/run/media/$(hostname)/syncstick/home/pcsync-inclexcl.txt"
+#STICK="/mnt/truecrypt1"  # truecrypt mount directory
+STICK="/run/media/$(hostname)/syncstick/sync"
+STATUSFILE="/run/media/$(hostname)/syncstick/pcsync-statusfile.txt"
+INCLUDEFILE="/run/media/$(hostname)/syncstick/pcsync-inclexcl.txt"
 DRY=""
 FORCE=""
 
