@@ -5,11 +5,9 @@
 # INFO     randomly chooses albums from library and copies them to 
 #          mobile player
 #
-# DATE     01.05.2014
+# DATE     19.05.2014
 # OWNER    Bischofberger
 # ==================================================================
-
-# TODO: distribute to more than SD card
 
 
 # paths
