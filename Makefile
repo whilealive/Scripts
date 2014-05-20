@@ -4,13 +4,13 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     14.05.2014
+# DATE     20.05.2014
 # OWNER    Bischofberger
 # ==================================================================
 
 PREFIX:=/usr/local
 
-SCRIPTS = susp nmgui pcsync pullemall trash zathuratab vol
+SCRIPTS = susp nmgui pcsync pullemall trash zathuratab vol musictogo
 
 MUTTSESSIONDIR = mutt-session/
 MUTTSCRIPTS = mbsync-secure mutt-session mutt-session-tmux-init
