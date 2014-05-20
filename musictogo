@@ -13,13 +13,12 @@
 
 
 # paths
-#LIBRARY="$HOME/Music"
-#PLAYER1="/run/media/$(hostname)/E966-8E42"  # my sd card
-#PLAYER2="/run/media/$(hostname)/"  # my sd card
+LIBRARY="$HOME/Music"
+PLAYER="/run/media/$(hostname)/E966-8E42"  # my sd card
 
 # paths of testing environment
-LIBRARY="$HOME/Music/mp3-snapshot"
-PLAYER="/run/media/$(hostname)/syncstick"  # path after mounting
+#LIBRARY="$HOME/Music/mp3-snapshot"
+#PLAYER="/run/media/$(hostname)/syncstick"  # path after mounting
 
 # temporary files
 ALBUMLIST=albumlist.tmp
