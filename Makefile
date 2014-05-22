@@ -10,7 +10,7 @@
 
 PREFIX:=/usr/local
 
-SCRIPTS = susp nmgui pcsync pullemall trash zathuratab vol musictogo
+SCRIPTS = susp nmgui pcsync pullemall trash zathuratab vol
 
 MUTTSESSIONDIR = mutt-session/
 MUTTSCRIPTS = mbsync-secure mutt-session mutt-session-tmux-init
