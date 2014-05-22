@@ -5,11 +5,16 @@
 # INFO     randomly chooses albums from library and copies them to 
 #          mobile player
 #
-# DATE     19.05.2014
+# DATE     22.05.2014
 # OWNER    Bischofberger
 # ==================================================================
 
-# TODO: better player path handling
+# TODO: better player path handling:
+#       - search for some possible mount points such as /mnt/... /run/media/... (also check, if 
+#         folders there really represent mounted volumes, how?) and give a choice such as
+#         1) /mnt/drive1  2) /run/media/drive2 ... n) enter a path
+#         --> maybe use output of "mount" here
+#       - same for LIBRARY
 
 
 # paths
@@ -28,9 +33,11 @@ EXCHANGE_NMBR=99999  # some big number for the -n option
 
 
 die() {
+    clean
     echo -e "$0: Error: $1" >&2
     exit 1
 }
+
 
 clean() {
     local cleaning_list="$ALBUMLIST $COPYLIST"
@@ -61,11 +68,11 @@ Copies whole albums from your local music library to an external player/SD card.
 }
 
 
-# global vars set here:
+# option parser
 # ---------------------
-# $DELETE
-# $INCLUDE
-# $EXCHANGE_NMBR
+# $DELETE  (flag for the --delete-logs option)
+# $INCLUDE  (flag for the --include option)
+# $EXCHANGE_NMBR  (pos. integer for --number option)
 # ---------------------
 while [ -n "$1" ]; do
     case "$1" in
@@ -99,18 +106,19 @@ while [ -n "$1" ]; do
 done
 
 
+# deletes all content on player before copying new material
+# this step already checks a fist time if $PLAYER really exists
 delete_all() {
     if [ -e $PLAYER ] ; then
-        echo -n "Do you really want to delete ALL content on $PLAYER? (y/n) "
+        echo -e "If you want to delete all content on $PLAYER now, type \"delete\"?"
+        echo -n "Otherwise press <Enter> "
         read answer
 
-        if [[ $answer == y ]] ; then
+        if [[ $answer == delete ]] ; then
             rm -rf $PLAYER/* || die "Could not delete content."
             echo -e "Successfully deleted all content.\n"
-        elif [[ $answer == n ]] ; then
-            echo -e "No changes on $PLAYER.\n"
         else
-            die "Invalid answer."
+            echo -e "No changes on $PLAYER.\n"
         fi
     else
         die "Please plug in player/card and rerun programme."
@@ -118,9 +126,8 @@ delete_all() {
 }
 
 
-# global vars set here:
 # ---------------------
-# $FREE_SPACE
+# $FREE_SPACE  (free space on $PLAYER)
 # ---------------------
 check_free_space() {
     if [ -e $PLAYER ] ; then
@@ -139,35 +146,40 @@ check_free_space() {
         fi
         echo ""
     else
-        die "Please plug in player/card and rerun programme."
+        die "Please plug in player/card and re-run program."
     fi
 }
 
 
-# global vars set here:
+# create a new list of all albums in music library
 # ---------------------
-# $TOTAL_TRACK_NMBR
+# $TOTAL_TRACK_NMBR  (length of $ALBUMLIST)
 # ---------------------
 list_albums() {
     echo -n "Collecting music library information..."
 
     rm -f $ALBUMLIST albumlist2.tmp
-    touch $ALBUMLIST albumlist2.tmp  # some temporary helper file
+    touch $ALBUMLIST albumlist2.tmp  # albumlist2.tmp is some temporary helper file
 
-    # create a new list of all albums in music library
-    find . -type d -links 2 > albumlist2.tmp  # search for directories which have no more subdirectories
-    awk '{ printf("%d\t%s\n", NR, $0) }' albumlist2.tmp > $ALBUMLIST  # add line numbers
-    TOTAL_TRACK_NMBR=`wc -l < $ALBUMLIST`  # upper bound for random number generator in rand_choose()
+    # search for directories which have no more subdirectories
+    find . -type d -links 2 > albumlist2.tmp
+
+    # add line numbers
+    awk '{ printf("%d\t%s\n", NR, $0) }' albumlist2.tmp > $ALBUMLIST
+
+    # upper bound for random number generator in rand_choose()
+    TOTAL_TRACK_NMBR=`wc -l < $ALBUMLIST`
+
+    # clean up
     rm albumlist2.tmp
 
     echo -e "done.\n"
 }
 
 
-# global vars set here:
 # ---------------------
-# $NEXTALBUM
-# $ALBUMSIZE
+# $NEXTALBUM  (path of next chosen album)
+# $ALBUMSIZE  (albumsize in KB)
 # ---------------------
 rand_choose() {
     local floor=1
@@ -175,18 +187,20 @@ rand_choose() {
     while [ $nextnumbr -lt $floor ] ; do
         nextnumbr=`expr $RANDOM % $TOTAL_TRACK_NMBR`
     done
-    NEXTALBUM=`awk -F '\t' '$1 ~ /^'$nextnumbr'$/ {print $2}' $ALBUMLIST`  # no line numbers here anymore
+
+    # no line numbers here anymore...
+    NEXTALBUM=`awk -F '\t' '$1 ~ /^'$nextnumbr'$/ {print $2}' $ALBUMLIST`
     ALBUMSIZE=`du --block-size=1K -s "$NEXTALBUM" | cut -f1 | grep -o '[0-9]\+'`
 }
 
 
-# global vars set here:
-# ---------------------
-# $OLD_COPY_LIST_LENGTH
-# ---------------------
-# With -f option, take old COPYLIST (if existent) and list new albums 
+# add $NEXTALBUM to a copylist for later copying to $PLAYER.
+# With -i option, take old COPYLIST (if existent) and list new albums 
 # below the old (already copied last time) ones. In copy() we will skip 
 # the old ones by using the $OLD_COPY_LIST_LENGTH variable from here.
+# ---------------------
+# $OLD_COPY_LIST_LENGTH  (number of already copied tracks from last run)
+# ---------------------
 create_copy_list() {
     echo -n "Randomly choosing albums..."
 
@@ -199,7 +213,6 @@ create_copy_list() {
         OLD_COPY_LIST_LENGTH=`wc -l < $COPYLIST`
     elif [ -v INCLUDE ] ; then
         echo ""
-        clean
         die "No copylist found. Need to run musictogo -k once first before using the -i option.\n"
     else
         OLD_COPY_LIST_LENGTH=0
@@ -208,9 +221,10 @@ create_copy_list() {
     fi
 
     local copy_list_length=$OLD_COPY_LIST_LENGTH  # for checking if copylist has same size as albumlist
+
     while (( copy_list_length <  TOTAL_TRACK_NMBR && size_sum < FREE_SPACE && EXCHANGE_NMBR > 0 )) ; do
         rand_choose
-
+        # there must be a better way for this...
         while [[ $again == yes ]] ; do
             again="no"
             while read line ; do
@@ -234,6 +248,7 @@ create_copy_list() {
 }
 
 
+# primitive process bar included
 copy() {
     echo "Data is being copied..."
 
@@ -259,11 +274,14 @@ copy() {
         (( ++copied ))
 
         # print a process bar (uses bash arithmetics, not bourne shell compatible)
+        # computations...
         percent=`echo "scale=2; 100.0 / $total * $copied" | bc`        # floating point...
         currentbar=`echo "scale=2; $barlength / 100 * $percent" | bc`
         percent=${percent/.*}  # round (to int): only for output
         currentbar=${currentbar/.*}  # for bar drawing
         ((diffbar = barlength - currentbar))
+
+        # output...
         echo -n "["
         while (( currentbar-- > 0 )) ; do
             echo -n "#"
@@ -282,7 +300,9 @@ copy() {
 
 
 
+###############################
 ### main script starts here ###
+###############################
 cd $LIBRARY || die "Directory $LIBRARY not available on this system."
 delete_all
 check_free_space
