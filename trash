@@ -5,7 +5,7 @@
 # INFO     moves files and folders to ~/.trash instead of 
 #          deleting them
 #
-# DATE     15.05.2014
+# DATE     24.05.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -17,7 +17,7 @@ die() {
 }
 
 if [ -z "$1" ] ; then
-    die "use with arguments."
+    ls $TRASH
 fi
 
 # if first argument is "-e", then empty
