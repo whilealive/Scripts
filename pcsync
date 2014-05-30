@@ -11,7 +11,7 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     19.05.2014
+# DATE     30.05.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -19,16 +19,15 @@
 # - SSH option for sync over network
 
 
-# variables and paths
-#STICK="/mnt/truecrypt1"  # truecrypt mount directory
-STICK="/run/media/$(hostname)/syncstick/sync"
-STATUSFILE="/run/media/$(hostname)/syncstick/pcsync-statusfile.txt"
-INCLUDEFILE="/run/media/$(hostname)/syncstick/pcsync-inclexcl.txt"
+# default paths
+REMOTEFOLDER="/run/media/$(hostname)/syncstick/sync"
+FILEPATH="/run/media/$(hostname)/syncstick"
+
+# default options
 DRY=""
 FORCE=""
 
 
-# helper functions
 die(){
     echo -e "$0: Error: $1" >&2
     exit 1
@@ -39,6 +38,54 @@ nothing_done(){
     echo -e "\nEither answered \"no\" or invalid input."
     echo "Nothing will be done."
     exit 1
+}
+
+# set $REMOTEFOLDER
+remote_sync_folder_input() {
+    echo "Enter a valid path of your remote sync folder or press <Enter> for default ($REMOTEFOLDER):"
+    read -e answer  # -e is for autocompletition
+
+    if [ ! -e $answer ] ; then
+        die "Path invalid. Quit without executing."
+    fi
+
+    # if last character is a "/", then remove it
+    if [[ $answer == */ ]] ; then
+        answer="${answer%?}"
+    fi
+
+    if [[ $answer != "" ]] ; then
+        REMOTEFOLDER=$answer
+        echo -e "Your chosen remote sync folder: $REMOTEFOLDER \n"
+    else
+        echo -e "Default chosen. ($REMOTEFOLDER)\n"
+    fi
+}
+
+# set $FILEPATH
+file_path_input() {
+    echo "Enter a valid path where statusfiles can be found, or press <Enter> for default ($FILEPATH):"
+    read -e answer  # -e is for autocompletition
+
+    if [ ! -e $answer ] ; then
+        die "Path invalid. Quit without executing."
+    fi
+
+    # if last character is a "/", then remove it
+    if [[ $answer == */ ]] ; then
+        answer="${answer%?}"
+    fi
+
+    if [[ $answer != "" ]] ; then
+        FILEPATH=$answer
+        echo -e "Your chosen remote sync folder: $FILEPATH \n"
+    else
+        echo -e "Default chosen. ($FILEPATH)\n"
+    fi
+
+    # set file paths
+    STATUSFILE="$FILEPATH/pcsync-statusfile.txt"
+    INCLUDEFILE="$FILEPATH/pcsync-inclexcl.txt"
 }
 
 create_statusfile(){
@@ -70,6 +117,13 @@ update_statusfile(){
 
 }
 
+
+
+
+#############################
+## main script starts here ##
+#############################
+
 # handle options
 while [ -n "$1" ]; do
     case "$1" in
@@ -86,16 +140,11 @@ while [ -n "$1" ]; do
     esac
 done
 
-if [ ! -e $STICK ] ; then
-    die "Please insert stick and rerun program."
-fi
-
 # better ask twice...
 echo -n "Syncup (up) or Syncdown (down)? "
 read answer
 if [[ $answer == up ]] ; then
     DIRECTION=up
-    unset answer
     echo -n "Do you really want to sync local data to EXTERNAL disk? (y/n) "
 	read answer
 	if [[ ! $answer == y ]] ; then
@@ -103,7 +152,6 @@ if [[ $answer == up ]] ; then
     fi
 elif [[ $answer == down ]] ; then
     DIRECTION=down
-    unset answer
     echo -n "Do you really want to sync external disk to this LOCAL disk? (y/n) "
 	read answer
 	if [[ ! $answer == y ]] ; then
@@ -112,6 +160,10 @@ elif [[ $answer == down ]] ; then
 else
     nothing_done
 fi
+
+# path input
+remote_sync_folder_input
+file_path_input
 
 # extra protection through statusfile
 create_statusfile
@@ -125,20 +177,12 @@ if [[ $DIRECTION == down && $LAST_RUN == down && $FORCE != -f ]] ; then
          Use the \"-f\" option to force direction."
 fi
 
-# set correct rights
-# NOTE: here, it is assumed that all participating users are member of the group "users",
-#       otherwhise rsync's --delete option doesn't work properly.
-#if [[ $DRY != -n ]] ; then
-#    echo "setting correct rights on $STICK"
-#    sudo chown -R $(hostname):users $STICK || die "chown error"  # user handling for rsync --delete
-#fi
-
 # sync
 if [[ $DIRECTION == up ]] ; then
-    rsync -avu $DRY --delete --include-from="$INCLUDEFILE" $HOME/ $STICK/ \
+    rsync -avu $DRY --delete --include-from="$INCLUDEFILE" $HOME/ $REMOTEFOLDER/ \
         || die "rsync error"
 elif [[ $DIRECTION == down ]] ; then
-    rsync -avu $DRY --delete --include-from="$INCLUDEFILE" $STICK/ $HOME/ \
+    rsync -avu $DRY --delete --include-from="$INCLUDEFILE" $REMOTEFOLDER/ $HOME/ \
         || die "rsync error"
 else
     die "direction unknown."
