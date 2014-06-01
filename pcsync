@@ -11,7 +11,7 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     30.05.2014
+# DATE     01.06.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -42,7 +42,7 @@ nothing_done(){
 
 # set $REMOTEFOLDER
 remote_sync_folder_input() {
-    echo "Enter a valid path of your remote sync folder or press <Enter> for default ($REMOTEFOLDER):"
+    echo -n "Enter the path of your remote sync folder, or hit <Enter> for default: "
     read -e answer  # -e is for autocompletition
 
     if [ ! -e $answer ] ; then
@@ -58,13 +58,13 @@ remote_sync_folder_input() {
         REMOTEFOLDER=$answer
         echo -e "Your chosen remote sync folder: $REMOTEFOLDER \n"
     else
-        echo -e "Default chosen. ($REMOTEFOLDER)\n"
+        echo -e "Default chosen. \"$REMOTEFOLDER\"\n"
     fi
 }
 
 # set $FILEPATH
 file_path_input() {
-    echo "Enter a valid path where statusfiles can be found, or press <Enter> for default ($FILEPATH):"
+    echo -n "Enter a valid path where statusfiles can be found, or hit <Enter> for default: "
     read -e answer  # -e is for autocompletition
 
     if [ ! -e $answer ] ; then
@@ -80,7 +80,7 @@ file_path_input() {
         FILEPATH=$answer
         echo -e "Your chosen remote sync folder: $FILEPATH \n"
     else
-        echo -e "Default chosen. ($FILEPATH)\n"
+        echo -e "Default chosen. \"$FILEPATH\"\n"
     fi
 
     # set file paths
@@ -145,21 +145,29 @@ echo -n "Syncup (up) or Syncdown (down)? "
 read answer
 if [[ $answer == up ]] ; then
     DIRECTION=up
-    echo -n "Do you really want to sync local data to EXTERNAL disk? (y/n) "
-	read answer
-	if [[ ! $answer == y ]] ; then
-        nothing_done
-    fi
+#    echo -n "Do you really want to sync local data to EXTERNAL disk? (y/n) "
+#	read answer
+#	if [[ ! $answer == y ]] ; then
+#        nothing_done
+#    fi
 elif [[ $answer == down ]] ; then
     DIRECTION=down
-    echo -n "Do you really want to sync external disk to this LOCAL disk? (y/n) "
-	read answer
-	if [[ ! $answer == y ]] ; then
-        nothing_done
-    fi
+#    echo -n "Do you really want to sync external disk to this LOCAL disk? (y/n) "
+#	read answer
+#	if [[ ! $answer == y ]] ; then
+#        nothing_done
+#    fi
 else
     nothing_done
 fi
+
+# some info
+echo -e "\npcsync needs two working paths:\n\
+First of is the remote sync folder. Default is: \"$REMOTEFOLDER\".
+In addition, pcsync takes two files to work properly: the includefile for rsync,
+and a statusfile for extra protection. They must be at the same place on the remote host.
+Therefore we need to give the path of the folder where these can be found in.
+Default is \"$FILEPATH\".\n"
 
 # path input
 remote_sync_folder_input
