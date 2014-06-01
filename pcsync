@@ -19,10 +19,6 @@
 # - SSH option for sync over network
 
 
-# default paths
-REMOTEFOLDER="/run/media/$(hostname)/syncstick/sync"
-FILEPATH="/run/media/$(hostname)/syncstick"
-
 # default options
 DRY=""
 FORCE=""
@@ -40,52 +36,60 @@ nothing_done(){
     exit 1
 }
 
-# set $REMOTEFOLDER
-remote_sync_folder_input() {
-    echo -n "Enter the path of your remote sync folder, or hit <Enter> for default: "
-    read -e answer  # -e is for autocompletition
+# use "mount" to scan for mounted disks. 
+# Give a choice of possible targets to choose from.
+# ---------------------
+# $REMOTE       (path of music player/SD-card)
+# $STATUSFILE   (for extra protection)
+# $INCLUDEFILE  (for rsync)
+# ---------------------
+diskscan() {
+    local MOUNTLIST0=/tmp/mountlist0.tmp
+    local MOUNTLIST1=/tmp/mountlist1.tmp
 
-    if [ ! -e $answer ] ; then
-        die "Path invalid. Quit without executing."
-    fi
+    # list all possibly mounted external disks and save them into a tempfile
+    mount | grep sd[bcd] | awk '$1 {print $3}' > $MOUNTLIST0
 
-    # if last character is a "/", then remove it
-    if [[ $answer == */ ]] ; then
-        answer="${answer%?}"
-    fi
+    # put line numbers in front
+    awk '{ printf("%d)\t%s\n", NR, $0) }' $MOUNTLIST0 > $MOUNTLIST1
 
-    if [[ $answer != "" ]] ; then
-        REMOTEFOLDER=$answer
-        echo -e "Your chosen remote sync folder: $REMOTEFOLDER \n"
+    # the custom choice, last line
+    echo -e "n)\t custom path" >> $MOUNTLIST1
+
+    # for later check
+    local NUMBER_OF_DISKS=`wc -l < $MOUNTLIST1`
+
+    # print list
+    echo "List of mounted external disks:"
+    cat $MOUNTLIST1 || die "Mountlist not found."
+    echo -n -e "\nPlease enter the number of your disk or hit \"n\" for entering a custom path: "
+
+    # input parser
+    read answer
+    if [[ $answer =~ ^[0-9]+$ ]] && (( answer > 0 && answer <= NUMBER_OF_DISKS )) ; then
+        REMOTE=`awk -F '\t' '$1 ~ /^'$answer\)'$/ {print $2}' $MOUNTLIST1`
+        echo "Your chosen target: $REMOTE"
+    elif [[ $answer == n ]] ; then
+        echo -n -e "\nEnter custom path: "
+        read REMOTE
+        echo "Your chosen target: $REMOTE"
     else
-        echo -e "Default chosen. \"$REMOTEFOLDER\"\n"
-    fi
-}
-
-# set $FILEPATH
-file_path_input() {
-    echo -n "Enter a valid path where statusfiles can be found, or hit <Enter> for default: "
-    read -e answer  # -e is for autocompletition
-
-    if [ ! -e $answer ] ; then
-        die "Path invalid. Quit without executing."
+        die "No valid disk path chosen."
     fi
 
-    # if last character is a "/", then remove it
-    if [[ $answer == */ ]] ; then
-        answer="${answer%?}"
-    fi
-
-    if [[ $answer != "" ]] ; then
-        FILEPATH=$answer
-        echo -e "Your chosen remote sync folder: $FILEPATH \n"
+    # create remote data folder if not existent
+    if [ -d $REMOTE/pcsync_data ] ; then
+        echo "Using existing folder $REMOTE/pcsync_data."
     else
-        echo -e "Default chosen. \"$FILEPATH\"\n"
+        echo -n "Folder $REMOTE/pcsync_data not existent. Making one...."
+        mkdir pcsync_data
+        echo "done."
     fi
 
-    # set file paths
-    STATUSFILE="$FILEPATH/pcsync-statusfile.txt"
-    INCLUDEFILE="$FILEPATH/pcsync-inclexcl.txt"
+    mkdir $REMOTE/pcsync_extra 2>/dev/null
+    STATUSFILE="$REMOTE/pcsync_extra/pcsync-statusfile.txt"
+    INCLUDEFILE="$REMOTE/pcsync_extra/pcsync-inclexcl.txt"
+    REMOTE="$REMOTE/pcsync_data"
 }
 
 create_statusfile(){
@@ -117,6 +121,15 @@ update_statusfile(){
 
 }
 
+check_includefile() {
+    if [ ! -e $INCLUDEFILE ] ; then
+        die "pcsync is a rsync wrapper. Therefore it needs a proper includefile to work.
+               Create a file called \"$INCLUDEFILE\" 
+               according to the rsync includefile specifications and run pcsync
+               again."
+    fi
+}
+
 
 
 
@@ -145,33 +158,14 @@ echo -n "Syncup (up) or Syncdown (down)? "
 read answer
 if [[ $answer == up ]] ; then
     DIRECTION=up
-#    echo -n "Do you really want to sync local data to EXTERNAL disk? (y/n) "
-#	read answer
-#	if [[ ! $answer == y ]] ; then
-#        nothing_done
-#    fi
 elif [[ $answer == down ]] ; then
     DIRECTION=down
-#    echo -n "Do you really want to sync external disk to this LOCAL disk? (y/n) "
-#	read answer
-#	if [[ ! $answer == y ]] ; then
-#        nothing_done
-#    fi
 else
     nothing_done
 fi
 
-# some info
-echo -e "\npcsync needs two working paths:\n\
-First of is the remote sync folder. Default is: \"$REMOTEFOLDER\".
-In addition, pcsync takes two files to work properly: the includefile for rsync,
-and a statusfile for extra protection. They must be at the same place on the remote host.
-Therefore we need to give the path of the folder where these can be found in.
-Default is \"$FILEPATH\".\n"
-
-# path input
-remote_sync_folder_input
-file_path_input
+# set the paths
+diskscan
 
 # extra protection through statusfile
 create_statusfile
@@ -186,11 +180,12 @@ if [[ $DIRECTION == down && $LAST_RUN == down && $FORCE != -f ]] ; then
 fi
 
 # sync
+check_includefile
 if [[ $DIRECTION == up ]] ; then
-    rsync -avu $DRY --delete --include-from="$INCLUDEFILE" $HOME/ $REMOTEFOLDER/ \
+    rsync -avu $DRY --delete --include-from="$INCLUDEFILE" $HOME/ $REMOTE/ \
         || die "rsync error"
 elif [[ $DIRECTION == down ]] ; then
-    rsync -avu $DRY --delete --include-from="$INCLUDEFILE" $REMOTEFOLDER/ $HOME/ \
+    rsync -avu $DRY --delete --include-from="$INCLUDEFILE" $REMOTE/ $HOME/ \
         || die "rsync error"
 else
     die "direction unknown."
