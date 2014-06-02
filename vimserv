@@ -1,0 +1,39 @@
+#!/bin/bash
+# ==================================================================
+# FILE     vimserv  
+# MACHINE  all
+# INFO     open files from ranger in one vim server
+#
+# DATE     02.06.2014
+# OWNER    Bischofberger
+# ==================================================================
+
+# TODO: close empty first window after opening a second
+
+SERVER_ID="VIMSERV"
+
+die() {
+    echo -e "$0: Error: $1" >&2
+    exit 1
+}
+
+# run it with/without arguments
+if [ -z "$1" ] ; then
+    # only one server should be running at the same time
+    serverlist=`vim --serverlist | grep $SERVER_ID`
+    if [ $serverlist ] ; then
+        die "vimserv server already running."
+    fi
+
+    vim --servername $SERVER_ID  || die "Could not start vim server."
+else
+    serverlist=`vim --serverlist | grep $SERVER_ID`
+    if [ -z $serverlist ] ; then
+        die "Need to start a vim server first by running \"vimserv\"."
+    fi
+
+    for file in "$@" ; do
+        vim --servername $SERVER_ID --remote-tab "$file" \
+            || die "could not attach to vim server."
+    done
+fi
