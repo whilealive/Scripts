@@ -1,14 +1,15 @@
-#!/bin/bash
+#!/bin/env bash
 # ==================================================================
 # FILE     vimserv  
 # MACHINE  all
 # INFO     open files from ranger in one vim server
+#          uses tmux
 #
 # DATE     02.06.2014
 # OWNER    Bischofberger
 # ==================================================================
 
-# TODO: close empty first window after opening a second
+# TODO: close empty first window in vim after opening a second
 
 SERVER_ID="VIMSERV"
 
@@ -25,6 +26,10 @@ if [ -z "$1" ] ; then
         die "vimserv server already running."
     fi
 
+    # rename tmux window
+    tmux rename-window vimserv
+
+    # start the vim server
     vim --servername $SERVER_ID  || die "Could not start vim server."
 else
     serverlist=`vim --serverlist | grep $SERVER_ID`
