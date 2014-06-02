@@ -16,3 +16,12 @@ pcsync
 zathuratab
 ----------
 - open pdfs in zathura within tabbed (suckless)
+
+vimserv
+-------
+- start a vimserver with "vimserv" command (no argument)
+- to open files in that server, use "vimserv $file"
+- I use that to open text files from ranger in a unique vim server
+  so that I have only one vim session running (copy/yank etc.)
+- Just modify this line in ranger's rifle.conf:
+  mime ^text,  label editor = "vimserv" -- "$@"
