@@ -3,15 +3,16 @@
 # FILE     vimserv  
 # MACHINE  all
 # INFO     open files from ranger in one vim server
+#          edit .config/ranger/rifle $EDITOR line...
 #          uses tmux
 #
-# DATE     02.06.2014
+# DATE     04.06.2014
 # OWNER    Bischofberger
 # ==================================================================
 
-# TODO: close empty first window in vim after opening a second
 
 SERVER_ID="VIMSERV"
+TAB=""
 
 die() {
     echo -e "$0: Error: $1" >&2
@@ -37,8 +38,14 @@ else
         die "Need to start a vim server first by running \"vimserv\"."
     fi
 
+    # set -tab option to open files in new tabs
+    if [[ $1 == --tabe ]] ; then
+        TAB="-tab"
+        shift
+    fi
+
     for file in "$@" ; do
-        vim --servername $SERVER_ID --remote-tab "$file" \
+        vim --servername $SERVER_ID --remote$TAB "$file" \
             || die "could not attach to vim server."
     done
 fi
