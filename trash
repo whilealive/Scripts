@@ -5,7 +5,7 @@
 # INFO     moves files and folders to ~/.trash instead of 
 #          deleting them
 #
-# DATE     24.05.2014
+# DATE     08.06.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -17,7 +17,7 @@ die() {
 }
 
 if [ -z "$1" ] ; then
-    ls $TRASH
+    ls --color=auto $TRASH
 fi
 
 # if first argument is "-e", then empty
@@ -42,9 +42,12 @@ for file in "$@" ; do
         echo "invalid argument: $file."
         continue
     fi
-    if [ -e "$TRASH/$file" ] || [ -d "$TRASH/$file" ] ; then  # file/dir exists, give it a new name
-        mv -v "$file" "$TRASH/_$file"
-    else
-        mv -v "$file" "$TRASH/"
-    fi
+
+    # add prefixes
+    prefix=""
+    while [ -e "$TRASH/$prefix$file" ] || [ -d "$TRASH/$prefix$file" ] ; do
+        prefix="_$prefix"
+    done
+    
+    mv -v "$file" "$TRASH/$prefix$file"
 done
