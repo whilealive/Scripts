@@ -1,0 +1,30 @@
+#!/bin/bash
+# ==================================================================
+# FILE     pushemall
+# MACHINE  all
+# INFO     pushes all my git repositories at once
+#
+# DATE     16.06.2014
+# OWNER    Bischofberger
+# ==================================================================
+
+# my github repositories
+declare -a Repo=(
+    "$HOME/Dotfiles/" \
+    "$HOME/Build/" \
+    "$HOME/Scripts/" \
+    "$HOME/Developer/C_C++/own/dwmstatus/" \
+)
+
+die(){
+    echo -e "$0: Error: $1" >&2
+    exit 1
+}
+
+for path in "${Repo[@]}" ; do
+    cd $path
+    pwd
+    git push origin master || die "Could not push"
+done
+
+exit 0
