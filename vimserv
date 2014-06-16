@@ -6,7 +6,7 @@
 #          edit .config/ranger/rifle $EDITOR line...
 #          uses tmux
 #
-# DATE     04.06.2014
+# DATE     16.06.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -32,6 +32,9 @@ if [ -z "$1" ] ; then
 
     # start the vim server
     vim --servername $SERVER_ID  || die "Could not start vim server."
+
+    # un-rename tmux window
+    tmux set-window-option automatic-rename on
 else
     serverlist=`vim --serverlist | grep $SERVER_ID`
     if [ -z $serverlist ] ; then
