@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     pushes all my git repositories at once
 #
-# DATE     16.06.2014
+# DATE     18.06.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -14,6 +14,7 @@ declare -a Repo=(
     "$HOME/Build/" \
     "$HOME/Scripts/" \
     "$HOME/Developer/C_C++/own/dwmstatus/" \
+    "$HOME/Developer/Bash-and-Unix-Tools/own/musictogo/" \
 )
 
 die(){
