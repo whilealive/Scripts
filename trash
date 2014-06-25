@@ -5,7 +5,7 @@
 # INFO     moves files and folders to ~/.trash instead of 
 #          deleting them
 #
-# DATE     08.06.2014
+# DATE     25.06.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -25,8 +25,10 @@ if [[ $1 == -e ]] || [[ $1 == --empty ]] ; then
     echo -n "Do you really want to empty the trash? (y/n) "
     read answer
     if [[ $answer == y ]] ; then
-        rm -r $TRASH
+        rm -r $TRASH  || die "Could not empty trash."
         mkdir $TRASH
+        # do not let the owner of .trash/ be "root"
+        chown "$(users):users" $TRASH
         echo "trash is empty."
     else
         echo "Nothing done."
@@ -36,6 +38,7 @@ fi
 
 # move all arguments to $TRASH if possible
 mkdir -p $TRASH
+chown "$(users):users" $TRASH
 
 for file in "$@" ; do
     if [[ $file == -* ]] ; then  # arguments beginning with "-" are invalid
