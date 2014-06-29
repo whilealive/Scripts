@@ -1,0 +1,18 @@
+#!/bin/bash
+# ==================================================================
+# FILE     wma2mp3
+# MACHINE  all
+# INFO     - stolen from http://blog.jgriffiths.org/?p=194
+#          - copy script to directory with .wma files in it
+#            before running it
+#
+# DATE     29.06.2014
+# OWNER    Bischofberger
+# ==================================================================
+
+#Rip with Mplayer / encode with LAME
+for i in *.wma ; do mplayer -ao pcm -vc dummy "$i" && lame --preset 128 audiodump.wav -o \
+"`basename "$i" .wma`.mp3"; done; rm -f audiodump.wav
+
+#Delete audiodump.wav
+rm audiodump.wav 
