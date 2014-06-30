@@ -25,3 +25,11 @@ vimserv
   so that I have only one vim session running (copy/yank etc.)
 - Just modify this line in ranger's rifle.conf:
   mime ^text,  label editor = "vimserv" -- "$@"
+
+albumartinflac
+--------------
+- includes albumart in .flac files
+- uses "metaflac" program
+- How it works:
+  1.) save album cover as "cover.jpg" in album folder
+  2.) run: albumartinflac /path/to/album/
