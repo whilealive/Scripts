@@ -3,11 +3,14 @@
 # FILE     albumartinflac
 # MACHINE  all
 # INFO     - includes albumart in .flac files
-#          - uses "metaflac" program, see 
+#          - uses "metaflac" program, see:
 #            https://www.xiph.org/flac/documentation_tools_metaflac.html
 #          - How it works:
 #            1.) save album cover as "cover.jpg" in album folder
 #            2.) run albumartinflac /path/to/album/
+#          - if you have file containing a list of album folder paths
+#            you can simply do a:
+#            while read line ; do ./albumartinflac "$line"; done < albumlist
 #
 # DATE     30.06.2014
 # OWNER    Bischofberger
