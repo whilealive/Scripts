@@ -1,0 +1,57 @@
+#!/bin/bash
+# ==================================================================
+# FILE     albumartinflac
+# MACHINE  all
+# INFO     - includes albumart in .flac files
+#          - uses "metaflac" program, see 
+#            https://www.xiph.org/flac/documentation_tools_metaflac.html
+#          - How it works:
+#            1.) save album cover as "cover.jpg" in album folder
+#            2.) run albumartinflac /path/to/album/
+#
+# DATE     30.06.2014
+# OWNER    Bischofberger
+# ==================================================================
+
+die() {
+    echo -e "$0: Error: $1" >&2
+    exit 1
+}
+
+# no arguments given
+if [ -z "$1" ] ; then
+    die "Path to album folder needed as argument."
+fi
+
+# wrong argument
+if [ ! -d "$1" ] ; then
+    die "Argument given is no valid folder path."
+fi
+
+albumpath="$1"
+
+# if last character is a "/", then remove it
+if [[ $1 == */ ]] ; then
+    albumpath="${1%?}"
+fi
+
+# check if "cover.jpg" exists
+if [ ! -e "$albumpath/cover.jpg" ] ; then
+    die "No cover.jpg found in $albumpath/"
+fi
+
+
+# --------------------------
+# everything ok, do the work
+# --------------------------
+cd "$1"
+
+for track in *.flac ; do
+    echo "uploading albumcover to $track"
+
+    # remove existing images
+    metaflac --remove --block-type=PICTURE "$track"
+
+    # add image to track
+    metaflac --import-picture-from="|image/jpeg|||./cover.jpg" "$track"
+done
