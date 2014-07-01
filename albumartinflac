@@ -12,7 +12,7 @@
 #            you can simply do a:
 #            while read line ; do ./albumartinflac "$line"; done < albumlist
 #
-# DATE     30.06.2014
+# DATE     01.07.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -26,35 +26,47 @@ if [ -z "$1" ] ; then
     die "Path to album folder needed as argument."
 fi
 
-# wrong argument
-if [ ! -d "$1" ] ; then
-    die "Argument given is no valid folder path."
-fi
+START=`pwd`
 
-albumpath="$1"
+# loop over argument list
+for album in "$@" ; do
+    cd "$START"
 
-# if last character is a "/", then remove it
-if [[ $1 == */ ]] ; then
-    albumpath="${1%?}"
-fi
+    # wrong argument
+    if [ ! -d "$album" ] ; then
+        echo "Not a valid path. Skipping $album"
+        continue
+    fi
 
-# check if "cover.jpg" exists
-if [ ! -e "$albumpath/cover.jpg" ] ; then
-    die "No cover.jpg found in $albumpath/"
-fi
+    albumpath="$1"
 
+    # if last character is a "/", then remove it
+    if [[ $album == */ ]] ; then
+        albumpath="${album%?}"
+    fi
 
-# --------------------------
-# everything ok, do the work
-# --------------------------
-cd "$1"
+    # check if "cover.jpg" exists
+    if [ ! -e "$albumpath/cover.jpg" ] ; then
+        echo "No cover.jpg found. Skipping $albumpath"
+        continue
+    fi
 
-for track in *.flac ; do
-    echo "uploading albumcover to $track"
+    # -------------------------------------
+    # everything ok up to here, do the work
+    # -------------------------------------
+    echo "next album: $albumpath..."
+    cd "$albumpath/"
 
-    # remove existing images
-    metaflac --remove --block-type=PICTURE "$track"
+    shopt -s nullglob
+    for track in *.flac ; do
+        echo "uploading albumcover to $track"
 
-    # add image to track
-    metaflac --import-picture-from="|image/jpeg|||./cover.jpg" "$track"
+        # remove existing images
+        metaflac --remove --block-type=PICTURE "$track"
+
+        # add image to track
+        metaflac --import-picture-from="|image/jpeg|||./cover.jpg" "$track"
+    done
+
+    echo "...done."
 done
