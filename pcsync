@@ -11,7 +11,7 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     01.06.2014
+# DATE     07.07.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -48,7 +48,7 @@ diskscan() {
     local MOUNTLIST1=/tmp/mountlist1.tmp
 
     # list all possibly mounted external disks and save them into a tempfile
-    mount | grep sd[bcd] | awk '$1 {print $3}' > $MOUNTLIST0
+    mount | grep 'sd[bcd]\|truecrypt1' | awk '$1 {print $3}' > $MOUNTLIST0
 
     # put line numbers in front
     awk '{ printf("%d)\t%s\n", NR, $0) }' $MOUNTLIST0 > $MOUNTLIST1
@@ -71,7 +71,7 @@ diskscan() {
         echo "Your chosen target: $REMOTE"
     elif [[ $answer == n ]] ; then
         echo -n -e "\nEnter custom path: "
-        read REMOTE
+        read -e REMOTE  # -e is for autocomplete
         echo "Your chosen target: $REMOTE"
     else
         die "No valid disk path chosen."
