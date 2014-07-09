@@ -11,7 +11,7 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     07.07.2014
+# DATE     09.07.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -107,7 +107,7 @@ create_statusfile(){
 # ==================================================================
 
 # last action:
-LAST_RUN="init"
+LAST_RUN="up"
 EOF
         echo "done."
     fi
