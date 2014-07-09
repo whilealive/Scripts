@@ -107,7 +107,7 @@ create_statusfile(){
 # ==================================================================
 
 # last action:
-LAST_RUN="up"
+LAST_RUN="init"
 EOF
         echo "done."
     fi
