@@ -82,7 +82,7 @@ diskscan() {
         echo "Using existing folder $REMOTE/pcsync_data."
     else
         echo -n "Folder $REMOTE/pcsync_data not existent. Making one...."
-        mkdir pcsync_data
+        mkdir $REMOTE/pcsync_data
         echo "done."
     fi
 
