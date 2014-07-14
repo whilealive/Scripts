@@ -54,9 +54,18 @@ do
 	# either wait for 15 minutes or check again immediately by pressing Enter
     channels="-a"
     echo -e "for a short inbox sync, press \"s\"+[Enter]"
-    echo -e "for a complete sync, press [Enter]\n"
+    echo -e "for a complete sync, press [Enter]"
+    echo -e "to quit, press \"q\"+[Enter]\n"
+
     read -t $period_sec input
+
+    # shortcut: only check fastmail inbox, see .mbsyncrc
     if [[ $input == s ]] ; then
       channels="fastmail_in"
+    fi
+
+    # quit script
+    if [[ $input == q ]] ; then
+        break
     fi
 done
