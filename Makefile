@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     01.07.2014
+# DATE     15.07.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -21,8 +21,8 @@ SCRIPTS = susp \
 		  vimserv \
 		  albumartinflac
 
-MUTTSESSIONDIR = mutt-session/
-MUTTSCRIPTS = mbsync-secure mutt-session mutt-session-tmux-init
+MUTTSESSIONDIR = emailsession/
+MUTTSCRIPTS = mbsyncsecure emailsessioninit email
 
 all:
 	@echo "Scripts installation"
@@ -31,7 +31,7 @@ install:
 	@echo "installing scripts to ${DESTDIR}${PREFIX}/bin"
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@cp -f -t ${DESTDIR}${PREFIX}/bin/ ${SCRIPTS}
-	@echo "installing mutt-session scripts to ${DESTDIR}${PREFIX}/bin"
+	@echo "installing emailsession scripts to ${DESTDIR}${PREFIX}/bin"
 	@cd ${MUTTSESSIONDIR} && cp -f -t ${DESTDIR}${PREFIX}/bin/ ${MUTTSCRIPTS}
 	@cd ${DESTDIR}${PREFIX}/bin && chmod 0755 ${SCRIPTS} ${MUTTSCRIPTS}
 	@echo "done"
