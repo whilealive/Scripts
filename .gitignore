@@ -1,0 +1,12 @@
+# ==================================================================
+# FILE     .gitignore (for Scripts repository)
+# MACHINE  all
+# INFO     -
+#
+# DATE     15.07.2014
+# OWNER    Bischofberger
+# ==================================================================
+
+# git shall ignore the following
+old/
+pcsync-inclexcl.txt
