@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==================================================================
-# FILE     mutt-session
+# FILE     email
 # MACHINE  all
 # INFO     open a new st window and run the mutt-session-tmux-init
 #          script in it.
@@ -10,5 +10,4 @@
 # OWNER    Bischofberger
 # ==================================================================
 
-
-st -t mail -f -*-terminus-medium-r-*-*-16-*-*-*-*-*-*-* -e mutt-session-tmux-init
+st -t mail -f -*-terminus-medium-r-*-*-16-*-*-*-*-*-*-* -e emailsessioninit

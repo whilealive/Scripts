@@ -1,10 +1,10 @@
 #!/bin/bash
 # ==================================================================
-# FILE     mbsync-secure
+# FILE     mbsyncsecure
 # MACHINE  all
 # INFO     runs mbsync periodically with gpg security
 #
-# DATE     07.05.2014
+# DATE     15.07.2014
 # OWNER    Bischofberger
 # ==================================================================
 
