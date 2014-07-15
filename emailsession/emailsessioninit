@@ -9,12 +9,12 @@
 # OWNER    Bischofberger
 # ==================================================================
 
+# encrypt password file once such that gpg server is on
+# and we don't have to enter passwords multiple times
+gpg -d ~/.my-pwds.gpg >/dev/null
+
 tmux new-session -d -n mail -s mail 'mutt'
 tmux new-window -n mbsyncsecure -t mail:1 'mbsyncsecure'
 tmux select-window -t mail:0
 tmux -2 attach-session -t mail
-
-# encrypt password file once such that gpg server is on
-# and we don't have to enter passwords multiple times
-#gpg -d ~/.my-pwds.gpg >/dev/null
 
