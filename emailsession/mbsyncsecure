@@ -53,7 +53,7 @@ do
 
 	# either wait for 15 minutes or check again immediately by pressing Enter
     channels="-a"
-    echo -e "for a short inbox sync, press \"s\"+[Enter]"
+    echo -e "for a quick inbox sync, press \"s\"+[Enter]"
     echo -e "for a complete sync, press [Enter]"
     echo -e "to quit, press \"q\"+[Enter]\n"
 
