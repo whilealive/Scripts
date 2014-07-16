@@ -3,11 +3,10 @@ Scripts
 
 Some shell scripts
 
-dwm-statusbar
--------------
-- out of order --> see: dwmstatus in C
-- bash version of my statusbar using xsetroot
-- shows battery, volume and date
+emailsession
+------------
+- consists of three bash scripts to start a mutt/mbsync session
+  with gpg key security in a tmux window
 
 pcsync
 ------
@@ -33,3 +32,10 @@ albumartinflac
 - How it works:
   1.) save album cover as "cover.jpg" in album folder
   2.) run: albumartinflac /path/to/album/
+
+dwm-statusbar
+-------------
+- out of order --> see: dwmstatus in C
+- bash version of my statusbar using xsetroot
+- shows battery, volume and date
+
