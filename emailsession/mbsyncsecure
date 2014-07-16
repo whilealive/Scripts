@@ -24,6 +24,12 @@ INBOX3=$HOME/Maildir/zhaw-pseudo/zhaw/new/
 passwd1="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 1p)"
 passwd3="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 3p)"
 
+die_continue() {
+    echo -e "$0: Error: $1" >&2
+	shred -xu ~/.mbsyncrc-temp 2>/dev/null
+    sleep 60
+    continue
+}
 
 while true
 do
@@ -35,7 +41,7 @@ do
 	sed -i s/\#Pass3/Pass\ $passwd3/ ~/.mbsyncrc-temp
 
 	# run mbsync using the temporary rc file and delete it aftwerwards
-    mbsync -c ~/.mbsyncrc-temp $channels
+    mbsync -c ~/.mbsyncrc-temp $channels || die_continue "Didn't work. I'll try again in a minute."
 	shred -xu ~/.mbsyncrc-temp
 
 	# count new messages
@@ -53,7 +59,7 @@ do
 
 	# either wait for 15 minutes or check again immediately by pressing Enter
     channels="-a"
-    echo -e "for a short inbox sync, press \"s\"+[Enter]"
+    echo -e "for a quick inbox sync, press \"s\"+[Enter]"
     echo -e "for a complete sync, press [Enter]"
     echo -e "to quit, press \"q\"+[Enter]\n"
 
