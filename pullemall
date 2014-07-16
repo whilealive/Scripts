@@ -4,9 +4,11 @@
 # MACHINE  all
 # INFO     pulls all my git repositories at once
 #
-# DATE     16.06.2014
+# DATE     16.07.2014
 # OWNER    Bischofberger
 # ==================================================================
+
+#TODO: pull all branches at once
 
 declare -a Repo=(
     "$HOME/Dotfiles/" \
@@ -21,7 +23,7 @@ die(){
 for path in "${Repo[@]}" ; do
     cd $path
     pwd
-    git pull origin master || die "Could not pull."
+    git pull origin master
 done
 
 exit 0
