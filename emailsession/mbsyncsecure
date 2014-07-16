@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     runs mbsync periodically with gpg security
 #
-# DATE     15.07.2014
+# DATE     16.07.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -16,13 +16,13 @@ let "period_sec = 60 * $period"
 channels="-a"  # channels to be synched by mbsync
 
 INBOX1=$HOME/Maildir/fastmail/INBOX/new/
-#INBOX2=$HOME/Maildir/uzh-pseudo/INBOX_uzh/new/
-#INBOX3=$HOME/Maildir/zhaw-pseudo/INBOX_zhaw/new/
 INBOX2=$HOME/Maildir/uzh-pseudo/uzh/new/
 INBOX3=$HOME/Maildir/zhaw-pseudo/zhaw/new/
+# old port
+#INBOX2=$HOME/Maildir/uzh-pseudo/INBOX_uzh/new/
+#INBOX3=$HOME/Maildir/zhaw-pseudo/INBOX_zhaw/new/
 
 passwd1="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 1p)"
-passwd3="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 3p)"
 
 die_continue() {
     echo -e "$0: Error: $1" >&2
@@ -38,7 +38,6 @@ do
 	# copy password into a temporary rc file.
 	# the right position in the rc file is crucial and marked in the original file by the line '#Pass1' etc.
 	sed s/\#Pass1/Pass\ $passwd1/ ~/.mbsyncrc > ~/.mbsyncrc-temp
-	sed -i s/\#Pass3/Pass\ $passwd3/ ~/.mbsyncrc-temp
 
 	# run mbsync using the temporary rc file and delete it aftwerwards
     mbsync -c ~/.mbsyncrc-temp $channels || die_continue "Didn't work. I'll try again in a minute."
