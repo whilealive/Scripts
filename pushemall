@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     pushes all my git repositories at once
 #
-# DATE     18.06.2014
+# DATE     16.07.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -25,7 +25,7 @@ die(){
 for path in "${Repo[@]}" ; do
     cd $path
     pwd
-    git push origin master || die "Could not push"
+    git push --all || die "Could not push"
 done
 
 exit 0
