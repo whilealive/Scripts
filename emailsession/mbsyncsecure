@@ -12,8 +12,8 @@
 
 # variables
 period="15"
-let "period_sec = 60 * $period"
 
+LOGFILE="/tmp/mbsyncsecure.log"
 channels="-a"  # channels to be synched by mbsync
 
 INBOX1=$HOME/Maildir/fastmail/INBOX/new/
@@ -29,14 +29,38 @@ while true
 do
 	echo "running mbsync..."
 
+    let "period_sec = 60 * $period"
+
 	# copy password into a temporary rc file.
 	# the right position in the rc file is crucial and marked in the original file by the line '#Pass1' etc.
 	sed s/\#Pass1/Pass\ $passwd1/ ~/.mbsyncrc > ~/.mbsyncrc-temp
 
 	# run mbsync using the temporary rc file and delete it aftwerwards.
-    # mbsync sometimes hangs with "Cannot resolve server...". Therefore, we run it with timeout3
-    # which kills it then.
-    timeout3 mbsync -c ~/.mbsyncrc-temp $channels
+    # fork mbsync in the background and redirect output to a logfile
+    # in the foreground, we check whether output of mbsync ended with
+    # "Cannot resolve server...". If so, we kill mbsync.
+    mbsync -c ~/.mbsyncrc-temp $channels >> $LOGFILE & 
+    WAITPID=$!
+
+    while true ; do
+        sleep 10
+        # check if mbsync is still running
+        if [[ `ps -h $WAITPID` ]] ; then
+            # is it hanging?
+            if [[ `tail -1 $LOGFILE | grep "Cannot resolve server"` ]] ; then
+                echo "Error: mbsync couldn't resolve server. Sync aborted. Retry in 1 minute."
+                period_sec=60
+                kill -s SIGKILL $WAITPID
+                break
+            else  # it is still synching mails
+                continue
+            fi
+        else  # mbsync has terminated
+            echo "...completed successfully."
+            break
+        fi
+    done
+
 	shred -xu ~/.mbsyncrc-temp
 
 	# count new messages
