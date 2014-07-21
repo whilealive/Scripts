@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     runs mbsync periodically with gpg security
 #
-# DATE     15.07.2014
+# DATE     21.07.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -24,13 +24,6 @@ INBOX3=$HOME/Maildir/zhaw-pseudo/zhaw/new/
 
 passwd1="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 3p)"
 
-die_continue() {
-    echo -e "$0: Error: $1" >&2
-	shred -xu ~/.mbsyncrc-temp 2>/dev/null
-    sleep 60
-    continue
-}
-
 while true
 do
 	echo "running mbsync..."
@@ -40,7 +33,7 @@ do
 	sed s/\#Pass1/Pass\ $passwd1/ ~/.mbsyncrc > ~/.mbsyncrc-temp
 
 	# run mbsync using the temporary rc file and delete it aftwerwards
-    mbsync -c ~/.mbsyncrc-temp $channels || die_continue "Didn't work. I'll try again in a minute."
+    mbsync -c ~/.mbsyncrc-temp $channels
 	shred -xu ~/.mbsyncrc-temp
 
 	# count new messages
