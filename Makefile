@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     15.07.2014
+# DATE     21.07.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -22,7 +22,7 @@ SCRIPTS = susp \
 		  albumartinflac
 
 MUTTSESSIONDIR = emailsession/
-MUTTSCRIPTS = mbsyncsecure emailsessioninit email
+MUTTSCRIPTS = mbsyncsecure emailsessioninit email timeout3
 
 all:
 	@echo "Scripts installation"
