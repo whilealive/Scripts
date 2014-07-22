@@ -12,6 +12,7 @@
 
 # variables
 period="15"
+let "period_sec = 60 * $period"
 
 LOGFILE="/tmp/mbsyncsecure.log"
 channels="-a"  # channels to be synched by mbsync
@@ -24,7 +25,6 @@ INBOX3=$HOME/Maildir/zhaw-pseudo/zhaw/new/
 #INBOX3=$HOME/Maildir/zhaw-pseudo/INBOX_zhaw/new/
 
 passwd1="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 3p)"
-let "period_sec = 60 * $period"
 
 while true
 do
@@ -37,11 +37,12 @@ do
 	# Run mbsync using the temporary rc file and delete it aftwerwards.
     #
     # Sometimes mbsync hangs. Here is a workaround for that:
-    # - Fork mbsync in the background and redirect output to a logfile.
+    # - Fork mbsync in the background and redirect output (including stderr) 
+    #   to a logfile.
     # - In the foreground, we check whether output of mbsync ended with
     #   "Cannot resolve server...". 
     # - If so, we kill mbsync and skip rest of this loop after 1 minute.
-    mbsync -c ~/.mbsyncrc-temp $channels >> $LOGFILE & 
+    mbsync -c ~/.mbsyncrc-temp $channels >> $LOGFILE 2>&1 & 
     WAITPID=$!
     HANG=false
 
