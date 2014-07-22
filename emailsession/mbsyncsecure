@@ -5,7 +5,7 @@
 # INFO     runs mbsync periodically with gpg security
 #          depends on timeout3 script to kill mbsync when it hangs
 #
-# DATE     21.07.2014
+# DATE     22.07.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -24,23 +24,26 @@ INBOX3=$HOME/Maildir/zhaw-pseudo/zhaw/new/
 #INBOX3=$HOME/Maildir/zhaw-pseudo/INBOX_zhaw/new/
 
 passwd1="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 3p)"
+let "period_sec = 60 * $period"
 
 while true
 do
 	echo "running mbsync..."
 
-    let "period_sec = 60 * $period"
-
 	# copy password into a temporary rc file.
 	# the right position in the rc file is crucial and marked in the original file by the line '#Pass1' etc.
 	sed s/\#Pass1/Pass\ $passwd1/ ~/.mbsyncrc > ~/.mbsyncrc-temp
 
-	# run mbsync using the temporary rc file and delete it aftwerwards.
-    # fork mbsync in the background and redirect output to a logfile
-    # in the foreground, we check whether output of mbsync ended with
-    # "Cannot resolve server...". If so, we kill mbsync.
+	# Run mbsync using the temporary rc file and delete it aftwerwards.
+    #
+    # Sometimes mbsync hangs. Here is a workaround for that:
+    # - Fork mbsync in the background and redirect output to a logfile.
+    # - In the foreground, we check whether output of mbsync ended with
+    #   "Cannot resolve server...". 
+    # - If so, we kill mbsync and skip rest of this loop after 1 minute.
     mbsync -c ~/.mbsyncrc-temp $channels >> $LOGFILE & 
     WAITPID=$!
+    HANG=false
 
     while true ; do
         sleep 10
@@ -49,7 +52,7 @@ do
             # is it hanging?
             if [[ `tail -1 $LOGFILE | grep "Cannot resolve server"` ]] ; then
                 echo "Error: mbsync couldn't resolve server. Sync aborted. Retry in 1 minute."
-                period_sec=60
+                HANG=true
                 kill -s SIGKILL $WAITPID
                 break
             else  # it is still synching mails
@@ -62,6 +65,12 @@ do
     done
 
 	shred -xu ~/.mbsyncrc-temp
+
+    # skip rest basic loop if mbsync was hanging above
+    if $HANG ; then
+        sleep 60
+        continue
+    fi
 
 	# count new messages
 	NEW1=`find $INBOX1 -type f | wc -l`
