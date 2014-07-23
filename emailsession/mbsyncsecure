@@ -60,7 +60,12 @@ do
                 continue
             fi
         else  # mbsync has terminated
-            echo "...completed successfully."
+            # did it throw a "Cannot resolve..." error? (offline etc.)
+            if [[ `tail -1 $LOGFILE | grep "Cannot resolve server"` ]] ; then
+                echo "Error: mbsync couldn't resolve server. Probably offline. No mail sync."
+            else
+                echo "...completed successfully."
+            fi
             break
         fi
     done
