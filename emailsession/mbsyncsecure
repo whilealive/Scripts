@@ -5,7 +5,7 @@
 # INFO     runs mbsync periodically with gpg security
 #          depends on timeout3 script to kill mbsync when it hangs
 #
-# DATE     22.07.2014
+# DATE     23.07.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -62,7 +62,7 @@ do
         else  # mbsync has terminated
             # did it throw a "Cannot resolve..." error? (offline etc.)
             if [[ `tail -1 $LOGFILE | grep "Cannot resolve server"` ]] ; then
-                echo "Error: mbsync couldn't resolve server. Probably offline. No mail sync."
+                echo "Error: mbsync couldn't resolve server. Probably offline. No mails synched."
             else
                 echo "...completed successfully."
             fi
