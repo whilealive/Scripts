@@ -5,7 +5,7 @@
 # INFO     runs mbsync periodically with gpg security
 #          depends on timeout3 script to kill mbsync when it hangs
 #
-# DATE     21.07.2014
+# DATE     23.07.2014
 # OWNER    Bischofberger
 # ==================================================================
 
