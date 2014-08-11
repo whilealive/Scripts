@@ -22,9 +22,6 @@ case "$1" in
 	  # cpu
 	  for i in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo powersave > $i; done
 
-	  # aspm
-	  echo powersave > /sys/module/pcie_aspm/parameters/policy
-
 	  # kernel write mode
 	  echo 5 > /proc/sys/vm/laptop_mode
 	  echo 90 > /proc/sys/vm/dirty_ratio
@@ -58,9 +55,6 @@ case "$1" in
 
 	  # cpu
 	  for i in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo ondemand > $i; done
-
-	  # aspm
-	  echo default > /sys/module/pcie_aspm/parameters/policy
 
 	  # kernel write mode
 	  echo 0 > /proc/sys/vm/laptop_mode
