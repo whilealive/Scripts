@@ -1,0 +1,37 @@
+#!/bin/bash
+# ==================================================================
+# FILE     mergemall
+# MACHINE  all
+# INFO     merges develop branches to master on all my repos
+#
+# DATE     12.08.2014
+# OWNER    Bischofberger
+# ==================================================================
+
+#TODO: - option to skip repos
+#	   - error handling
+
+# my github repositories
+declare -a Repo=(
+    "$HOME/Dotfiles/" \
+    "$HOME/Build/" \
+    "$HOME/Scripts/" \
+    "$HOME/Developer/C_C++/own/dwmstatus/" \
+    "$HOME/Developer/Bash-and-Unix-Tools/own/musictogo/" \
+)
+
+die(){
+    echo -e "$0: Error: $1" >&2
+    exit 1
+}
+
+for path in "${Repo[@]}" ; do
+    cd $path
+    pwd
+	git checkout master
+	git merge branch develop
+	git checkout develop
+	echo ""
+done
+
+exit 0
