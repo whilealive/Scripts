@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     21.07.2014
+# DATE     12.08.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -15,6 +15,7 @@ SCRIPTS = susp \
 		  pcsync \
 		  pullemall \
 		  pushemall \
+		  mergemall \
 		  trash \
 		  zathuratab \
 		  vol \
