@@ -4,12 +4,11 @@
 # MACHINE  all
 # INFO     merges develop branches to master on all my repos
 #
-# DATE     12.08.2014
+# DATE     13.08.2014
 # OWNER    Bischofberger
 # ==================================================================
 
-#TODO: - option to skip repos
-#	   - error handling
+#TODO:	- error handling
 
 # my github repositories
 declare -a Repo=(
@@ -20,17 +19,53 @@ declare -a Repo=(
     "$HOME/Developer/Bash-and-Unix-Tools/own/musictogo/" \
 )
 
-die(){
+die() {
     echo -e "$0: Error: $1" >&2
     exit 1
 }
 
-for path in "${Repo[@]}" ; do
-    cd $path
-    pwd
+git_merge() {
 	git checkout master
 	git merge branch develop
 	git checkout develop
+}
+
+# option for merging all repos at once
+echo -n "want to merge develop branch with master in ALL repos? (y/n) "
+read answer
+case "$answer" in
+	"y")
+		ALL=true
+		;;
+	"n")
+		ALL=false
+		;;
+	*)
+		die "invalid input"
+esac
+
+# merge loop
+for path in "${Repo[@]}" ; do
+    cd $path
+	if ( $ALL ) ; then
+		pwd
+		git_merge
+	else
+		echo -n "merge branch develop to master in $(pwd)? (y/n) "
+		read answer
+		case "$answer" in
+			"y")
+				git_merge
+				;;
+			"n")
+				continue
+				;;
+			*)
+				die "invalid input"
+				;;
+		esac
+	fi
+
 	echo ""
 done
 
