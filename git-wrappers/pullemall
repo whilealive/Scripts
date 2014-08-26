@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     pulls all my git repositories at once
 #
-# DATE     04.08.2014
+# DATE     26.08.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -19,6 +19,7 @@ for path in "${Repo[@]}" ; do
     cd $path
     pwd
     git pull origin ${BRANCHES}
+		echo ""
 done
 
 exit 0
