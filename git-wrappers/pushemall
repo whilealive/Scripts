@@ -26,6 +26,7 @@ for path in "${Repo[@]}" ; do
     cd $path
     pwd
     git push --all
+		echo ""
 done
 
 exit 0
