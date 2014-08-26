@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     12.08.2014
+# DATE     26.08.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -13,9 +13,6 @@ PREFIX:=/usr/local
 SCRIPTS = susp \
 		  nmgui \
 		  pcsync \
-		  pullemall \
-		  pushemall \
-		  mergemall \
 		  trash \
 		  zathuratab \
 		  vol \
@@ -23,7 +20,11 @@ SCRIPTS = susp \
 		  albumartinflac
 
 MUTTSESSIONDIR = emailsession/
-MUTTSCRIPTS = mbsyncsecure emailsessioninit email timeout3
+MUTTSCRIPTS    = mbsyncsecure emailsessioninit email
+
+GITWRAPPERSDIR = git-wrappers/
+GITWRAPPERS    = pullemall pushemall mergemall
+
 
 all:
 	@echo "Scripts installation"
@@ -32,8 +33,13 @@ install:
 	@echo "installing scripts to ${DESTDIR}${PREFIX}/bin"
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@cp -f -t ${DESTDIR}${PREFIX}/bin/ ${SCRIPTS}
+
 	@echo "installing emailsession scripts to ${DESTDIR}${PREFIX}/bin"
 	@cd ${MUTTSESSIONDIR} && cp -f -t ${DESTDIR}${PREFIX}/bin/ ${MUTTSCRIPTS}
+
+	@echo "installing git-wrapper scripts to ${DESTDIR}${PREFIX}/bin"
+	@cd ${GITWRAPPERSDIR} && cp -f -t ${DESTDIR}${PREFIX}/bin/ ${GITWRAPPERS}
+
 	@cd ${DESTDIR}${PREFIX}/bin && chmod 0755 ${SCRIPTS} ${MUTTSCRIPTS}
 	@echo "done"
 
