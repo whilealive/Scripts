@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     copy all cover.jpg to destination
 #
-# DATE     21.09.2014
+# DATE     24.09.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -14,7 +14,7 @@ FLACDIR="/home/desktop/Music/flac"
 OGGDIR="/home/desktop/Music/ogg"
 
 while read LINE ; do
-	if [[ -e $FLACDIR/$LINE/$FILE ]] && [[ ! -e $OGGDIR/$LINE/$FILE ]] ; then
+	if [[ -e $FLACDIR/$LINE/$FILE ]] ; then
 			cp --verbose "$FLACDIR/$LINE/$FILE" "$OGGDIR/$LINE/$FILE"
 	fi
 done < albumlist_nonumbr.tmp
