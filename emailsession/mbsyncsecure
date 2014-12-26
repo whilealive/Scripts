@@ -5,7 +5,7 @@
 # INFO     runs mbsync periodically with gpg security
 #          depends on timeout3 script to kill mbsync when it hangs
 #
-# DATE     03.09.2014
+# DATE     26.12.2014
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -17,7 +17,6 @@ let "period_sec = 60 * $period"
 channels="-a"  # channels to be synched by mbsync
 
 INBOX1=$HOME/Maildir/fastmail/INBOX/new/
-INBOX2=$HOME/Maildir/uzh-pseudo/uzh/new/
 
 passwd1="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 2p)"
 
@@ -35,9 +34,7 @@ do
 
 	# count new messages
 	NEW1=`find $INBOX1 -type f | wc -l`
-	NEW2=`find $INBOX2 -type f | wc -l`
 	echo -e "\nfastmail new:\t $NEW1"
-	echo -e "uzh new:\t $NEW2"
 
 	# some information
 	echo -n -e "\nlast sync: "
