@@ -1,0 +1,11 @@
+#!/bin/bash
+# ==================================================================
+# FILE     loadVirtualboxModules
+# MACHINE  all
+# INFO     
+#
+# DATE     15.02.2015
+# OWNER    Bischofberger
+# ==================================================================
+
+sudo modprobe vboxdrv vboxnetadp vboxnetflt vboxpci
