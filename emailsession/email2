@@ -1,11 +1,11 @@
 #!/bin/bash
 # ==================================================================
-# FILE     loadVirtualboxModules
+# FILE     email2
 # MACHINE  all
-# INFO     
+# INFO     -
 #
-# DATE     15.02.2015
+# DATE     15.07.2014
 # OWNER    Bischofberger
 # ==================================================================
 
-sudo modprobe vboxdrv vboxnetadp vboxnetflt vboxpci
+st -t mail -f -*-terminus-medium-r-*-*-16-*-*-*-*-*-*-* -e dvtm mutt mbsyncsecure

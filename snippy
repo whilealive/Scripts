@@ -1,0 +1,35 @@
+#!/bin/bash
+# ==================================================================
+# FILE     snippy
+# MACHINE  all
+# INFO     mostly taken from: https://bbs.archlinux.org/viewtopic.php?id=71938&p=2
+#          https://bbs.archlinux.org/viewtopic.php?id=71938
+#          depends on: dmenu, xsel
+#
+# DATE     16.07.2015
+# OWNER    Bischofberger
+# ==================================================================
+
+DIR=${HOME}/.snippy
+
+DMENU_ARGS="-b"
+#DMENU_ARGS="-b -p gotbletu$ -fn 10x20"
+
+#XSEL_ARGS="--primary --clipboard --input"
+#XSEL_ARGS="--clipboard --input"
+
+cd ${DIR}
+
+# Use the filenames in the snippy directory as menu entries.
+# Get the menu selection from the user.
+FILE=`find . -type f | grep -v '^\.$' | sed 's!\.\/!!' | /usr/bin/dmenu ${DMENU_ARGS}`
+
+if [ -f ${DIR}/${FILE} ]; then
+	# Put the contents of the selected file into the paste buffer.
+	xsel -p --input < ${DIR}/${FILE}
+	xsel -b --input < ${DIR}/${FILE}
+
+	# Paste into the current application.
+	#xdotool key ctrl+v		#gui paste
+	#xdotool key ctrl+shift+v	#cli
+fi
