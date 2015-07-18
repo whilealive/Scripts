@@ -5,52 +5,63 @@
 # INFO     moves files and folders to ~/.trash instead of 
 #          deleting them
 #
-# DATE     25.06.2014
+# DATE     18.07.2015
 # OWNER    Bischofberger
 # ==================================================================
 
 TRASH="/home/$(hostname)/.trash"
 
 die() {
-    echo -e "$0: Error: $1" >&2
-    exit 1
+	echo -e "$0: Error: $1" >&2
+	exit 1
 }
 
+# Check if $TRASH folder already exists. If not, create one.
+# Avoid creating $TRASH folder as root.
+if [ ! -d $TRASH ] ; then
+	echo "$TRASH/ folder not available."
+
+	if [[ $EUID -eq 0 ]] ; then
+		die "Your are root. Either run as non-root or create $TRASH folder manually."
+	fi
+
+	echo "Creating empty folder: $TRASH".
+	mkdir $TRASH
+fi
+
+# If no argument is given, show content of .trash/ folder.
 if [ -z "$1" ] ; then
-    ls --color=auto $TRASH
+	ls --color=auto $TRASH
+	exit
 fi
 
-# if first argument is "-e", then empty
+# If first argument is "-e", then empty.
 if [[ $1 == -e ]] || [[ $1 == --empty ]] ; then
-    echo -n "Do you really want to empty the trash? (y/n) "
-    read answer
-    if [[ $answer == y ]] ; then
-        rm -r $TRASH  || die "Could not empty trash."
-        mkdir $TRASH
-        # do not let the owner of .trash/ be "root"
-        chown "$(users):users" $TRASH
-        echo "trash is empty."
-    else
-        echo "Nothing done."
-    fi
-    exit
+	echo -n "Do you really want to empty the trash? (y/n) "
+	read answer
+
+	if [[ $answer == y ]] ; then
+		rm -rf $TRASH/*  || die "Could not empty trash."
+		echo "Trash is empty."
+	else
+		echo "Nothing done."
+	fi
+
+	exit
 fi
 
-# move all arguments to $TRASH if possible
-mkdir -p $TRASH
-chown "$(users):users" $TRASH
+# Move all arguments to $TRASH if possible.
+for data in "$@" ; do
+	if [[ $data == -* ]] ; then  # arguments beginning with "-" are invalid
+		echo "Invalid argument: $data"
+		continue
+	fi
 
-for file in "$@" ; do
-    if [[ $file == -* ]] ; then  # arguments beginning with "-" are invalid
-        echo "invalid argument: $file."
-        continue
-    fi
+	# Add prefixes to duplicates.
+	prefix=""
+	while [ -e "$TRASH/$prefix$data" ] || [ -d "$TRASH/$prefix$data" ] ; do
+		prefix="_$prefix"
+	done
 
-    # add prefixes
-    prefix=""
-    while [ -e "$TRASH/$prefix$file" ] || [ -d "$TRASH/$prefix$file" ] ; do
-        prefix="_$prefix"
-    done
-    
-    mv -v "$file" "$TRASH/$prefix$file"
+	mv -v "$data" "$TRASH/$prefix$data"
 done
