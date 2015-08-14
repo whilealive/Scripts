@@ -1,0 +1,26 @@
+#!/bin/bash
+# ==================================================================
+# FILE     pdfpextr
+# MACHINE  all
+# INFO     - extract pages from pdf
+#          - use as pdfpextr 22 35 inputfile.pdf
+#
+# DATE     14.08.2015
+# OWNER    Bischofberger
+# ==================================================================
+
+die() {
+	echo -e "$0: Error: $1" >&2
+	exit 1
+}
+
+# no argument given
+if [[ $# -ne 3 ]] ; then
+	die "use: \"pdfpextr [begin page number] [end page number] [document]\""
+fi
+
+gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER \
+	-dFirstPage=${1} \
+	-dLastPage=${2} \
+	-sOutputFile=${3%.pdf}_p${1}-p${2}.pdf \
+	${3}
