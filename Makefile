@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     15.07.2015
+# DATE     14.08.2015
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -18,7 +18,8 @@ SCRIPTS = susp \
 		  vol \
 		  vimserv \
 		  albumartinflac \
-		  snippy
+		  snippy \
+		  pdfpextr
 
 MUTTSESSIONDIR = emailsession/
 MUTTSCRIPTS    = mbsyncsecure email2
