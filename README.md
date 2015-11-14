@@ -5,8 +5,8 @@ Some shell scripts
 
 emailsession
 ------------
-- consists of three bash scripts to start a mutt/mbsync session
-  with gpg key security in a tmux window
+- consists of some bash scripts to start a mutt/mbsync session
+  with gpg key security in a dvtm window
 
 pcsync
 ------
@@ -38,4 +38,16 @@ dwm-statusbar
 - out of order --> see: dwmstatus in C
 - bash version of my statusbar using xsetroot
 - shows battery, volume and date
+
+clipswap
+--------
+- swap PRIMARY and CLIPBOARD
+
+pdfpextr
+--------
+- extract pages from pdf files
+
+snippy
+------
+see: https://bbs.archlinux.org/viewtopic.php?id=71938&p=2
 
