@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     14.08.2015
+# DATE     14.11.2015
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -19,11 +19,11 @@ SCRIPTS = susp \
 		  vimserv \
 		  albumartinflac \
 		  snippy \
-		  pdfpextr
+		  pdfpextr \
+		  clipswap
 
 MUTTSESSIONDIR = emailsession/
 MUTTSCRIPTS    = mbsyncsecure email2
-#MUTTSCRIPTS    = mbsyncsecure emailsessioninit email
 
 GITWRAPPERSDIR = git-wrappers/
 GITWRAPPERS    = pullemall pushemall mergemall

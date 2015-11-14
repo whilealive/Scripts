@@ -1,0 +1,18 @@
+#!/bin/bash
+# ==================================================================
+# FILE     clipswap
+# MACHINE  all
+# INFO     uses xsel to swap PRIMARY and CLIPBOARD
+#
+# DATE     14.11.2015
+# OWNER    Bischofberger
+# ==================================================================
+
+# step 1 - copy PRIMARY to SECONDARY
+xsel --primary | xsel --secondary --input
+
+# step 2 - copy CLIPBOARD to PRIMARY
+xsel --clipboard | xsel --primary --input
+
+# step 3 - copy SECONDARY (former PRIMARY) to CLIPBOARD
+xsel --secondary | xsel --clipboard --input
