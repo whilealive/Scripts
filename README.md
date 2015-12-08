@@ -51,3 +51,6 @@ snippy
 ------
 see: https://bbs.archlinux.org/viewtopic.php?id=71938&p=2
 
+pushemall
+------
+push all my repos to github at once

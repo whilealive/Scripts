@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     14.11.2015
+# DATE     08.12.2015
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -20,14 +20,11 @@ SCRIPTS = susp \
 		  albumartinflac \
 		  snippy \
 		  pdfpextr \
-		  clipswap
+		  clipswap \
+		  pushemall
 
 MUTTSESSIONDIR = emailsession/
 MUTTSCRIPTS    = mbsyncsecure email2
-
-GITWRAPPERSDIR = git-wrappers/
-GITWRAPPERS    = pullemall pushemall mergemall
-
 
 all:
 	@echo "Scripts installation"
@@ -39,9 +36,6 @@ install:
 
 	@echo "installing emailsession scripts to ${DESTDIR}${PREFIX}/bin"
 	@cd ${MUTTSESSIONDIR} && cp -f -t ${DESTDIR}${PREFIX}/bin/ ${MUTTSCRIPTS}
-
-	@echo "installing git-wrapper scripts to ${DESTDIR}${PREFIX}/bin"
-	@cd ${GITWRAPPERSDIR} && cp -f -t ${DESTDIR}${PREFIX}/bin/ ${GITWRAPPERS}
 
 	@cd ${DESTDIR}${PREFIX}/bin && chmod 0755 ${SCRIPTS} ${MUTTSCRIPTS}
 	@echo "done"
