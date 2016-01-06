@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     08.12.2015
+# DATE     06.01.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -16,10 +16,7 @@ SCRIPTS = susp \
 		  trash \
 		  zathuratab \
 		  vol \
-		  vimserv \
-		  albumartinflac \
 		  snippy \
-		  pdfpextr \
 		  clipswap \
 		  pushemall
 
