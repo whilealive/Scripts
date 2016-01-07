@@ -54,3 +54,16 @@ see: https://bbs.archlinux.org/viewtopic.php?id=71938&p=2
 pushemall
 ------
 push all my repos to github at once
+
+musictogo
+=========
+take your music with you
+- little program written in bash that randomly chooses 
+  albums of your music library and copies them to an 
+  SD-card which goes into your phone or player.
+- always copies whole albums either until card is full
+  or up to a maximal number of albums to be replaced
+- can also distribute music to more than one disk
+- sync option: "pseudo sync" of music library to more 
+  than one SD-card, mounting one after another
+- check musictogo --help for further details
