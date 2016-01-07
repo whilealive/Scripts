@@ -4,15 +4,44 @@
 # MACHINE  all
 # INFO     uses xsel to swap PRIMARY and CLIPBOARD
 #
-# DATE     14.11.2015
+# DATE     07.01.2016
 # OWNER    Bischofberger
 # ==================================================================
 
-# step 1 - copy PRIMARY to SECONDARY
-xsel --primary | xsel --secondary --input
+die() {
+	echo -e "$0: Error: $1" >&2
+	exit 1
+}
 
-# step 2 - copy CLIPBOARD to PRIMARY
-xsel --clipboard | xsel --primary --input
+listContent() {
+	echo -e "[[PRIMARY]]------------------------" 
+	xsel -p ; echo ""
 
-# step 3 - copy SECONDARY (former PRIMARY) to CLIPBOARD
-xsel --secondary | xsel --clipboard --input
+	echo -e "[[CLIPBOARD]]----------------------"
+	xsel -b ; echo ""
+
+	echo -e "[[SECONDARY]]----------------------"
+	xsel -s ; echo ""
+}
+
+# if no argument is given, swap contents of PRIMARY/CLIPBOARD
+if [ -z "$1" ] ; then
+	# step 1 - copy PRIMARY to SECONDARY
+	xsel --primary | xsel --secondary --input
+	# step 2 - copy CLIPBOARD to PRIMARY
+	xsel --clipboard | xsel --primary --input
+	# step 3 - copy SECONDARY (former PRIMARY) to CLIPBOARD
+	xsel --secondary | xsel --clipboard --input
+	exit 0
+fi
+
+# various options
+case "$1" in
+	"-s"|"--show")
+		listContent
+		exit 0
+		;;
+	*)
+		exit 0
+		;;
+esac
