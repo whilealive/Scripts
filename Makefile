@@ -4,9 +4,10 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     06.01.2016
+# DATE     07.01.2016
 # OWNER    Bischofberger
 # ==================================================================
+# TODO: give uninstall option
 
 PREFIX:=/usr/local
 
@@ -20,8 +21,13 @@ SCRIPTS = susp \
 		  clipswap \
 		  pushemall
 
-MUTTSESSIONDIR = emailsession/
-MUTTSCRIPTS    = mbsyncsecure email2
+MUTTSESSIONDIR   = emailsession/
+MUTTSCRIPTS      = mbsyncsecure email2
+
+MUSICTOGODIR     = musictogo/
+MUSICTOGOSCRIPTS = musictogo
+
+ALLSCRIPTS = ${SCRIPTS} ${MUTTSCRIPTS} ${MUSICTOGOSCRIPTS}
 
 all:
 	@echo "Scripts installation"
@@ -34,7 +40,10 @@ install:
 	@echo "installing emailsession scripts to ${DESTDIR}${PREFIX}/bin"
 	@cd ${MUTTSESSIONDIR} && cp -f -t ${DESTDIR}${PREFIX}/bin/ ${MUTTSCRIPTS}
 
-	@cd ${DESTDIR}${PREFIX}/bin && chmod 0755 ${SCRIPTS} ${MUTTSCRIPTS}
+	@echo "installing musictogo script to ${DESTDIR}${PREFIX}/bin"
+	@cd ${MUSICTOGODIR} && cp -f -t ${DESTDIR}${PREFIX}/bin/ ${MUSICTOGOSCRIPTS}
+
+	@cd ${DESTDIR}${PREFIX}/bin && chmod 0755 ${ALLSCRIPTS}
 	@echo "done"
 
 .PHONY: all install
