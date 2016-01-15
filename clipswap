@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     uses xsel to swap PRIMARY and CLIPBOARD
 #
-# DATE     12.01.2016
+# DATE     14.01.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -24,16 +24,26 @@ listContent() {
 	xsel -s ; echo ""
 }
 
+swapThem() {
+	# step 1 - copy PRIMARY to SECONDARY
+	xsel --primary | xsel --input --secondary
+	# step 2 - copy CLIPBOARD to PRIMARY
+	xsel --clipboard | xsel --input --primary
+	# step 3 - copy SECONDARY (former PRIMARY) to CLIPBOARD
+	xsel --secondary | xsel --input --clipboard
+	# step 4 - clear SECONDARY
+	xsel --clear --secondary
+}
+
+clearAll() {
+	xsel --clear --primary
+	xsel --clear --secondary
+	xsel --clear --clipboard
+}
+
 # if no argument is given, swap contents of PRIMARY/CLIPBOARD
 if [ -z "$1" ] ; then
-	# step 1 - copy PRIMARY to SECONDARY
-	xsel --primary | xsel --secondary --input
-	# step 2 - copy CLIPBOARD to PRIMARY
-	xsel --clipboard | xsel --primary --input
-	# step 3 - copy SECONDARY (former PRIMARY) to CLIPBOARD
-	xsel --secondary | xsel --clipboard --input
-	# step 4 - clear SECONDARY
-	xsel --secondary --clear
+	swapThem
 	exit 0
 fi
 
@@ -43,7 +53,10 @@ case "$1" in
 		listContent
 		exit 0
 		;;
+	"-c"|"--clear")
+		clearAll
+		;;
 	*)
-		exit 0
+		die "invalid argument"
 		;;
 esac
