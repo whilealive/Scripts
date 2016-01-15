@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     07.01.2016
+# DATE     15.01.2016
 # OWNER    Bischofberger
 # ==================================================================
 # TODO: give uninstall option
@@ -22,7 +22,7 @@ SCRIPTS = susp \
 		  pushemall
 
 MUTTSESSIONDIR   = emailsession/
-MUTTSCRIPTS      = mbsyncsecure email2
+MUTTSCRIPTS      = mbsyncsecure email emailsessioninit
 
 MUSICTOGODIR     = musictogo/
 MUSICTOGOSCRIPTS = musictogo
