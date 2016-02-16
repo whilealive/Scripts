@@ -3,15 +3,15 @@
 # FILE     mbsyncsecure
 # MACHINE  all
 # INFO     runs mbsync periodically with gpg security
-#          depends on timeout3 script to kill mbsync when it hangs
 #
-# DATE     26.09.2015
+# DATE     16.02.2016
 # OWNER    Bischofberger
 # ==================================================================
 
 
-# variables
-period="15"
+# variables ========================================================
+
+period=15
 let "period_sec = 60 * $period"
 
 channels="-a"  # channels to be synched by mbsync
@@ -20,12 +20,64 @@ INBOX1=$HOME/Maildir/fastmail/INBOX/new/
 INBOX2=$HOME/Maildir/bmz/INBOX/new/
 INBOX3=$HOME/Maildir/uzh-pseudo/uzh/new/
 
+UNREAD1=0
+UNREAD2=0
+UNREAD3=0
+
 passwd1="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 2p)"
 passwd2="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 3p)"
+
+SOUNDFILE=$HOME/Scripts/emailsession/mario1.wav
+
+# functions ========================================================
+
+playSound() {
+	mplayer -mixer-channel Master -volume 80 $SOUNDFILE >/dev/null 2>&1
+}
+
+# count messages in $2 and save number in $1
+countMessages() {
+	local -n ref="$1"  # call by reference
+	ref=`find $2 -type f | wc -l`
+}
+
+# count unread messages and compare number to previously set UNREADXX variables
+checkNewMail() {
+	local NEW1=0 && countMessages NEW1 $INBOX1
+	local NEW2=0 && countMessages NEW2 $INBOX2
+	local NEW3=0 && countMessages NEW3 $INBOX3
+
+	echo -e "\nfastmail new: $NEW1"
+	echo -e   "bmz new:      $NEW2"
+	echo -e   "uzh new:      $NEW3"
+
+	if [[ $NEW1 != $UNREAD1 || $NEW2 != $UNREAD2 || $NEW3 != $UNREAD3 ]] ; then
+		playSound
+	fi
+}
+
+printLastSync() {
+	echo -n -e "\nlast sync: "
+	date +"%H:%M"
+	echo "next sync in $period minutes."
+}
+
+printOptions() {
+	echo -e "for a quick inbox sync, press \"s\"+[Enter]"
+	echo -e "for a complete sync, press [Enter]"
+	echo -e "to quit, press \"q\"+[Enter]\n"
+}
+
+# main loop ========================================================
 
 while true
 do
 	echo "running mbsync..."
+
+	# count unread messages before sync
+	countMessages UNREAD1 $INBOX1
+	countMessages UNREAD2 $INBOX2
+	countMessages UNREAD3 $INBOX3
 
 	# copy password into a temporary rc file.
 	# the right position in the rc file is crucial and marked in the original file by the line '#Pass1' etc.
@@ -33,37 +85,25 @@ do
 	sed -i s/\#Pass2/Pass\ $passwd2/ ~/.mbsyncrc-temp
 
 	# run mbsync using the temporary rc file and delete it aftwerwards.
-  mbsync -c ~/.mbsyncrc-temp $channels
+	mbsync -c ~/.mbsyncrc-temp $channels
 	shred -xu ~/.mbsyncrc-temp
 
-	# count new messages
-	NEW1=`find $INBOX1 -type f | wc -l`
-	NEW2=`find $INBOX2 -type f | wc -l`
-	NEW3=`find $INBOX3 -type f | wc -l`
-	echo -e "\nfastmail new: $NEW1"
-	echo -e   "bmz new:      $NEW2"
-	echo -e   "uzh new:      $NEW3"
-
-	# some information
-	echo -n -e "\nlast sync: "
-	date +"%H:%M"
-	echo "next sync in $period minutes."
+	checkNewMail
+	printLastSync
+	printOptions
 
 	# either wait for 15 minutes or check again immediately by pressing Enter
-    channels="-a"
-    echo -e "for a quick inbox sync, press \"s\"+[Enter]"
-    echo -e "for a complete sync, press [Enter]"
-    echo -e "to quit, press \"q\"+[Enter]\n"
+	read -t $period_sec input
 
-    read -t $period_sec input
+	# shortcut: only check fastmail inbox, see .mbsyncrc
+	if [[ $input == s ]] ; then
+		channels="fastmail_in"
+	else
+		channels="-a"
+	fi
 
-    # shortcut: only check fastmail inbox, see .mbsyncrc
-    if [[ $input == s ]] ; then
-      channels="fastmail_in"
-    fi
-
-    # quit script
-    if [[ $input == q ]] ; then
-        break
-    fi
+	# quit script
+	if [[ $input == q ]] ; then
+		break
+	fi
 done

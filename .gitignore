@@ -3,7 +3,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     07.01.2016
+# DATE     16.02.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -11,3 +11,4 @@
 old/
 pcsync-inclexcl.txt
 musictogo/testing/
+*.wav
