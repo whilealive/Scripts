@@ -27,7 +27,7 @@ UNREAD3=0
 passwd1="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 2p)"
 passwd2="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 3p)"
 
-SOUNDFILE=$HOME/Scripts/data/emailsession/mario1.wav
+SOUNDFILE=$HOME/Scripts/data/mario1.wav
 
 # functions ========================================================
 
