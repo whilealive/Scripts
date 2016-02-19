@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     runs mbsync periodically with gpg security
 #
-# DATE     16.02.2016
+# DATE     19.02.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -27,7 +27,7 @@ UNREAD3=0
 passwd1="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 2p)"
 passwd2="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 3p)"
 
-SOUNDFILE=$HOME/Scripts/emailsession/mario1.wav
+SOUNDFILE=$HOME/Scripts/data/emailsession/mario1.wav
 
 # functions ========================================================
 
