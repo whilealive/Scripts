@@ -1,0 +1,53 @@
+#!/bin/bash
+# ==================================================================
+# FILE     beamer
+# MACHINE  all
+# INFO     handles resolution in multi-monitor setup with dwm
+#					 when mirroring is involved
+#
+# DATE     02.03.2016
+# OWNER    Bischofberger
+# ==================================================================
+
+die(){
+	echo -e "$0: Error: $1" >&2
+	exit 1
+}
+
+INTERNAL="LVDS"
+EXTERNAL="VGA-0"
+RES_INT="1366x768"
+
+# print possible resolutions for external (VGA)
+xrandr
+
+# enter (highest) resolution of external (VGA)
+echo -e "\nEnter highest common resolution: "
+read RES_EXT
+
+#xrandr --output LVDS --mode 1366x768 --fb 1920x1200 --panning 1920x1200* --output VGA-0 --mode 1920x1200 --same-as LVDS
+activateDualMode_panning(){
+	xrandr --output $INTERNAL --mode $RES_INT --fb $RES_EXT --panning $RES_EXT* --output $EXTERNAL --mode $RES_EXT --same-as $INTERNAL
+}
+
+# für 1024x768
+activateDualMode(){
+	xrandr --output $EXTERNAL --auto --same-as $INTERNAL --mode $RES_EXT
+	xrandr --output $INTERNAL --mode $RES_EXT
+}
+
+# TODO: workaround for getting back to normal mode... (BUG in xrandr)
+deactivateDualMode(){
+	xrandr --output $EXTERNAL --primary
+	xrandr --output $INTERNAL --primary
+	echo -e "Plug out external monitor. [Enter]"
+	read local blah
+	xrandr --output $INTERNAL --mode $RES_INT
+	xrandr >/dev/null
+	xrandr --auto
+}
+
+
+activateDualMode
+deactivateDualMode
+
