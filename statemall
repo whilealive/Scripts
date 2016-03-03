@@ -1,8 +1,8 @@
 #!/bin/bash
 # ==================================================================
-# FILE     pushemall
+# FILE     statemall
 # MACHINE  all
-# INFO     pushes all my git repositories at once
+# INFO     show git status of all my git repositories at once
 #
 # DATE     03.03.2016
 # OWNER    Bischofberger
@@ -16,8 +16,8 @@ mapfile -t Repos <$GitHubReposFile
 for path in "${Repos[@]}" ; do
 	eval cd $path
 	pwd
-	git push --all
-	echo ""
+	git status
+	echo "--------------"
 done
 
 exit 0
