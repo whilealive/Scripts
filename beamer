@@ -5,9 +5,32 @@
 # INFO     handles resolution in multi-monitor setup with dwm
 #					 when mirroring is involved
 #
-# DATE     02.03.2016
+# DATE     03.03.2016
 # OWNER    Bischofberger
 # ==================================================================
+
+# Auto:
+# 1. Auflösungen auflisten
+# 2. Wähle grösste Beamer-Auflösung
+# 3. Vergleiche in internen Auflösungen
+#		 3a. Suche erfolgreich (1024x768 oder höher)
+#				-> activateDualMode()
+#    3b. Suche erfolglos													
+#				-> Meldung und check, ob Auflösung grösser als internal
+#						-> Falls ja   -> activateDualMode_panning()
+#						-> Falls nein -> ???
+
+# Manuell (-m|--manually):
+# 1. Auflösungen auflisten
+# 2. Beamer-Auflösung eingeben
+# 3. Panning? eingeben
+# Tests fahren:
+# Panning ja		-> Auflösung >= Internal? -> Ja, ok, Nein, Abbruch
+# Panning Nein	-> Auflösung = InternalMax? -> Ja, ok, Nein, Abbruch
+
+# Force (-f|--force):
+# wie manuell, aber ohne Tests
+
 
 die(){
 	echo -e "$0: Error: $1" >&2
@@ -15,19 +38,25 @@ die(){
 }
 
 INTERNAL="LVDS"
+RES_INT_MAX="1366x768"
+RES_INT_LIST=("1366x768" \
+							"1280x720" \
+							"1152x768" \
+							"1024x768")
 EXTERNAL="VGA-0"
-RES_INT="1366x768"
 
 # print possible resolutions for external (VGA)
 xrandr
 
-# enter (highest) resolution of external (VGA)
-echo -e "\nEnter highest common resolution: "
-read RES_EXT
+# get hightest supported resolution of external
+getHighestExternalResolution(){
+	# TODO
+	echo "res"
+}
 
 #xrandr --output LVDS --mode 1366x768 --fb 1920x1200 --panning 1920x1200* --output VGA-0 --mode 1920x1200 --same-as LVDS
 activateDualMode_panning(){
-	xrandr --output $INTERNAL --mode $RES_INT --fb $RES_EXT --panning $RES_EXT* --output $EXTERNAL --mode $RES_EXT --same-as $INTERNAL
+	xrandr --output $INTERNAL --mode $RES_INT_MAX --fb $RES_EXT --panning $RES_EXT* --output $EXTERNAL --mode $RES_EXT --same-as $INTERNAL
 }
 
 # für 1024x768
@@ -42,11 +71,21 @@ deactivateDualMode(){
 	xrandr --output $INTERNAL --primary
 	echo -e "Plug out external monitor. [Enter]"
 	read local blah
-	xrandr --output $INTERNAL --mode $RES_INT
+	xrandr --output $INTERNAL --mode $RES_INT_MAX
 	xrandr >/dev/null
 	xrandr --auto
 }
 
+
+# Main ------------------------------------------------
+
+# option handling
+
+RES_EXT_MAX=`getHighestExternalResolution`
+
+# enter (highest) resolution of external (VGA)
+echo -e "\nEnter highest common resolution: "
+read RES_EXT
 
 activateDualMode
 deactivateDualMode
