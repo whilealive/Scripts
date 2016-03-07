@@ -22,7 +22,7 @@
 
 # Manuell (-m|--manually):
 # 1. Auflösungen auflisten
-# 2. Beamer-Auflösung eingeben
+# 2. Beamer-Auflösung eingeben (x, y)
 # 3. Panning? eingeben
 # Tests fahren:
 # Panning ja		-> Auflösung >= Internal? -> Ja, ok, Nein, Abbruch
@@ -32,23 +32,31 @@
 # wie manuell, aber ohne Tests
 
 
+INTERNAL="LVDS"
+RES_INT_x="1366"
+RES_INT_y="768"
+RES_INT_LIST=("1366x768" \
+							"1280x720" \
+							"1152x768" \
+							"1024x768")
+
+EXTERNAL="VGA-0"
+RES_EXT_x="1"
+RES_EXT_y="1"
+
 die(){
 	echo -e "$0: Error: $1" >&2
 	exit 1
 }
 
-INTERNAL="LVDS"
-RES_INT_MAX="1366x768"
-RES_INT_LIST=("1366x768" \
-							"1280x720" \
-							"1152x768" \
-							"1024x768")
-EXTERNAL="VGA-0"
+listAllResolutions(){
+	xrandr
+}
 
-# print possible resolutions for external (VGA)
-xrandr
+printResolution(){
+	echo "${1}x${2}"
+}
 
-# get hightest supported resolution of external
 getHighestExternalResolution(){
 	# TODO
 	echo "res"
@@ -56,7 +64,10 @@ getHighestExternalResolution(){
 
 #xrandr --output LVDS --mode 1366x768 --fb 1920x1200 --panning 1920x1200* --output VGA-0 --mode 1920x1200 --same-as LVDS
 activateDualMode_panning(){
-	xrandr --output $INTERNAL --mode $RES_INT_MAX --fb $RES_EXT --panning $RES_EXT* --output $EXTERNAL --mode $RES_EXT --same-as $INTERNAL
+	xrandr	--output $INTERNAL --mode $RES_INT_MAX --fb $RES_EXT --panning $RES_EXT* \
+					--output $EXTERNAL --mode $RES_EXT --same-as $INTERNAL
+	echo "In order to get out of panning mode, you must kill dwm (Mod1-Shift-q)
+				and therefore kill the X-server. (Bug in xrandr, 03.2016)"
 }
 
 # für 1024x768
@@ -65,28 +76,50 @@ activateDualMode(){
 	xrandr --output $INTERNAL --mode $RES_EXT
 }
 
-# TODO: workaround for getting back to normal mode... (BUG in xrandr)
+# TODO: workaround for getting out of panning...
 deactivateDualMode(){
-	xrandr --output $EXTERNAL --primary
-	xrandr --output $INTERNAL --primary
-	echo -e "Plug out external monitor. [Enter]"
-	read local blah
-	xrandr --output $INTERNAL --mode $RES_INT_MAX
+	#xrandr --output $EXTERNAL --primary
+	#xrandr --output $INTERNAL --primary
+	read -p "Plug out external monitor and press [Enter]."
+	xrandr --output $INTERNAL --mode `printResolution $RES_INT_x $RES_INT_y`
 	xrandr >/dev/null
 	xrandr --auto
 }
 
+readDesiredExternalResolution(){
+	echo "Enter desired resolution of external:"
+	echo -n "x:"
+	read RES_EXT_x
+	echo -n "y:"
+	read RES_EXT_y
+	echo -n "Input: "
+	printResolution $RES_EXT_x $RES_EXT_y
+}
+
+# Test in Funktion scheint nicht zu gehen...
+isExternalGreaterThanInternal(){
+	if (( "$RES_EXT_x" > "$RES_INT_x" && "$RES_EXT_y" > "$RES_INT_y" )) ; then
+		return 0  # 0 = true
+	else
+		return 1  # 1 = false
+	fi
+}
+
+#isExternalEqualToInternal(){
+#
+#}
 
 # Main ------------------------------------------------
 
 # option handling
 
-RES_EXT_MAX=`getHighestExternalResolution`
+#RES_EXT_MAX=`getHighestExternalResolution`
 
-# enter (highest) resolution of external (VGA)
-echo -e "\nEnter highest common resolution: "
-read RES_EXT
+#activateDualMode_panning
+readDesiredExternalResolution
+if isExternalGreaterThanInternal ; then 
+	echo yeah
+fi
 
-activateDualMode
 deactivateDualMode
 
