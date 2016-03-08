@@ -4,10 +4,11 @@
 # MACHINE  all
 # INFO     runs mbsync periodically with gpg security
 #
-# DATE     19.02.2016
+# DATE     08.03.2016
 # OWNER    Bischofberger
 # ==================================================================
 
+source $HOME/Scripts/tmuxHelpers
 
 # variables ========================================================
 
@@ -31,8 +32,9 @@ SOUNDFILE=$HOME/Scripts/data/mario1.wav
 
 # functions ========================================================
 
-playSound() {
+mailAlert() {
 	mplayer -mixer-channel Master -volume 80 $SOUNDFILE >/dev/null 2>&1
+	tmux_DisplayMessageAllClients "You've got mail!"
 }
 
 # count messages in $2 and save number in $1
@@ -52,7 +54,7 @@ checkNewMail() {
 	echo -e   "uzh new:      $NEW3"
 
 	if [[ $NEW1 != $UNREAD1 || $NEW2 != $UNREAD2 || $NEW3 != $UNREAD3 ]] ; then
-		playSound
+		mailAlert
 	fi
 }
 

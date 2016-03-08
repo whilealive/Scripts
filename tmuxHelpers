@@ -1,0 +1,25 @@
+#!/bin/bash
+# ==================================================================
+# FILE     tmuxHelpers
+# MACHINE  all
+# INFO     various tmux helper functions
+#
+# DATE     08.03.2016
+# OWNER    Bischofberger
+# ==================================================================
+
+
+# params: $1 = message to be shown
+tmux_DisplayMessageAllClients(){
+	local clientsList=`tmux list-clients -F "#{client_tty}"`
+	readarray -t clientsArray <<<"$clientsList"
+	for client in "${clientsArray[@]}" ; do
+		tmux display-message -c $client "$1"
+	done
+}
+
+
+
+# put functions below for testing
+# ==================================================================
+#tmux_DisplayMessageAllClients "blahblah"
