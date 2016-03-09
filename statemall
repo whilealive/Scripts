@@ -3,21 +3,33 @@
 # FILE     statemall
 # MACHINE  all
 # INFO     show git status of all my git repositories at once
+#					 ANSI escape sequences:
+#					 Black        0;30     Dark Gray     1;30
+#					 Red          0;31     Light Red     1;31
+#					 Green        0;32     Light Green   1;32
+#					 Brown/Orange 0;33     Yellow        1;33
+#					 Blue         0;34     Light Blue    1;34
+#					 Purple       0;35     Light Purple  1;35
+#					 Cyan         0;36     Light Cyan    1;36
+#					 Light Gray   0;37     White         1;37
 #
-# DATE     03.03.2016
+# DATE     09.03.2016
 # OWNER    Bischofberger
 # ==================================================================
 
 GitHubReposFile="$HOME/Scripts/data/GitHubRepos.txt"
+COLOR='\033[0;35m'
+NC='\033[0m'  # No Color
 
 # my github repositories
 mapfile -t Repos <$GitHubReposFile
 
+echo -e "${COLOR}--------------------------------------------${NC}"
 for path in "${Repos[@]}" ; do
 	eval cd $path
-	pwd
+	echo -e ${COLOR}`pwd`${NC}
 	git status
-	echo "--------------"
+	echo -e "${COLOR}--------------------------------------------${NC}"
 done
 
 exit 0
