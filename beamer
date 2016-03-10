@@ -5,7 +5,7 @@
 # INFO     handles resolution in multi-monitor setup with dwm
 #					 when mirroring is involved
 #
-# DATE     03.03.2016
+# DATE     10.03.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -87,13 +87,11 @@ deactivateDualMode(){
 }
 
 readDesiredExternalResolution(){
-	echo "Enter desired resolution of external:"
-	echo -n "x:"
-	read RES_EXT_x
-	echo -n "y:"
-	read RES_EXT_y
-	echo -n "Input: "
-	printResolution $RES_EXT_x $RES_EXT_y
+	echo "Enter desired resolution of external: [{X}x{Y}]"
+	read res
+	RES_EXT_x="$(echo $res | awk -F "x" '{print $1}')"
+	RES_EXT_y="$(echo $res | awk -F "x" '{print $2}')"
+	unset res
 }
 
 # Test in Funktion scheint nicht zu gehen...
@@ -105,21 +103,32 @@ isExternalGreaterThanInternal(){
 	fi
 }
 
-#isExternalEqualToInternal(){
-#
-#}
+isExternalEqualToInternal(){
+	for res in "${RES_INT_LIST[@]}" ; do
+		local resX="$(echo $res | awk -F "x" '{print $1}')"
+		local resY="$(echo $res | awk -F "x" '{print $2}')"
+		unset res
+		if (( "$resX" == "$RES_EXT_x" && "$resY" == "$RES_EXT_y" )) ; then
+			return 0  # 0 = true
+		fi
+	done
+	return 1  # 1 = false
+}
 
 # Main ------------------------------------------------
 
 # option handling
+#getopts
 
 #RES_EXT_MAX=`getHighestExternalResolution`
 
 #activateDualMode_panning
 readDesiredExternalResolution
-if isExternalGreaterThanInternal ; then 
+#if isExternalGreaterThanInternal ; then 
+#	echo yeah
+#fi
+
+#deactivateDualMode
+if isExternalEqualToInternal ; then
 	echo yeah
 fi
-
-deactivateDualMode
-
