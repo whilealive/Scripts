@@ -8,6 +8,7 @@
 # DATE     10.03.2016
 # OWNER    Bischofberger
 # ==================================================================
+# TODO: option for getting out of dual mode
 
 # Auto:
 # 1. Auflösungen auflisten
@@ -48,6 +49,26 @@ die(){
 	echo -e "$0: Error: $1" >&2
 	exit 1
 }
+
+usage(){
+	echo -e "Usage: $0 [OPTION]
+
+Handles dual-monitor setup with suckless dwm.
+
+If no argument is given, automatic setup ist being executed. In automatic mode
+the highest possible external resolution will be chosen by default and compared
+to the internal resolutions. If there is a match, conventional dual-mode will
+be activated. If it is larger than the highest interal resolution, panning mode
+will be activated.
+Note, that by now (03.2016) there is no proper way to get out of panning mode.
+You must kill the Xserver to do so.\n\
+
+-h, --help            Show this help.
+-m, --manually        Manually enter desired external monitor resolution.
+                      Additional size checks give extra security in this mode.
+-f, --force           Same as the \"-m\"-flag but no size checks here.
+"
+	}
 
 listAllResolutions(){
 	xrandr
@@ -115,20 +136,100 @@ isExternalEqualToInternal(){
 	return 1  # 1 = false
 }
 
+usePanning(){
+	echo "panning? [y|n]"
+	read panning
+	case "$panning" in
+		"y")
+			unset panning
+			return 0  # 0 = true
+			;;
+		"n")
+			unset panning
+			return 1  # 1 = false
+			;;
+		*)
+			die "unknown parameter '$panning"
+			;;
+	esac
+}
+
+# manually but with some tests
+setup_m(){
+	listAllResolutions
+	readDesiredExternalResolution
+	if usePanning ; then
+		if isExternalGreaterThanInternal ; then
+			activateDualMode_panning
+		else
+			die "External screen resolution greater than internal. Panning not allowed."
+		fi
+	else  # no panning
+		if isExternalEqualToInternal ; then
+			activateDualMode
+		else
+			die "No common screen resolution found. Try \"-f|-force\"."
+		fi
+	fi
+}
+
+# no tests here
+setup_force(){
+	listAllResolutions
+	readDesiredExternalResolution
+	if usePanning ; then
+		activateDualMode_panning
+	else
+		activateDualMode
+	fi
+}
+
+# fully automatic
+setup_a(){
+	listAllResolutions
+	getHighestExternalResolution
+	if isExternalEqualToInternal ; then
+		echo -n "Highest external resolution is equal to internal resolution: "
+		printResolution $RES_EXT_x $RES_EXT_y
+		echo "Activating dual-mode..."
+		activateDualMode
+	else
+		echo "Hightest external resolution could not be found in internal list."
+		if isExternalGreaterThanInternal ; then
+			echo "We are lucky. External resolution is greater than hightest internal."
+			echo "Activating dual-mode with panning..."
+			activateDualMode_panning
+		else
+			die "Hightest external resolution is smaller than highest internal. No solution yet..."
+		fi
+	fi
+}
+
+
 # Main ------------------------------------------------
 
-# option handling
-#getopts
-
-#RES_EXT_MAX=`getHighestExternalResolution`
-
-#activateDualMode_panning
-readDesiredExternalResolution
-#if isExternalGreaterThanInternal ; then 
-#	echo yeah
-#fi
-
-#deactivateDualMode
-if isExternalEqualToInternal ; then
-	echo yeah
-fi
+# handle options
+while [ -n "$1" ]; do
+	case "$1" in
+		"-a"|"--auto")
+			setup_a
+			exit 0
+			;;
+		"-m"|"--manually")
+			setup_m
+			exit 0
+			;;
+		"-f"|"--force")
+			setup_f
+			exit 0
+			;;
+		"-h"|"--help")
+			usage
+			exit 0
+			;;
+		*)
+			echo "usage: $0 [-a|--auto] [-m|--manually] [-f|--force]"
+			die "unknown parameter '$1'"
+			;;
+	esac
+done
