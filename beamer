@@ -5,7 +5,7 @@
 # INFO     handles resolution in multi-monitor setup with dwm
 #					 when mirroring is involved
 #
-# DATE     10.03.2016
+# DATE     14.03.2016
 # OWNER    Bischofberger
 # ==================================================================
 # TODO: option for getting out of dual mode
@@ -50,6 +50,14 @@ die(){
 	exit 1
 }
 
+isValidRes(){
+	if [[ $1 =~ ^[0-9]+$ ]] && (( $1 > 0 )); then
+		return 0  # 0 = true
+	else
+		return 1  # 1 = false
+	fi
+}
+
 usage(){
 	echo -e "Usage: $0 [OPTION]
 
@@ -79,8 +87,19 @@ printResolution(){
 }
 
 getHighestExternalResolution(){
-	# TODO
-	echo "res"
+	# awk:	1.) search first line containing $EXTERNAL; there set x as current line number, y as 1
+	#				2.) skip two lines: "NR<x+2 {next}
+	#				3.) print only one line: while y!= 0 print first column ($1), 
+	#						set y to 0 right afterwards in order to just print 1 line.
+	local res=`xrandr | awk '/'$EXTERNAL'/{x=NR; y=1} NR < x+2 {next} y!= 0 {print $1; y=0}'`
+	if [ -z "$res" ] ; then
+		die "no external resolution detected"
+	fi
+	RES_EXT_x="$(echo $res | awk -F "x" '{print $1}')"
+	RES_EXT_y="$(echo $res | awk -F "x" '{print $2}')"
+	if !(isValidRes $RES_EXT_x && isValidRes $RES_EXT_y) ; then
+		die "failed to extract external resolution"
+	fi
 }
 
 #xrandr --output LVDS --mode 1366x768 --fb 1920x1200 --panning 1920x1200* --output VGA-0 --mode 1920x1200 --same-as LVDS
@@ -109,10 +128,13 @@ deactivateDualMode(){
 
 readDesiredExternalResolution(){
 	echo "Enter desired resolution of external: [{X}x{Y}]"
-	read res
+	read res  # local not possible due to "read"
 	RES_EXT_x="$(echo $res | awk -F "x" '{print $1}')"
 	RES_EXT_y="$(echo $res | awk -F "x" '{print $2}')"
 	unset res
+	if !(isValidRes $RES_EXT_x && isValidRes $RES_EXT_y) ; then
+		die "failed to extract external resolution"
+	fi
 }
 
 # Test in Funktion scheint nicht zu gehen...
@@ -211,10 +233,6 @@ setup_a(){
 # handle options
 while [ -n "$1" ]; do
 	case "$1" in
-		"-a"|"--auto")
-			setup_a
-			exit 0
-			;;
 		"-m"|"--manually")
 			setup_m
 			exit 0
@@ -233,3 +251,7 @@ while [ -n "$1" ]; do
 			;;
 	esac
 done
+
+# if no argument is given do automatic setup
+setup_a
+exit 0
