@@ -5,7 +5,7 @@
 # INFO     handles resolution in multi-monitor setup with dwm
 #					 when mirroring is involved
 #
-# DATE     14.03.2016
+# DATE     16.03.2016
 # OWNER    Bischofberger
 # ==================================================================
 # TODO: option for getting out of dual mode
@@ -75,6 +75,7 @@ You must kill the Xserver to do so.\n\
 -m, --manually        Manually enter desired external monitor resolution.
                       Additional size checks give extra security in this mode.
 -f, --force           Same as the \"-m\"-flag but no size checks here.
+-d, --deactivate      Get out of dual-mode. (not working properly for panning yet)
 "
 	}
 
@@ -87,11 +88,11 @@ printResolution(){
 }
 
 getHighestExternalResolution(){
-	# awk:	1.) search first line containing $EXTERNAL; there set x as current line number, y as 1
-	#				2.) skip two lines: "NR<x+2 {next}
+	# awk:	1.) search first line containing $EXTERNAL; set y as 1
+	#				2.) skip one line: "next"
 	#				3.) print only one line: while y!= 0 print first column ($1), 
 	#						set y to 0 right afterwards in order to just print 1 line.
-	local res=`xrandr | awk '/'$EXTERNAL'/{x=NR; y=1} NR < x+2 {next} y!= 0 {print $1; y=0}'`
+	local res=`xrandr | awk '/'$EXTERNAL'/{y=1; next} y!= 0 {print $1; y=0}'`
 	if [ -z "$res" ] ; then
 		die "no external resolution detected"
 	fi
@@ -112,8 +113,8 @@ activateDualMode_panning(){
 
 # für 1024x768
 activateDualMode(){
-	xrandr --output $EXTERNAL --auto --same-as $INTERNAL --mode $RES_EXT
-	xrandr --output $INTERNAL --mode $RES_EXT
+	xrandr --output $EXTERNAL --auto --same-as $INTERNAL --mode `printResolution $RES_EXT_x $RES_EXT_y`
+	xrandr --output $INTERNAL --mode `printResolution $RES_EXT_x $RES_EXT_y`
 }
 
 # TODO: workaround for getting out of panning...
@@ -216,13 +217,13 @@ setup_a(){
 		echo "Activating dual-mode..."
 		activateDualMode
 	else
-		echo "Hightest external resolution could not be found in internal list."
+		echo "Hightest external resolution (`printResolution $RES_EXT_x $RES_EXT_y`) could not be found in internal list."
 		if isExternalGreaterThanInternal ; then
 			echo "We are lucky. External resolution is greater than hightest internal."
 			echo "Activating dual-mode with panning..."
 			activateDualMode_panning
 		else
-			die "Hightest external resolution is smaller than highest internal. No solution yet..."
+			die "Hightest external resolution (`printResolution $RES_EXT_x $RES_EXT_y`) is smaller than highest internal. No solution yet..."
 		fi
 	fi
 }
@@ -243,6 +244,10 @@ while [ -n "$1" ]; do
 			;;
 		"-h"|"--help")
 			usage
+			exit 0
+			;;
+		"-d"|"--deactivate")
+			deactivateDualMode
 			exit 0
 			;;
 		*)
