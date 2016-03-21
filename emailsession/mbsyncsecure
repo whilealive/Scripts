@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     runs mbsync periodically with gpg security
 #
-# DATE     08.03.2016
+# DATE     21.03.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -33,7 +33,7 @@ SOUNDFILE=$HOME/Scripts/data/mario1.wav
 # functions ========================================================
 
 mailAlert() {
-	mplayer -mixer-channel Master -volume 80 $SOUNDFILE >/dev/null 2>&1
+	mplayer $SOUNDFILE >/dev/null 2>&1
 	tmux_DisplayMessageAllClients "You've got mail!"
 }
 
