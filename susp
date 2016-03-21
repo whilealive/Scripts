@@ -7,7 +7,7 @@
 #          doesn't work reliably in my case, I ended up with this
 #          workaround
 #
-# DATE     21.03.2014
+# DATE     21.03.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -25,6 +25,6 @@ systemctl suspend
 # POST:
 # -----
 sleep 10  # for safety
-dwmstatus --$host &
+dwmstatus &
 
 exit 0
