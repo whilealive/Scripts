@@ -6,8 +6,8 @@
 #          script in it.
 #          use terminus font instead of standard
 #
-# DATE     15.07.2014
+# DATE     23.03.2016
 # OWNER    Bischofberger
 # ==================================================================
 
-st -t mail -f -*-terminus-medium-r-*-*-16-*-*-*-*-*-*-* -e emailsessioninit
+st -t mail -f -*-terminus-medium-r-*-*-18-*-*-*-*-*-*-* -e emailsessioninit

@@ -7,7 +7,7 @@
 #          doesn't work reliably in my case, I ended up with this
 #          workaround
 #
-# DATE     21.03.2016
+# DATE     23.03.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -17,14 +17,14 @@ host=$(hostname)
 # PRE:
 # ----
 if [ "$(pidof dwmstatus)" ] ; then  # dwmstatus is running
-    killall dwmstatus
+  killall dwmstatus
 fi
 
 systemctl suspend
 
 # POST:
 # -----
-sleep 10  # for safety
+sleep 5  # for safety
 dwmstatus &
 
 exit 0
