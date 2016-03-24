@@ -5,45 +5,26 @@
 # INFO     handles resolution in multi-monitor setup with dwm
 #					 when mirroring is involved
 #
-# DATE     16.03.2016
+# DATE     24.03.2016
 # OWNER    Bischofberger
 # ==================================================================
-# TODO: option for getting out of dual mode
-
-# Auto:
-# 1. Auflösungen auflisten
-# 2. Wähle grösste Beamer-Auflösung
-# 3. Vergleiche in internen Auflösungen
-#		 3a. Suche erfolgreich (1024x768 oder höher)
-#				-> activateDualMode()
-#    3b. Suche erfolglos													
-#				-> Meldung und check, ob Auflösung grösser als internal
-#						-> Falls ja   -> activateDualMode_panning()
-#						-> Falls nein -> ???
-
-# Manuell (-m|--manually):
-# 1. Auflösungen auflisten
-# 2. Beamer-Auflösung eingeben (x, y)
-# 3. Panning? eingeben
-# Tests fahren:
-# Panning ja		-> Auflösung >= Internal? -> Ja, ok, Nein, Abbruch
-# Panning Nein	-> Auflösung = InternalMax? -> Ja, ok, Nein, Abbruch
-
-# Force (-f|--force):
-# wie manuell, aber ohne Tests
 
 
-INTERNAL="LVDS"
-RES_INT_x="1366"
-RES_INT_y="768"
-RES_INT_LIST=("1366x768" \
-							"1280x720" \
-							"1152x768" \
-							"1024x768")
-
+# set the following two according to your system
+# ----------------------------------------------
+INTERNAL="eDP1"
 EXTERNAL="VGA-0"
+# ----------------------------------------------
+
+
+# global vars (will be set automatically later)
+RES_INT_x="1"
+RES_INT_y="1"
+RES_INT_LIST=()
 RES_EXT_x="1"
 RES_EXT_y="1"
+RES_EXT_LIST=()
+COMMON_RES="1"
 
 die(){
 	echo -e "$0: Error: $1" >&2
@@ -64,10 +45,9 @@ usage(){
 Handles dual-monitor setup with suckless dwm.
 
 If no argument is given, automatic setup ist being executed. In automatic mode
-the highest possible external resolution will be chosen by default and compared
-to the internal resolutions. If there is a match, conventional dual-mode will
-be activated. If it is larger than the highest interal resolution, panning mode
-will be activated.
+a common resolution will be searched by default and activated if user wishes
+to.  If there is no match and hightest external is higher than internal
+resolution, panning mode will be activated.\n
 Note, that by now (03.2016) there is no proper way to get out of panning mode.
 You must kill the Xserver to do so.\n\
 
@@ -77,33 +57,69 @@ You must kill the Xserver to do so.\n\
 -f, --force           Same as the \"-m\"-flag but no size checks here.
 -d, --deactivate      Get out of dual-mode. (not working properly for panning yet)
 "
-	}
+}
 
-listAllResolutions(){
+showAllResolutions(){
 	xrandr
+	echo ""
 }
 
 printResolution(){
 	echo "${1}x${2}"
 }
 
-getHighestExternalResolution(){
-	# awk:	1.) search first line containing $EXTERNAL; set y as 1
-	#				2.) skip one line: "next"
-	#				3.) print only one line: while y!= 0 print first column ($1), 
-	#						set y to 0 right afterwards in order to just print 1 line.
-	local res=`xrandr | awk '/'$EXTERNAL'/{y=1; next} y!= 0 {print $1; y=0}'`
-	if [ -z "$res" ] ; then
-		die "no external resolution detected"
-	fi
-	RES_EXT_x="$(echo $res | awk -F "x" '{print $1}')"
-	RES_EXT_y="$(echo $res | awk -F "x" '{print $2}')"
-	if !(isValidRes $RES_EXT_x && isValidRes $RES_EXT_y) ; then
-		die "failed to extract external resolution"
+getCurrentInternalResolution(){
+	local res=`xrandr | awk '/'\*'/ {print $1; exit}'`
+  extractResolution RES_INT_x RES_INT_y $res
+}
+
+fillListOfInternalResolutions(){
+	# awk:	1.) skip lines not beginning with a space and count them (in y)
+	#						note that awk sets all variables to 0 by default, so we can
+	#						just increment them whithout initialization
+	#				2.) stop extracting numbers after three lines having no space at
+	#						the beginning (see output of xrandr)
+	local res=`xrandr | awk '!/'^\ '/ {++n;next} n<3 {print $1}'`
+	RES_INT_LIST=($res)
+}
+
+fillListOfExternalResolutions(){
+	local res=`xrandr | awk '/'^$EXTERNAL$'/ {m=1; next} m==1 && !/'^\ '/ {exit} m==1 && /'^\ '/ {print $1}'`
+	RES_EXT_LIST=($res)
+}
+
+extractResolution(){
+	eval "$1="$(echo $3 | awk -F "x" '{print $1}')""
+	eval "$2="$(echo $3 | awk -F "x" '{print $2}')""
+	if !(isValidRes ${!1} && isValidRes ${!2}) ; then
+		die "failed to extract resolution: ${!1} x ${!2}."
 	fi
 }
 
-#xrandr --output LVDS --mode 1366x768 --fb 1920x1200 --panning 1920x1200* --output VGA-0 --mode 1920x1200 --same-as LVDS
+getHighestExternalResolutionFromList(){
+  extractResolution RES_EXT_x RES_EXT_y $RES_EXT_LIST[0]
+}
+
+getHighestInternalResolutionFromList(){
+  extractResolution RES_INT_x RES_INT_y $RES_INT_LIST[0]
+}
+
+# search for a match between internal and external list
+# match will be saved in COMMON_RES
+compareLists(){
+	for resInt in "${RES_INT_LIST[@]}" ; do
+		for resExt in "${RES_EXT_LIST[@]}" ; do
+			if [[ "$resINT" == "$resExt" ]] ; then
+				COMMON_RES=$resExt
+				unset resInt resExt
+				return 0  # 0 = true
+			fi
+		done
+	done
+  unset resInt resExt
+	return 1  # 1 = false
+}
+
 activateDualMode_panning(){
 	xrandr	--output $INTERNAL --mode $RES_INT_MAX --fb $RES_EXT --panning $RES_EXT* \
 					--output $EXTERNAL --mode $RES_EXT --same-as $INTERNAL
@@ -111,7 +127,6 @@ activateDualMode_panning(){
 				and therefore kill the X-server. (Bug in xrandr, 03.2016)"
 }
 
-# für 1024x768
 activateDualMode(){
 	xrandr --output $EXTERNAL --auto --same-as $INTERNAL --mode `printResolution $RES_EXT_x $RES_EXT_y`
 	xrandr --output $INTERNAL --mode `printResolution $RES_EXT_x $RES_EXT_y`
@@ -122,6 +137,8 @@ deactivateDualMode(){
 	#xrandr --output $EXTERNAL --primary
 	#xrandr --output $INTERNAL --primary
 	read -p "Plug out external monitor and press [Enter]."
+  fillListOfInternalResolutions
+  getHighestInternalResolutionFromList
 	xrandr --output $INTERNAL --mode `printResolution $RES_INT_x $RES_INT_y`
 	xrandr >/dev/null
 	xrandr --auto
@@ -130,12 +147,8 @@ deactivateDualMode(){
 readDesiredExternalResolution(){
 	echo "Enter desired resolution of external: [{X}x{Y}]"
 	read res  # local not possible due to "read"
-	RES_EXT_x="$(echo $res | awk -F "x" '{print $1}')"
-	RES_EXT_y="$(echo $res | awk -F "x" '{print $2}')"
+  extractResolution RES_EXT_x RES_EXT_y $res
 	unset res
-	if !(isValidRes $RES_EXT_x && isValidRes $RES_EXT_y) ; then
-		die "failed to extract external resolution"
-	fi
 }
 
 # Test in Funktion scheint nicht zu gehen...
@@ -147,10 +160,11 @@ isExternalGreaterThanInternal(){
 	fi
 }
 
-isExternalEqualToInternal(){
+isExternalInInternalList(){
+	fillListOfInternalResolutions
 	for res in "${RES_INT_LIST[@]}" ; do
-		local resX="$(echo $res | awk -F "x" '{print $1}')"
-		local resY="$(echo $res | awk -F "x" '{print $2}')"
+    local resX resY
+    extractResolution resX resY $res
 		unset res
 		if (( "$resX" == "$RES_EXT_x" && "$resY" == "$RES_EXT_y" )) ; then
 			return 0  # 0 = true
@@ -179,16 +193,17 @@ usePanning(){
 
 # manually but with some tests
 setup_m(){
-	listAllResolutions
+	showAllResolutions
+	getCurrentInternalResolution
 	readDesiredExternalResolution
 	if usePanning ; then
 		if isExternalGreaterThanInternal ; then
 			activateDualMode_panning
 		else
-			die "External screen resolution greater than internal. Panning not allowed."
+			die "External screen resolution smaller than internal. Panning not allowed."
 		fi
 	else  # no panning
-		if isExternalEqualToInternal ; then
+		if isExternalInInternalList ; then
 			activateDualMode
 		else
 			die "No common screen resolution found. Try \"-f|-force\"."
@@ -198,7 +213,8 @@ setup_m(){
 
 # no tests here
 setup_force(){
-	listAllResolutions
+	showAllResolutions
+	getCurrentInternalResolution
 	readDesiredExternalResolution
 	if usePanning ; then
 		activateDualMode_panning
@@ -209,15 +225,30 @@ setup_force(){
 
 # fully automatic
 setup_a(){
-	listAllResolutions
-	getHighestExternalResolution
-	if isExternalEqualToInternal ; then
-		echo -n "Highest external resolution is equal to internal resolution: "
-		printResolution $RES_EXT_x $RES_EXT_y
-		echo "Activating dual-mode..."
-		activateDualMode
+	showAllResolutions
+  fillListOfInternalResolutions
+  fillListOfExternalResolutions
+	if compareLists ; then
+		echo "Common resolution found: $COMMON_RES"
+    echo "Do you want to activate dual-mode with this resolution? [y|n]"
+    read answer
+    case "$answer" in
+      "y")
+        extractResolution RES_EXT_x RES_EXT_y $COMMON_RES
+        activateDualMode
+        return 0  # 0 = true
+        ;;
+      "n")
+        return 1  # 1 = false
+        ;;
+      *)
+        die "unknown parameter '$answer"
+        ;;
+    esac
 	else
-		echo "Hightest external resolution (`printResolution $RES_EXT_x $RES_EXT_y`) could not be found in internal list."
+		echo "No common resolution found."
+    getCurrentInternalResolution
+    getHighestExternalResolutionFromList
 		if isExternalGreaterThanInternal ; then
 			echo "We are lucky. External resolution is greater than hightest internal."
 			echo "Activating dual-mode with panning..."
@@ -228,35 +259,35 @@ setup_a(){
 	fi
 }
 
-
 # Main ------------------------------------------------
 
-# handle options
-while [ -n "$1" ]; do
-	case "$1" in
-		"-m"|"--manually")
-			setup_m
-			exit 0
-			;;
-		"-f"|"--force")
-			setup_f
-			exit 0
-			;;
-		"-h"|"--help")
-			usage
-			exit 0
-			;;
-		"-d"|"--deactivate")
-			deactivateDualMode
-			exit 0
-			;;
-		*)
-			echo "usage: $0 [-a|--auto] [-m|--manually] [-f|--force]"
-			die "unknown parameter '$1'"
-			;;
-	esac
-done
+if [ -z "$1" ] ; then
+  # if no argument is given do automatic setup
+  setup_a
+  exit 0
+fi
 
-# if no argument is given do automatic setup
-setup_a
-exit 0
+# handle options
+case "$1" in
+  "-m"|"--manually")
+    setup_m
+    exit 0
+    ;;
+  "-f"|"--force")
+    setup_f
+    exit 0
+    ;;
+  "-h"|"--help")
+    usage
+    exit 0
+    ;;
+  "-d"|"--deactivate")
+    deactivateDualMode
+    exit 0
+    ;;
+  *)
+    echo "usage: $0 [-m|--manually] [-f|--force] [-d|--deactivate] [-h|--help]"
+    die "unknown parameter '$1'"
+    ;;
+esac
+
