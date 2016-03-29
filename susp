@@ -7,24 +7,48 @@
 #          doesn't work reliably in my case, I ended up with this
 #          workaround
 #
-# DATE     23.03.2016
+# DATE     28.03.2016
 # OWNER    Bischofberger
 # ==================================================================
 
-
 host=$(hostname)
 
-# PRE:
-# ----
-if [ "$(pidof dwmstatus)" ] ; then  # dwmstatus is running
-  killall dwmstatus
+die(){
+	echo -e "$0: Error: $1" >&2
+	exit 1
+}
+
+preActions(){
+  if [ "$(pidof dwmstatus)" ] ; then  # dwmstatus is running
+    killall dwmstatus
+  fi
+}
+
+suspendActions(){
+  systemctl suspend
+}
+
+postActions(){
+  sleep 5  # for safety
+  dwmstatus &
+}
+
+# Main ------------------------------------------------
+
+if [ -z "$1" ] ; then
+  preActions
+  suspendActions
+  postActions
+  exit 0
 fi
 
-systemctl suspend
-
-# POST:
-# -----
-sleep 5  # for safety
-dwmstatus &
-
-exit 0
+case "$1" in
+  "-s"|"--skippost")
+    preActions
+    suspendActions
+    exit 0
+    ;;
+  *)
+    die "unknown parameter '$1'"
+    ;;
+esac
