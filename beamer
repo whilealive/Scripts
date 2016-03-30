@@ -5,7 +5,7 @@
 # INFO     handles resolution in multi-monitor setup with dwm
 #					 when mirroring is involved
 #
-# DATE     24.03.2016
+# DATE     30.03.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -13,7 +13,7 @@
 # set the following two according to your system
 # ----------------------------------------------
 INTERNAL="eDP1"
-EXTERNAL="VGA-0"
+EXTERNAL="DP2"
 # ----------------------------------------------
 
 
@@ -97,11 +97,11 @@ extractResolution(){
 }
 
 getHighestExternalResolutionFromList(){
-  extractResolution RES_EXT_x RES_EXT_y $RES_EXT_LIST[0]
+  extractResolution RES_EXT_x RES_EXT_y ${RES_EXT_LIST[0]}
 }
 
 getHighestInternalResolutionFromList(){
-  extractResolution RES_INT_x RES_INT_y $RES_INT_LIST[0]
+  extractResolution RES_INT_x RES_INT_y ${RES_INT_LIST[0]}
 }
 
 # search for a match between internal and external list
@@ -109,7 +109,7 @@ getHighestInternalResolutionFromList(){
 compareLists(){
 	for resInt in "${RES_INT_LIST[@]}" ; do
 		for resExt in "${RES_EXT_LIST[@]}" ; do
-			if [[ "$resINT" == "$resExt" ]] ; then
+			if [[ "$resInt" == "$resExt" ]] ; then
 				COMMON_RES=$resExt
 				unset resInt resExt
 				return 0  # 0 = true
@@ -246,7 +246,7 @@ setup_a(){
         ;;
     esac
 	else
-		echo "No common resolution found."
+		echo "No common resolution found. Taking highest external resolution."
     getCurrentInternalResolution
     getHighestExternalResolutionFromList
 		if isExternalGreaterThanInternal ; then
@@ -254,7 +254,8 @@ setup_a(){
 			echo "Activating dual-mode with panning..."
 			activateDualMode_panning
 		else
-			die "Hightest external resolution (`printResolution $RES_EXT_x $RES_EXT_y`) is smaller than highest internal. No solution yet..."
+      die "Hightest external resolution (`printResolution $RES_EXT_x $RES_EXT_y`) is smaller than
+                 highest internal (`printResolution $RES_INT_x $RES_INT_y`). No solution yet..."
 		fi
 	fi
 }
