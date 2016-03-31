@@ -35,6 +35,9 @@ Some shell scripts
 #### pdfpextr
 - extract pages from pdf files
 
+#### pdfpsize
+- get page size of pdfs in mm
+
 #### trash
 - ~/.trash/ folder support
 

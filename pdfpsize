@@ -1,0 +1,38 @@
+#!/bin/bash
+# ==================================================================
+# FILE     pdfpsize
+# MACHINE  all
+# INFO     get size of pdf im mm
+#          depends on pdfinfo
+#
+# DATE     31.03.2016
+# OWNER    Bischofberger
+# ==================================================================
+
+ONEPTS="0.3527778"
+
+die() {
+	echo -e "$0: Error: $1" >&2
+	exit 1
+}
+
+pts_to_mm() {
+  local unrounded=`echo | awk '{print '$ONEPTS' * '$1'}'`
+  printf "%.1f" "$unrounded"
+}
+
+# Main ------------------------------------------------
+
+# if no argument is given exit
+if [[ "$#" != "1" ]] ; then
+  die "give a pdf file as single argument"
+fi
+
+pdfinfo $1 || die "failed to extract pdf info"
+
+SIZE_pts_X=`pdfinfo $1 | awk '/'Page\ size'/ {print $3}'` 
+SIZE_pts_Y=`pdfinfo $1 | awk '/'Page\ size'/ {print $5}'`
+SIZE_mm_X=`pts_to_mm $SIZE_pts_X`
+SIZE_mm_Y=`pts_to_mm $SIZE_pts_Y`
+
+echo -e "\nPage size (mm): ${SIZE_mm_X}x${SIZE_mm_Y}mm\n"

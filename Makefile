@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     03.03.2016
+# DATE     31.03.2016
 # OWNER    Bischofberger
 # ==================================================================
 # TODO: give uninstall option
@@ -20,7 +20,8 @@ SCRIPTS = susp \
 		  snippy \
 		  clipswap \
 		  pushemall \
-		  statemall
+		  statemall \
+		  pdfpsize
 
 MUTTSESSIONDIR   = emailsession/
 MUTTSCRIPTS      = mbsyncsecure email emailsessioninit
