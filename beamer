@@ -5,7 +5,7 @@
 # INFO     handles resolution in multi-monitor setup with dwm
 #					 when mirroring is involved
 #
-# DATE     30.03.2016
+# DATE     31.03.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -120,26 +120,29 @@ compareLists(){
 	return 1  # 1 = false
 }
 
-activateDualMode_panning(){
+xrandr_activateDualMode_panning(){
 	xrandr	--output $INTERNAL --mode $RES_INT_MAX --fb $RES_EXT --panning $RES_EXT* \
-					--output $EXTERNAL --mode $RES_EXT --same-as $INTERNAL
+					--output $EXTERNAL --mode $RES_EXT --same-as $INTERNAL \
+          || die "xrandr failure"
 	echo "In order to get out of panning mode, you must kill dwm (Mod1-Shift-q)
 				and therefore kill the X-server. (Bug in xrandr, 03.2016)"
 }
 
-activateDualMode(){
-	xrandr --output $EXTERNAL --auto --same-as $INTERNAL --mode `printResolution $RES_EXT_x $RES_EXT_y`
-	xrandr --output $INTERNAL --mode `printResolution $RES_EXT_x $RES_EXT_y`
+xrandr_activateDualMode(){
+	xrandr --output $EXTERNAL --auto --same-as $INTERNAL --mode `printResolution $RES_EXT_x $RES_EXT_y` \
+    || die "xrandr failure"
+	xrandr --output $INTERNAL --mode `printResolution $RES_EXT_x $RES_EXT_y` \
+    || die "xrandr failure"
 }
 
 # TODO: workaround for getting out of panning...
-deactivateDualMode(){
+xrandr_deactivateDualMode(){
 	#xrandr --output $EXTERNAL --primary
 	#xrandr --output $INTERNAL --primary
 	read -p "Plug out external monitor and press [Enter]."
   fillListOfInternalResolutions
   getHighestInternalResolutionFromList
-	xrandr --output $INTERNAL --mode `printResolution $RES_INT_x $RES_INT_y`
+	xrandr --output $INTERNAL --mode `printResolution $RES_INT_x $RES_INT_y`  || die "xrandr failure"
 	xrandr >/dev/null
 	xrandr --auto
 }
@@ -191,6 +194,19 @@ usePanning(){
 	esac
 }
 
+automatic_panning(){
+  getCurrentInternalResolution
+  getHighestExternalResolutionFromList
+  if isExternalGreaterThanInternal ; then
+    echo "We are lucky. External resolution is greater than hightest internal."
+    echo "Activating dual-mode with panning..."
+    xrandr_activateDualMode_panning
+  else
+    die "Hightest external resolution (`printResolution $RES_EXT_x $RES_EXT_y`) is smaller than
+    highest internal (`printResolution $RES_INT_x $RES_INT_y`). No solution yet..."
+  fi
+}
+
 # manually but with some tests
 setup_m(){
 	showAllResolutions
@@ -198,13 +214,13 @@ setup_m(){
 	readDesiredExternalResolution
 	if usePanning ; then
 		if isExternalGreaterThanInternal ; then
-			activateDualMode_panning
+			xrandr_activateDualMode_panning
 		else
 			die "External screen resolution smaller than internal. Panning not allowed."
 		fi
 	else  # no panning
 		if isExternalInInternalList ; then
-			activateDualMode
+			xrandr_activateDualMode
 		else
 			die "No common screen resolution found. Try \"-f|-force\"."
 		fi
@@ -217,47 +233,41 @@ setup_force(){
 	getCurrentInternalResolution
 	readDesiredExternalResolution
 	if usePanning ; then
-		activateDualMode_panning
+		xrandr_activateDualMode_panning
 	else
-		activateDualMode
+		xrandr_activateDualMode
 	fi
 }
 
 # fully automatic
 setup_a(){
-	showAllResolutions
+  showAllResolutions
   fillListOfInternalResolutions
   fillListOfExternalResolutions
-	if compareLists ; then
-		echo "Common resolution found: $COMMON_RES"
+  if compareLists ; then
+    echo "Common resolution found: $COMMON_RES"
     echo "Do you want to activate dual-mode with this resolution? [y|n]"
     read answer
     case "$answer" in
       "y")
         extractResolution RES_EXT_x RES_EXT_y $COMMON_RES
-        activateDualMode
-        return 0  # 0 = true
+        xrandr_activateDualMode
         ;;
       "n")
-        return 1  # 1 = false
+        echo "Do you want to try panning then? [y|n]"
+        read answer
+        if [[ "$answer" == "y" ]] : then
+          automatic_panning
+        fi
         ;;
       *)
         die "unknown parameter '$answer"
         ;;
     esac
-	else
-		echo "No common resolution found. Taking highest external resolution."
-    getCurrentInternalResolution
-    getHighestExternalResolutionFromList
-		if isExternalGreaterThanInternal ; then
-			echo "We are lucky. External resolution is greater than hightest internal."
-			echo "Activating dual-mode with panning..."
-			activateDualMode_panning
-		else
-      die "Hightest external resolution (`printResolution $RES_EXT_x $RES_EXT_y`) is smaller than
-                 highest internal (`printResolution $RES_INT_x $RES_INT_y`). No solution yet..."
-		fi
-	fi
+  else
+    echo "No common resolution found. Taking highest external resolution."
+    automatic_panning
+  fi
 }
 
 # Main ------------------------------------------------
@@ -272,19 +282,15 @@ fi
 case "$1" in
   "-m"|"--manually")
     setup_m
-    exit 0
     ;;
   "-f"|"--force")
     setup_f
-    exit 0
     ;;
   "-h"|"--help")
     usage
-    exit 0
     ;;
   "-d"|"--deactivate")
-    deactivateDualMode
-    exit 0
+    xrandr_deactivateDualMode
     ;;
   *)
     echo "usage: $0 [-m|--manually] [-f|--force] [-d|--deactivate] [-h|--help]"
