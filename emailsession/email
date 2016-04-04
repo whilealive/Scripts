@@ -6,8 +6,34 @@
 #          script in it.
 #          use terminus font instead of standard
 #
-# DATE     23.03.2016
+# DATE     01.04.2016
 # OWNER    Bischofberger
 # ==================================================================
 
-st -t mail -f -*-terminus-medium-r-*-*-18-*-*-*-*-*-*-* -e emailsessioninit
+HOST_DESKTOP="desktop"
+HOST_LAPTOP="laptop2"
+
+FONTSIZE_LARGE="18"
+FONTSIZE_MEDIUM="16"
+
+die() {
+  echo -e "$0: Error: $1" >&2
+  exit 1
+}
+
+# @param1: font size (terminus)
+launch_eMail() {
+  st -t mail -f -*-terminus-medium-r-*-*-$1-*-*-*-*-*-*-* -e emailsessioninit
+}
+
+case "$(hostname)" in
+  "$HOST_DESKTOP")
+    launch_eMail $FONTSIZE_MEDIUM
+    ;;
+  "$HOST_LAPTOP")
+    launch_eMail $FONTSIZE_LARGE
+    ;;
+  *)
+    die "hostname unknown"
+    ;;
+esac
