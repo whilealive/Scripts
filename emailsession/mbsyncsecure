@@ -3,8 +3,9 @@
 # FILE     mbsyncsecure
 # MACHINE  all
 # INFO     runs mbsync periodically with gpg security
+#          depends on script "vol"
 #
-# DATE     21.03.2016
+# DATE     05.04.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -29,11 +30,17 @@ passwd1="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 2p)"
 passwd2="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 3p)"
 
 SOUNDFILE=$HOME/Scripts/data/mario1.wav
+VOLUME="40"
 
 # functions ========================================================
 
 mailAlert() {
-	mplayer $SOUNDFILE >/dev/null 2>&1
+  local STAT=`vol --getStat`
+  if [[ "$STAT" == "on" ]] ; then  # we only want to play some sound if channel is unmuted
+    local VOL=`vol --getVol`  # save current volume
+    mplayer -mixer-channel Master -volume $VOLUME $SOUNDFILE >/dev/null 2>&1  # changes volume to $VOLUME
+    vol $VOL  # restore volume
+  fi
 	tmux_DisplayMessageAllClients "You've got mail!"
 }
 
