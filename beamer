@@ -5,7 +5,7 @@
 # INFO     handles resolution in multi-monitor setup with dwm
 #					 when mirroring is involved
 #
-# DATE     31.03.2016
+# DATE     11.04.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -256,7 +256,7 @@ setup_a(){
       "n")
         echo "Do you want to try panning then? [y|n]"
         read answer
-        if [[ "$answer" == "y" ]] : then
+        if [[ "$answer" == "y" ]] ; then
           automatic_panning
         fi
         ;;
