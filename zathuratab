@@ -1,3 +1,4 @@
+#!/bin/bash
 # ==================================================================
 # FILE     zathuratab.sh
 # MACHINE  all
@@ -7,7 +8,7 @@
 #          - for use with vim netrw (x command): 
 #            use "xdg-mime default zathuratab.desktop application/pdf"
 #
-# DATE     02.05.2014
+# DATE     01.05.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -17,15 +18,15 @@ tempfile=/tmp/tabbed.xid
 
 if [ "$(pidof tabbed)" ] && [ "$(pidof zathura)" ] ; then  # tabbed and zathura already running
     if [ -n "$1" ] ; then
-        zathura -e $(<$tempfile) "$1"
+        zathura --fork -e $(<$tempfile) "$1"
     else
-        zathura -e $(<$tempfile)
+        zathura --fork -e $(<$tempfile)
     fi
 else
     tabbed -c -d >$tempfile
     if [ -n "$1" ] ; then
-        zathura -e $(<$tempfile) "$1"
+        zathura --fork -e $(<$tempfile) "$1"
     else
-        zathura -e $(<$tempfile)
+        zathura --fork -e $(<$tempfile)
     fi
 fi
