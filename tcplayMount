@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# sdbm
+# cd /run/media/laptop2/transfer
+# losetup /dev/loop0 transferfile.tc
+# tcplay -m transferfile.tc -d /dev/loop0
+# mount -o nodev,nosuid /dev/mapper/transferfile.tc /mnt/localtransfer/
+
+# TODO: what about deleting the temporary folder in /mnt/transfer after umount?
+
+cryptfile=transferfile.tc
+cryptdev=transferfolder
+cryptpath=/run/media/$(hostname)/transfer/
+loopdev=$(losetup -f)
+mountpt=/mnt/"$cryptdev"
+
+# must be run as root
+if (( $EUID != 0 )); then
+  printf "%s\n" "You must be root to run this."
+  exit 1
+fi
+
+modprobe loop
+
+# unecrypt and mount container
+if [[ $1 == open ]]; then
+  cd "$cryptpath"
+  losetup "$loopdev" "$cryptfile"
+  tcplay -m "$cryptfile" -d "$loopdev"
+
+  # read passphrase
+  read -r -s passphrase <<EOF
+  "$passphrase"
+EOF
+
+  # mount container
+  [[ -d $mountpt ]] || mkdir "$mountpt"
+
+  # mount options
+  mount -o nodev,nosuid /dev/mapper/"$cryptfile" "$mountpt"
+
+# close and clean up…
+elif [[ $1 == close ]]; then
+  device=$(awk -v dev=$cryptdev -F":" '/dev/ {print $1}' <(losetup -a))
+  umount "$mountpt"
+  dmsetup remove "$cryptfile" || printf "%s\n" "demapping failed"
+  losetup -d "$device" || printf "%s\n" "deleting $loopdev failed"
+  rm -r "$mountpt"
+else
+  printf "%s\n" "Options are open or close."
+fi

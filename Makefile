@@ -4,15 +4,14 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     11.04.2016
+# DATE     14.06.2016
 # OWNER    Bischofberger
 # ==================================================================
 # TODO: give uninstall option
 
 PREFIX:=/usr/local
 
-SCRIPTS = susp \
-		  nmgui \
+SCRIPTS = nmgui \
 		  pcsync \
 		  trash \
 		  zathuratab \
@@ -22,7 +21,9 @@ SCRIPTS = susp \
 		  pushemall \
 		  statemall \
 		  pdfpsize \
-		  beamer
+		  pdfpextr\
+		  beamer\
+		  tcplayMount
 
 MUTTSESSIONDIR   = emailsession/
 MUTTSCRIPTS      = mbsyncsecure email emailsessioninit
