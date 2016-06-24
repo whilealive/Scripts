@@ -11,7 +11,7 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     09.07.2014
+# DATE     24.06.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -48,7 +48,7 @@ diskscan() {
     local MOUNTLIST1=/tmp/mountlist1.tmp
 
     # list all possibly mounted external disks and save them into a tempfile
-    mount | grep 'sd[bcd]\|truecrypt1' | awk '$1 {print $3}' > $MOUNTLIST0
+    mount | grep 'transferfolder' | awk '$1 {print $3}' > $MOUNTLIST0
 
     # put line numbers in front
     awk '{ printf("%d)\t%s\n", NR, $0) }' $MOUNTLIST0 > $MOUNTLIST1
