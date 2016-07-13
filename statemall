@@ -13,23 +13,41 @@
 #					 Cyan         0;36     Light Cyan    1;36
 #					 Light Gray   0;37     White         1;37
 #
-# DATE     09.03.2016
+# DATE     12.07.2016
 # OWNER    Bischofberger
 # ==================================================================
 
 GitHubReposFile="$HOME/Scripts/data/GitHubRepos.txt"
-COLOR='\033[0;35m'
+LocalReposFile="$HOME/Scripts/data/LocalRepos.txt"
+COLOR1='\033[1;31m'
+COLOR2='\033[1;35m'
 NC='\033[0m'  # No Color
 
-# my github repositories
-mapfile -t Repos <$GitHubReposFile
+# arg1: ReposFile
+# arg2: Color
+printRepos(){
+  mapfile -t Repos <$1
 
-echo -e "${COLOR}--------------------------------------------${NC}"
-for path in "${Repos[@]}" ; do
-	eval cd $path
-	echo -e ${COLOR}`pwd`${NC}
-	git status
-	echo -e "${COLOR}--------------------------------------------${NC}"
-done
+  echo -e "${2}--------------------------------------------${NC}"
+  for path in "${Repos[@]}" ; do
+    eval cd $path
+    echo -e ${2}`pwd`${NC}
+    git status
+    echo -e "${2}--------------------------------------------${NC}"
+  done
+
+}
+
+echo -e "${COLOR1}=============${NC}"
+echo -e "${COLOR1}GitHub repos:${NC}"
+echo -e "${COLOR1}=============${NC}"
+printRepos $GitHubReposFile $COLOR1
+
+echo -e "\n"
+
+echo -e "${COLOR2}============${NC}"
+echo -e "${COLOR2}Local repos:${NC}"
+echo -e "${COLOR2}============${NC}"
+printRepos $LocalReposFile $COLOR2
 
 exit 0
