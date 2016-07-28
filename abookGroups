@@ -1,17 +1,15 @@
 #!/bin/bash
 # ==================================================================
-# FILE     abookFind
+# FILE     abookGroups
 # MACHINE  all
 # INFO     
 #
-# DATE     19.07.2016
+# DATE     28.07.2016
 # OWNER    Bischofberger
 # ==================================================================
-# TODO: - GROUP as an argument
-#       - collect several groups
 
 ADDRESSBOOK="$HOME/.abook/addressbook"
-GROUP="BGB15a"
+GROUP=()
 BLOCKLIST=()
 COL_EMAIL_ADR=""
 
@@ -19,6 +17,11 @@ die() {
   echo -e "$0: Error: $1" >&2
   exit 1
 }
+
+# read argument list (= group names)
+for pattern in "$@" ; do
+  GROUP+=("$pattern")
+done
 
 # read blocks
 {
@@ -30,7 +33,7 @@ die() {
       BLOCKLIST+=("$block")
       block=""
     else
-      block+="$REPLY"$'\n'  # insert a new line (bash and zsh only)
+      block+="$REPLY"$'\n'  # $'\n' means: "insert a new line" (bash and zsh only)
     fi
   done
 } < $ADDRESSBOOK
@@ -38,13 +41,14 @@ die() {
 BLOCKLIST=("${BLOCKLIST[@]:1,3}") #removed the 1st 3 elements
 
 for block in "${BLOCKLIST[@]}" ; do
-  echo "$block" | awk -F "=|," '$1 == "group" && /'$GROUP'/ {exit 1}'
-
-  HAS_GROUP=$?  # $? is the exit status of the last statement
-
-  if [ $HAS_GROUP -eq 1 ] ; then
-    COL_EMAIL_ADR+=`echo "$block" | awk -F "=" '$1 == "email" {print $2", "}'`
-  fi
+  for group in "${GROUP[@]}" ; do
+    echo "$block" | awk -F "=|," '$1 == "group" && /'$group'/ {exit 1}'
+    HAS_GROUP=$?  # $? is the exit status of the last statement
+    if [ $HAS_GROUP -eq 1 ] ; then
+      COL_EMAIL_ADR+=`echo "$block" | awk -F "=" '$1 == "email" {print $2", "}'`
+      break  # inner loop
+    fi
+  done
 done
 
 echo -n "$COL_EMAIL_ADR" | xsel --primary -i
