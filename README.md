@@ -68,7 +68,10 @@ Some shell scripts
 - I use that to open text files from ranger in a unique vim server so that I have only one vim session running (copy/yank etc.)
 - Just modify this line in ranger's rifle.conf: `mime ^text,  label editor = "vimserv" -- "$@"`
 
-#### dwm-statusbar
-- deprecated, see: dwmstatus in C
-- bash version of my statusbar using xsetroot
-- shows battery, volume and date
+#### abookGroups
+- in abookrc, put: "field group = Group, list" to create a group entry as a list (of groups)
+- now run "abookGroups groupname1 groupname2 ..." to copy a comma-sperated list of all email addresses of the group members to CLIPBOARD
+- in mutt: simply do a Shift-Insert to paste them
+
+#### screenshot
+- uses imagemagick to capture screenshots
