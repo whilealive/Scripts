@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     12.07.2016
+# DATE     17.08.2016
 # OWNER    Bischofberger
 # ==================================================================
 # TODO: give uninstall option
@@ -23,7 +23,9 @@ SCRIPTS = nmgui \
 		  pdfpsize \
 		  pdfpextr\
 		  beamer\
-		  screenshot
+		  screenshot\
+		  abookGroups\
+		  abookExport
 
 MUTTSESSIONDIR   = emailsession/
 MUTTSCRIPTS      = mbsyncsecure email emailsessioninit
