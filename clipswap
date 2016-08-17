@@ -2,9 +2,9 @@
 # ==================================================================
 # FILE     clipswap
 # MACHINE  all
-# INFO     uses xsel to swap PRIMARY and CLIPBOARD
+# INFO     uses xclip to swap PRIMARY and CLIPBOARD
 #
-# DATE     14.01.2016
+# DATE     17.08.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -13,32 +13,36 @@ die() {
 	exit 1
 }
 
+clearSelection() {  # arg: primary/secondary/clipboard
+  xclip -i -selection "$1" /dev/null
+}
+
 listContent() {
 	echo -e "[[PRIMARY]]------------------------" 
-	xsel -p ; echo ""
+	xclip -o -selection primary 2>/dev/null ; echo ""
 
 	echo -e "[[CLIPBOARD]]----------------------"
-	xsel -b ; echo ""
+	xclip -o -selection clipboard 2>/dev/null ; echo ""
 
 	echo -e "[[SECONDARY]]----------------------"
-	xsel -s ; echo ""
+	xclip -o -selection secondary 2>/dev/null ; echo ""
 }
 
 swapThem() {
 	# step 1 - copy PRIMARY to SECONDARY
-	xsel --primary | xsel --input --secondary
+	xclip -o -selection primary 2>/dev/null | xclip -i -selection secondary
 	# step 2 - copy CLIPBOARD to PRIMARY
-	xsel --clipboard | xsel --input --primary
+	xclip -o -selection clipboard 2>/dev/null | xclip -i -selection primary
 	# step 3 - copy SECONDARY (former PRIMARY) to CLIPBOARD
-	xsel --secondary | xsel --input --clipboard
+	xclip -o -selection secondary 2>/dev/null | xclip -i -selection clipboard
 	# step 4 - clear SECONDARY
-	xsel --clear --secondary
+  clearSelection "secondary"
 }
 
 clearAll() {
-	xsel --clear --primary
-	xsel --clear --secondary
-	xsel --clear --clipboard
+  clearSelection "primary"
+  clearSelection "secondary"
+  clearSelection "clipboard"
 }
 
 # if no argument is given, swap contents of PRIMARY/CLIPBOARD
