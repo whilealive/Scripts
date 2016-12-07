@@ -5,7 +5,7 @@
 # INFO     initializes a new tmux session with mutt
 #          and mbsync-secure in seperate windows
 #
-# DATE     17.01.2016
+# DATE     07.12.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -15,6 +15,5 @@ gpg -d ~/.my-pwds.gpg >/dev/null
 
 tmux new-session -d -n mail -s mail 'mutt'
 tmux new-window -n mbsyncsecure -t mail:2 'mbsyncsecure'
-tmux select-window -t mail:0
+tmux select-window -t mail:1
 tmux -2 attach-session -t mail
-
