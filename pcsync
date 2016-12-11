@@ -11,7 +11,7 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     12.07.2016
+# DATE     11.12.2016
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -178,10 +178,10 @@ fi
 # sync
 check_includefile
 if [[ $DIRECTION == up ]] ; then
-    rsync -avu $DRY --delete --include-from="$INCLUDEFILE" $HOME/ $REMOTE/ \
+    rsync -rptgoDvu $DRY --delete --include-from="$INCLUDEFILE" $HOME/ $REMOTE/ \
         || die "rsync error"
 elif [[ $DIRECTION == down ]] ; then
-    rsync -avu $DRY --delete --include-from="$INCLUDEFILE" $REMOTE/ $HOME/ \
+    rsync -rptgoDvu $DRY --delete --include-from="$INCLUDEFILE" $REMOTE/ $HOME/ \
         || die "rsync error"
 else
     die "direction unknown."
