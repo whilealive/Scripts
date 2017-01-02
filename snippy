@@ -6,17 +6,20 @@
 #          https://bbs.archlinux.org/viewtopic.php?id=71938
 #          depends on: dmenu, xclip
 #
-# DATE     17.08.2016
+# DATE     02.01.2017
 # OWNER    Bischofberger
 # ==================================================================
 
 DIR=${HOME}/.snippy
 
-cd ${DIR}
+cd "${DIR}" || exit 1
 
-FILE=`find . -type f | grep -v '^\.$' | sed 's!\.\/!!' | /usr/bin/dmenu -b`
+FILE=$(find . -type f | grep -v '^\.$' | sed 's!\.\/!!' | /usr/bin/dmenu -b)
 
-if [ -f ${DIR}/${FILE} ]; then
-	xclip -i -selection primary < ${DIR}/${FILE}
-	xclip -i -selection clipboard < ${DIR}/${FILE}
+if [ -f "${DIR}/${FILE}" ]; then
+	xclip -i -selection primary < "${DIR}/${FILE}"
+	xclip -i -selection clipboard < "${DIR}/${FILE}"
+  exit 0  # 0 = success
 fi
+
+exit 1
