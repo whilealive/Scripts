@@ -6,7 +6,7 @@
 #          https://bbs.archlinux.org/viewtopic.php?id=71938
 #          depends on: dmenu, xclip
 #
-# DATE     02.01.2017
+# DATE     04.01.2017
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -14,7 +14,7 @@ DIR=${HOME}/.snippy
 
 cd "${DIR}" || exit 1
 
-FILE=$(find . -type f | grep -v '^\.$' | sed 's!\.\/!!' | /usr/bin/dmenu -b)
+FILE=$(find . -type f | grep -v '^\.$' | sed 's!\.\/!!' | sort | /usr/bin/dmenu -b)
 
 if [ -f "${DIR}/${FILE}" ]; then
 	xclip -i -selection primary < "${DIR}/${FILE}"
