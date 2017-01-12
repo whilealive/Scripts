@@ -6,7 +6,7 @@
 #          script in it.
 #          use terminus font instead of standard
 #
-# DATE     01.04.2016
+# DATE     12.01.2017
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -23,7 +23,8 @@ die() {
 
 # @param1: font size (terminus)
 launch_eMail() {
-  st -t mail -f -*-terminus-medium-r-*-*-$1-*-*-*-*-*-*-* -e emailsessioninit
+  #st -t mail -f -*-terminus-medium-r-*-*-$1-*-*-*-*-*-*-* -e emailsessioninit
+  st -t mail -e emailsessioninit
 }
 
 case "$(hostname)" in
