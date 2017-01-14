@@ -6,7 +6,7 @@
 #          script in it.
 #          use terminus font instead of standard
 #
-# DATE     12.01.2017
+# DATE     14.01.2017
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -23,8 +23,7 @@ die() {
 
 # @param1: font size (terminus)
 launch_eMail() {
-  #st -t mail -f -*-terminus-medium-r-*-*-$1-*-*-*-*-*-*-* -e emailsessioninit
-  st -t mail -e emailsessioninit
+  st -t mail -f "xos4 Terminus:pixelsize=$1" -e emailsessioninit
 }
 
 case "$(hostname)" in
