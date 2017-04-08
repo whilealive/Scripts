@@ -4,22 +4,35 @@
 # MACHINE  all
 # INFO     various tmux helper functions
 #
-# DATE     08.03.2016
+# DATE     06.04.2017
 # OWNER    Bischofberger
 # ==================================================================
 
 
 # params: $1 = message to be shown
 tmux_DisplayMessageAllClients(){
-	local clientsList=`tmux list-clients -F "#{client_tty}"`
+	local clientsList
+	clientsList=$(tmux list-clients -F "#{client_tty}")
 	readarray -t clientsArray <<<"$clientsList"
 	for client in "${clientsArray[@]}" ; do
-		tmux display-message -c $client "$1"
+		tmux display-message -c "$client" "$1"
 	done
 }
 
+tmux_ExportCurrentPath(){
+  if [ -n "$1" ] ; then
+    local currentPath
+    local currentSession
+    currentPath="$(pwd)"
+    currentSession="$(tmux display-message -p "#S")"
+    tmux send-keys -t "$currentSession:$1" "cd $currentPath" "Enter"
+  fi
+}
+
+alias tmexp="tmux_ExportCurrentPath"
 
 
 # put functions below for testing
 # ==================================================================
 #tmux_DisplayMessageAllClients "blahblah"
+#tmux_ExportCurrentPath
