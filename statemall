@@ -13,7 +13,7 @@
 #					 Cyan         0;36     Light Cyan    1;36
 #					 Light Gray   0;37     White         1;37
 #
-# DATE     12.07.2016
+# DATE     01.05.2017
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -32,6 +32,9 @@ printRepos(){
   for path in "${Repos[@]}" ; do
     eval cd $path
     echo -e ${2}`pwd`${NC}
+    echo "---------"
+    git branch
+    echo "---------"
     git status
     echo -e "${2}--------------------------------------------${NC}"
   done
