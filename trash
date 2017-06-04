@@ -5,7 +5,7 @@
 # INFO     moves files and folders to ~/.trash instead of 
 #          deleting them
 #
-# DATE     18.07.2015
+# DATE     04.06.2017
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -57,11 +57,11 @@ for data in "$@" ; do
 		continue
 	fi
 
-	# Add prefixes to duplicates.
-	prefix=""
-	while [ -e "$TRASH/$prefix$data" ] || [ -d "$TRASH/$prefix$data" ] ; do
-		prefix="_$prefix"
+	# Add postfix to duplicates.
+	postfix=""
+	while [ -e "$TRASH/$data$postfix" ] || [ -d "$TRASH/$data$postfix" ] ; do
+		postfix+="_"
 	done
 
-	mv -v "$data" "$TRASH/$prefix$data"
+	mv -v "$data" "$TRASH/$data$postfix"
 done
