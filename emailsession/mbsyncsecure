@@ -5,7 +5,7 @@
 # INFO     runs mbsync periodically with gpg security
 #          depends on script "vol"
 #
-# DATE     16.05.2017
+# DATE     02.07.2017
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -20,11 +20,13 @@ channels="-a"  # channels to be synched by mbsync
 
 INBOX1=$HOME/Maildir/fastmail/INBOX/new/
 INBOX2=$HOME/Maildir/bmz/INBOX/new/
-INBOX3=$HOME/Maildir/uzh-pseudo/uzh/new/
+INBOX3=$HOME/Maildir/bmz/Erstellungsteam/new/
+INBOX4=$HOME/Maildir/uzh-pseudo/uzh/new/
 
 UNREAD1=0
 UNREAD2=0
 UNREAD3=0
+UNREAD4=0
 
 SOUNDFILE=$HOME/Scripts/data/mario1.wav
 VOLUME="40"
@@ -52,12 +54,14 @@ checkNewMail() {
 	local NEW1=0 && countMessages NEW1 $INBOX1
 	local NEW2=0 && countMessages NEW2 $INBOX2
 	local NEW3=0 && countMessages NEW3 $INBOX3
+	local NEW4=0 && countMessages NEW4 $INBOX4
 
-	echo -e "\nfastmail new: $NEW1"
-	echo -e   "bmz new:      $NEW2"
-	echo -e   "uzh new:      $NEW3"
+	echo -e "\nfastmail new:        $NEW1"
+	echo -e   "bmz new:             $NEW2"
+	echo -e   "Erstellungsteam new: $NEW3"
+	echo -e   "uzh new:             $NEW4"
 
-	if [[ $NEW1 != $UNREAD1 || $NEW2 != $UNREAD2 || $NEW3 != $UNREAD3 ]] ; then
+	if [[ $NEW1 != $UNREAD1 || $NEW2 != $UNREAD2 || $NEW3 != $UNREAD3 || $NEW4 != $UNREAD4 ]] ; then
 		mailAlert
 	fi
 }
@@ -84,6 +88,7 @@ do
 	countMessages UNREAD1 $INBOX1
 	countMessages UNREAD2 $INBOX2
 	countMessages UNREAD3 $INBOX3
+	countMessages UNREAD4 $INBOX4
 
 	# run mbsync
 	mbsync -V $channels
