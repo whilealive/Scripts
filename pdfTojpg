@@ -1,0 +1,25 @@
+#!/bin/bash
+# ==================================================================
+# FILE     pdfTojpg
+# MACHINE  all
+# INFO     convert multiple pages pdf to multiple jpg files (e.g. latex standalone to Word)
+#          Standard density of 1200x1200
+#
+# DATE     23.07.2017
+# OWNER    Bischofberger
+# ==================================================================
+
+DENSITY="1200x1200"
+
+die() {
+	echo -e "$0: Error: $1" >&2
+	exit 1
+}
+
+# no argument given
+if [[ $# -ne 1 ]] ; then
+	die "use: \"pdfTojpg [filename]\""
+fi
+
+convert -density $DENSITY ${1} ${1%.pdf}.jpg
+

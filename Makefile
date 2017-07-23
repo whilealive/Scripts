@@ -4,10 +4,9 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     17.08.2016
+# DATE     23.07.2017
 # OWNER    Bischofberger
 # ==================================================================
-# TODO: give uninstall option
 
 PREFIX:=/usr/local
 
@@ -22,6 +21,7 @@ SCRIPTS = nmgui \
 		  statemall \
 		  pdfpsize \
 		  pdfpextr\
+		  pdfTojpg\
 		  beamer\
 		  screenshot\
 		  abookGroups\
