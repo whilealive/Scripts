@@ -5,7 +5,7 @@
 # INFO     runs mbsync periodically with gpg security
 #          depends on script "vol"
 #
-# DATE     02.07.2017
+# DATE     12.08.2017
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -57,10 +57,10 @@ checkNewMail() {
 	local NEW4=0 && countMessages NEW4 $INBOX4
 
 	echo -e "\nfastmail new:        $NEW1"
-	echo -e   "bmz new:             $NEW2"
-	echo -e   "Erstellungsteam new: $NEW3"
+	echo -e   "bmz new:             $NEW2/$NEW3"
 	echo -e   "uzh new:             $NEW4"
 
+  # FIXME: this check fails in rare cases
 	if [[ $NEW1 != $UNREAD1 || $NEW2 != $UNREAD2 || $NEW3 != $UNREAD3 || $NEW4 != $UNREAD4 ]] ; then
 		mailAlert
 	fi
