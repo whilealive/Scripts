@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     23.07.2017
+# DATE     22.08.2017
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -25,15 +25,13 @@ SCRIPTS = nmgui \
 		  beamer\
 		  screenshot\
 		  abookGroups\
-		  abookExport
+		  abookExport\
+		  notesd
 
 MUTTSESSIONDIR   = emailsession/
 MUTTSCRIPTS      = mbsyncsecure email emailsessioninit
 
-MUSICTOGODIR     = musictogo/
-MUSICTOGOSCRIPTS = musictogo
-
-ALLSCRIPTS = ${SCRIPTS} ${MUTTSCRIPTS} ${MUSICTOGOSCRIPTS}
+ALLSCRIPTS = ${SCRIPTS} ${MUTTSCRIPTS}
 
 all:
 	@echo "Scripts installation"
@@ -45,9 +43,6 @@ install:
 
 	@echo "installing emailsession scripts to ${DESTDIR}${PREFIX}/bin"
 	@cd ${MUTTSESSIONDIR} && cp -f -t ${DESTDIR}${PREFIX}/bin/ ${MUTTSCRIPTS}
-
-	@echo "installing musictogo script to ${DESTDIR}${PREFIX}/bin"
-	@cd ${MUSICTOGODIR} && cp -f -t ${DESTDIR}${PREFIX}/bin/ ${MUSICTOGOSCRIPTS}
 
 	@cd ${DESTDIR}${PREFIX}/bin && chmod 0755 ${ALLSCRIPTS}
 	@echo "done"

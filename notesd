@@ -1,0 +1,29 @@
+#!/bin/bash
+# ==================================================================
+# FILE     notesd
+# MACHINE  all
+# INFO     handle notes by dmenu
+#
+# DATE     22.08.2017
+# OWNER    Bischofberger
+# ==================================================================
+
+die() {
+  echo -e "$0: Error: $1" >&2
+  exit 1
+}
+
+NOTESD_DB="$HOME/.notesd"
+NOTESD_EDITOR="st -g 100x30+20+40 -t notesd -e ${VISUAL:-${EDITOR:-vim}}"
+
+
+cd "$NOTESD_DB"
+
+file="$(find . \( -path ./.git -prune -o -true \) -a -type f | sed -e 's:^\./::' | sort | dmenu ${DMENU_ARGS})"
+
+
+if [ -z "$file" ]; then
+  exit 0
+fi
+
+${NOTESD_EDITOR} "$file"
