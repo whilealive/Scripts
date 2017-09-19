@@ -4,10 +4,9 @@
 # MACHINE  all
 # INFO     handle notes by dmenu
 #
-# DATE     14.09.2017
+# DATE     19.09.2017
 # OWNER    Bischofberger
 # ==================================================================
-# TODO: - add a new file if name can't be found
 
 die() {
   echo -e "$0: Error: $1" >&2
