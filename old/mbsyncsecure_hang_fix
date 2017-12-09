@@ -1,0 +1,111 @@
+#!/bin/bash
+# ==================================================================
+# FILE     mbsyncsecure
+# MACHINE  all
+# INFO     runs mbsync periodically with gpg security
+#          depends on timeout3 script to kill mbsync when it hangs
+#
+# DATE     23.07.2014
+# OWNER    Bischofberger
+# ==================================================================
+
+
+# variables
+period="15"
+let "period_sec = 60 * $period"
+
+LOGFILE="/tmp/mbsyncsecure.log"
+channels="-a"  # channels to be synched by mbsync
+
+INBOX1=$HOME/Maildir/fastmail/INBOX/new/
+INBOX2=$HOME/Maildir/uzh-pseudo/uzh/new/
+INBOX3=$HOME/Maildir/zhaw-pseudo/zhaw/new/
+# old port
+#INBOX2=$HOME/Maildir/uzh-pseudo/INBOX_uzh/new/
+#INBOX3=$HOME/Maildir/zhaw-pseudo/INBOX_zhaw/new/
+
+passwd1="$(gpg2 -dq ~/.my-pwds.gpg | cut -c 40- | sed -n 3p)"
+
+while true
+do
+	echo "running mbsync..."
+
+	# copy password into a temporary rc file.
+	# the right position in the rc file is crucial and marked in the original file by the line '#Pass1' etc.
+	sed s/\#Pass1/Pass\ $passwd1/ ~/.mbsyncrc > ~/.mbsyncrc-temp
+
+	# Run mbsync using the temporary rc file and delete it aftwerwards.
+    #
+    # Sometimes mbsync hangs. Here is a workaround for that:
+    # - Fork mbsync in the background and redirect output (including stderr) 
+    #   to a logfile.
+    # - In the foreground, we check whether output of mbsync ended with
+    #   "Cannot resolve server...". 
+    # - If so, we kill mbsync and skip rest of this loop after 1 minute.
+    mbsync -c ~/.mbsyncrc-temp $channels >> $LOGFILE 2>&1 & 
+    WAITPID=$!
+    HANG=false
+
+    while true ; do
+        sleep 10
+        # check if mbsync is still running
+        if [[ `ps -h $WAITPID` ]] ; then
+            # is it hanging?
+            if [[ `tail -1 $LOGFILE | grep "Cannot resolve server"` ]] ; then
+                echo "Error: mbsync couldn't resolve server. Sync aborted. Retry in 1 minute."
+                HANG=true
+                kill -s SIGKILL $WAITPID
+                break
+            else  # it is still synching mails
+                continue
+            fi
+        else  # mbsync has terminated
+            # did it throw a "Cannot resolve..." error? (offline etc.)
+            if [[ `tail -1 $LOGFILE | grep "Cannot resolve server"` ]] ; then
+                echo "Error: mbsync couldn't resolve server. Probably offline. No mails synched."
+            else
+                echo "...completed successfully."
+            fi
+            break
+        fi
+    done
+
+	shred -xu ~/.mbsyncrc-temp
+
+    # skip rest basic loop if mbsync was hanging above
+    if $HANG ; then
+        sleep 60
+        continue
+    fi
+
+	# count new messages
+	NEW1=`find $INBOX1 -type f | wc -l`
+	NEW2=`find $INBOX2 -type f | wc -l`
+	NEW3=`find $INBOX3 -type f | wc -l`
+	echo -e "\nfastmail new:\t $NEW1"
+	echo -e "uzh new:\t $NEW2"
+	echo -e "zhaw new:\t $NEW3"
+
+	# some information
+	echo -n -e "\nlast sync: "
+	date +"%H:%M"
+	echo "next sync in $period minutes."
+
+	# either wait for 15 minutes or check again immediately by pressing Enter
+    channels="-a"
+    echo -e "for a quick inbox sync, press \"s\"+[Enter]"
+    echo -e "for a complete sync, press [Enter]"
+    echo -e "to quit, press \"q\"+[Enter]\n"
+
+    read -t $period_sec input
+
+    # shortcut: only check fastmail inbox, see .mbsyncrc
+    if [[ $input == s ]] ; then
+      channels="fastmail_in"
+    fi
+
+    # quit script
+    if [[ $input == q ]] ; then
+        break
+    fi
+done

@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# put it to:
+# /usr/lib/systemd/system-sleep/
+#
+# Note: this is considered a "hackish" way to run applications
+#       after waking up from suspend. However, since the systemd
+#       service files don't work properly, it is the only reliable
+#       way to do this.
+
+case $1 in
+	pre) powersave false ;;
+	post)
+		if cat /sys/class/power_supply/ACAD/online | grep 0 > /dev/null 2>&1
+		then
+			powersave true
+		else
+			powersave false
+		fi
+		
+		hdparm -B 255 /dev/sda
+	;;
+esac
+exit 0

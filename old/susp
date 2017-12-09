@@ -1,0 +1,54 @@
+#!/bin/bash
+# ==================================================================
+# FILE     susp
+# MACHINE  all
+# INFO     Stupid pre-/post-suspend script.
+#          Since in systemd .service files "AFTER=suspend.service"
+#          doesn't work reliably in my case, I ended up with this
+#          workaround
+#
+# DATE     28.03.2016
+# OWNER    Bischofberger
+# ==================================================================
+
+host=$(hostname)
+
+die(){
+	echo -e "$0: Error: $1" >&2
+	exit 1
+}
+
+preActions(){
+  if [ "$(pidof dwmstatus)" ] ; then  # dwmstatus is running
+    killall dwmstatus
+  fi
+}
+
+suspendActions(){
+  systemctl suspend
+}
+
+postActions(){
+  sleep 5  # for safety
+  dwmstatus &
+}
+
+# Main ------------------------------------------------
+
+if [ -z "$1" ] ; then
+  preActions
+  suspendActions
+  postActions
+  exit 0
+fi
+
+case "$1" in
+  "-s"|"--skippost")
+    preActions
+    suspendActions
+    exit 0
+    ;;
+  *)
+    die "unknown parameter '$1'"
+    ;;
+esac

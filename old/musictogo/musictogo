@@ -1,0 +1,548 @@
+#!/bin/bash
+# See LICENSE file for copyright and license details.
+# ==================================================================
+# FILE     musictogo
+# MACHINE  all
+# INFO     randomly chooses albums from library and copies them to 
+#          mobile player
+#
+# DATE     03.09.2014
+# OWNER    Bischofberger
+# ==================================================================
+
+
+VERSION=0.6
+
+# default music library path
+LIBRARY="$HOME/Music"
+
+# temporary files
+ALBUMLIST=albumlist.tmp
+ALBUMLIST_NONUMBR=albumlist_nonumbr.tmp
+COPYLIST=copy_list.tmp
+MOUNTLIST=mountlist.tmp
+ALBUMLIST_PLAYER=albumlist_player.tmp
+
+EXCHANGE_NMBR=99999  # some big number for the -n option
+
+
+die() {
+    clean all
+    echo -e "$0: Error: $1" >&2
+    exit 1
+}
+
+
+clean() {
+    case "$1" in
+        "all")
+            local cleaning_list="$ALBUMLIST $ALBUMLIST_NONUMBR $COPYLIST $MOUNTLIST $ALBUMLIST_PLAYER"
+            ;;
+        "light")
+            local cleaning_list="$ALBUMLIST_NONUMBR $MOUNTLIST $ALBUMLIST_PLAYER"
+            ;;
+        "all_but_albumlist_nonumber")
+            local cleaning_list="$ALBUMLIST $COPYLIST $MOUNTLIST $ALBUMLIST_PLAYER"
+            ;;
+        *)
+            local cleaning_list=""
+            ;;
+    esac
+
+    rm -f $cleaning_list
+}
+
+
+usage() {
+    echo -e "usage: $0 [OPTION]\n\
+Copies whole albums from your local music library to an external player/SD card.\n\
+
+-d, --delete-logs     Remove temporary files (such as albumlist and copylist)
+-i, --include         Include existing copylist, i.e. exclude albums on it.
+                      This makes sense if you want to randomly fill more than
+                      one SD card and make sure that no albums get doubled.
+                      Obviously, log files must have been created once before.
+                      Therefore, you would run musictogo without the -d option
+                      once on the first SD card and then a second time on the
+                      next card with the -i option.
+-l, --logs            Do nothing. Just produce albumlist. (NOT IMPLEMENTED YET)
+-n, --number [NUMBR]  Give a maximal number of albums to be exchanged through a
+                      random selection.
+-s, --sync            Pseudo synchronization of local library with player. Can
+                      handle several SD cards, one after another, until whole
+                      library is synched (or no more cards were inserted). Will
+                      discard all other options.
+    --help            Shows this help
+    --version         Shows version number
+"
+    exit 0
+}
+
+
+# option parser
+# ---------------------
+# $DELETE  (flag for the --delete-logs option)
+# $INCLUDE  (flag for the --include option)
+# $EXCHANGE_NMBR  (pos. integer for --number option)
+# ---------------------
+while [ -n "$1" ]; do
+    case "$1" in
+        "--help")
+            usage
+            ;;
+        "--version")
+            echo "musictogo Version $VERSION"
+            exit 0
+            ;;
+        "-d" | "--delete-logs")
+            DELETE=1
+            shift
+            ;;
+        "-i" | "--include")
+            INCLUDE=1
+            shift
+            ;;
+        "-l"|"--logs")
+            echo -e "Just producing albumlist..."
+            LOGS=1
+            break
+            ;;
+        "-n"|"--number")
+            shift
+            EXCHANGE_NMBR=$1
+            if [[ ! $EXCHANGE_NMBR =~ ^[0-9]+$  || $EXCHANGE_NMBR == 0 ]] ; then
+                die "Give a number > 1."
+            fi
+            shift
+            ;;
+        "-s"|"--sync")
+            echo -e "You have chosen to sync music libraries. All other options will be neglected.\n"
+            SYNC=1
+            break
+            ;;
+        *)
+            die "Unknown parameter '$1'.\nGet further information with the \"--help\" option."
+            ;;
+    esac
+done
+
+
+
+# ask for entering a library path, alternatively use default: ~/Music/
+# the main part deals with non-existent dirs, so we can leave it here
+# ---------------------
+# $LIBRARY  (path of local music library)
+# ---------------------
+libscan() {
+    echo -n "Enter a valid path of your music library or press <Enter> for default ($LIBRARY): "
+    read -e answer  # -e is for autocompletition
+
+    # if last character is a "/", then remove it
+    if [[ $answer == */ ]] ; then
+        answer="${answer%?}"
+    fi
+
+    if [[ $answer != "" ]] ; then
+        LIBRARY=$answer
+        echo -e "Your chosen library: $LIBRARY \n"
+    else
+        echo -e "Default chosen.\n"
+    fi
+}
+
+
+# use "mount" to scan for mounted disks. 
+# Give a choice of possible targets to choose from.
+# ---------------------
+# $PLAYER  (path of music player/SD-card)
+# ---------------------
+diskscan() {
+    # list all possibly mounted external disks and save them into a tempfile
+    mount | grep sd[bcd] | awk '$1 {print $3}' > mountlist1.tmp
+
+    # put line numbers in front
+    awk '{ printf("%d)\t%s\n", NR, $0) }' mountlist1.tmp > $MOUNTLIST
+
+    # for later checks
+    NUMBER_OF_DISKS=`wc -l < $MOUNTLIST`
+
+    # the custom choice, last line
+    echo -e "n)\t custom path" >> $MOUNTLIST
+
+    # clean up
+    rm -f mountlist1.tmp
+
+    # print list
+    echo "List of mounted external disks:"
+    cat $MOUNTLIST || die "Mountlist not found."
+    echo -n -e "\nPlease enter the number of your disk or hit \"n\" for entering a custom path: "
+
+    # input parser
+    read answer
+    if [[ $answer =~ ^[0-9]+$ ]] && (( answer > 0 && answer <= NUMBER_OF_DISKS )) ; then
+        PLAYER=`awk -F '\t' '$1 ~ /^'$answer\)'$/ {print $2}' $MOUNTLIST`
+        echo -e "Your chosen target: $PLAYER\n"
+    elif [[ $answer == n ]] ; then
+        echo -n -e "\nEnter custom path: "
+        read PLAYER
+        echo -e "Your chosen target: $PLAYER\n"
+    else
+        die "No valid disk path chosen."
+    fi
+}
+
+
+# deletes all content on player before copying new material
+# this step already checks a fist time if PLAYER really exists
+delete_all() {
+    if [ -e $PLAYER ] ; then
+        echo -e "If you want to delete all content on $PLAYER now, type \"delete\""
+        echo -n "Otherwise press <Enter>: "
+        read answer
+
+        if [[ $answer == delete ]] ; then
+            rm -rf $PLAYER/* || die "Could not delete content."
+            echo -e "Successfully deleted all content.\n"
+        else
+            echo -e "No changes on $PLAYER.\n"
+        fi
+    else
+        die "Please plug in player/card and rerun programme."
+    fi
+}
+
+
+# ---------------------
+# $FREE_SPACE  (free space on $PLAYER in KB)
+# ---------------------
+check_free_space() {
+    if [ -e $PLAYER ] ; then
+        echo -n "Checking free space on $PLAYER..."
+
+        FREE_SPACE=`df --block-size=1K $PLAYER | awk -F'[^0-9]*' 'NR==2 {print $5}'`
+        (( FREE_SPACE -= 10000 ))  # leave at least ~10 MB spare space on disk
+        local info_space=`expr $FREE_SPACE / 1024`
+
+        echo "done."
+        echo -e "You have approximately $info_space MB free space on $PLAYER.\n"
+        echo -n "Would you like to proceed? (y/n) "
+        read answer
+
+        if [[ $answer == n ]]  ; then
+            exit 1
+        fi
+        echo ""
+    else
+        die "Please plug in player/card and re-run program."
+    fi
+}
+
+
+# create a new list of all albums in music library
+# ---------------------
+# $TOTAL_TRACK_NMBR  (length of $ALBUMLIST)
+# ---------------------
+list_albums() {
+    echo -n "Collecting music library information..."
+
+    rm -f $ALBUMLIST $ALBUMLIST_NONUMBR
+    touch $ALBUMLIST $ALBUMLIST_NONUMBR
+
+    # search for directories which have no more subdirectories
+    find . -type d -links 2 > $ALBUMLIST_NONUMBR
+
+    # add line numbers
+    awk '{ printf("%d\t%s\n", NR, $0) }' $ALBUMLIST_NONUMBR > $ALBUMLIST
+
+    # upper bound for random number generator in rand_choose()
+    TOTAL_TRACK_NMBR=`wc -l < $ALBUMLIST`
+
+    echo -e "done.\n"
+}
+
+
+# ---------------------
+# $NEXTALBUM  (path of next chosen album)
+# $ALBUMSIZE  (albumsize in KB)
+# ---------------------
+rand_choose() {
+    local floor=1
+    local nextnumbr=`expr $RANDOM % $TOTAL_TRACK_NMBR`
+    while [ $nextnumbr -lt $floor ] ; do
+        nextnumbr=`expr $RANDOM % $TOTAL_TRACK_NMBR`
+    done
+
+    # no line numbers here anymore...
+    NEXTALBUM=`awk -F '\t' '$1 ~ /^'$nextnumbr'$/ {print $2}' $ALBUMLIST`
+    ALBUMSIZE=`du --block-size=1K -s "$NEXTALBUM" | cut -f1 | grep -o '[0-9]\+'`
+}
+
+
+# add $NEXTALBUM to a copylist for later copying to $PLAYER.
+# With -i option, take old COPYLIST (if existent) and list new albums 
+# below the old (already copied last time) ones. In copy() we will skip 
+# the old ones by using the $OLD_COPY_LIST_LENGTH variable from here.
+# ---------------------
+# $OLD_COPY_LIST_LENGTH  (number of already copied tracks from last run)
+# ---------------------
+# TODO: check, if album is already on PLAYER, if so, choose another one
+create_copy_list() {
+    echo -n "Randomly choosing albums..."
+
+    local size_sum=0
+    local again="yes"
+
+    # "-i" option handling here...
+    if [ -v INCLUDE ] && [ -e $COPYLIST ] ; then
+        echo -e "\nTaking old copylist into computation"
+        OLD_COPY_LIST_LENGTH=`wc -l < $COPYLIST`
+    elif [ -v INCLUDE ] ; then
+        echo ""
+        die "No copylist found. Need to run musictogo -k once first before using the -i option.\n"
+    else
+        OLD_COPY_LIST_LENGTH=0
+        rm -f $COPYLIST
+        touch $COPYLIST
+    fi
+
+    local copy_list_length=$OLD_COPY_LIST_LENGTH  # for checking if copylist has same size as albumlist
+
+    while (( copy_list_length <  TOTAL_TRACK_NMBR && size_sum < FREE_SPACE && EXCHANGE_NMBR > 0 )) ; do
+        rand_choose
+        # there must be a better way for this...
+        while [[ $again == yes ]] ; do
+            again="no"
+            while read line ; do
+                if [[ $line == $NEXTALBUM ]] ; then
+                    rand_choose
+                    again="yes"
+                fi
+            done < $COPYLIST
+        done
+
+        if (( (size_sum += ALBUMSIZE) < FREE_SPACE )) ; then
+            &>>$COPYLIST echo $NEXTALBUM
+            (( --EXCHANGE_NMBR ))
+            (( ++copy_list_length ))
+        else
+            break
+        fi
+    done
+
+    echo -e "done.\n"
+}
+
+
+# primitive process bar included
+copy() {
+    echo "Data is being copied..."
+
+    # variables for process bar
+    local barlength=40
+    local currentbar=0               # gets filled up with #'s
+    local diffbar=$BARLENGTH         # gets filled up with -'s
+    local total=`wc -l < $COPYLIST`  # total of albums to be copied
+    local copied=0
+    local percent=0
+
+    echo -ne "[----------------------------------------] $PERCENT%\r"
+
+    local linenmbr=0  # counter for skipping old copy list file entries
+
+    while read line ; do
+        # skip old copy list entries
+        if (( ++linenmbr <= OLD_COPY_LIST_LENGTH )) ; then
+            continue
+        fi
+
+        cp -r --parents "$line" $PLAYER/ || die "Could not copy all content."
+        (( ++copied ))
+
+        # print a process bar (uses bash arithmetics, not bourne shell compatible)
+        # computations...
+        percent=`echo "scale=2; 100.0 / $total * $copied" | bc`        # floating point...
+        currentbar=`echo "scale=2; $barlength / 100 * $percent" | bc`
+        percent=${percent/.*}  # round (to int): only for output
+        currentbar=${currentbar/.*}  # for bar drawing
+        ((diffbar = barlength - currentbar))
+
+        # output...
+        echo -n "["
+        while (( currentbar-- > 0 )) ; do
+            echo -n "#"
+        done
+        while (( diffbar-- > 0 )) ; do
+            echo -n "-"
+        done
+        echo -ne "] $percent%\r"
+
+    done < $COPYLIST
+    echo "[########################################] 100%"
+
+    echo "done."
+    echo "$copied album(s) have been copied."
+}
+
+
+# pre-step for sync modus: 
+# delete all albums on PLAYER which can't be found in albumlist
+# NOTE: this is just an ugly sync "delete", since I haven't figured out
+#       how to use rsync for two or more seperate disks...
+sync_delete() {
+    echo "Sync step 1/2..."
+
+    cd $PLAYER || die "Please plug in player/card and re-run program."
+
+    rm -f albumlist1_player.tmp albumlist2_player.tmp
+    touch albumlist1_player.tmp albumlist2_player.tmp  # some temporary helper files
+
+    find . -type d -links 2 > albumlist1_player.tmp
+    cp albumlist1_player.tmp $LIBRARY/$ALBUMLIST_PLAYER  # ALBUMLIST_PLAYER is for sync_copy()
+
+    # find albums on Player that are no longer in LIBRARY
+    while read line ; do
+        if [[ ! `grep "^$line$" $LIBRARY/$ALBUMLIST_NONUMBR` ]] ; then
+            echo "$line" >> albumlist2_player.tmp 
+        fi
+    done < albumlist1_player.tmp
+
+    while read line ; do
+        echo "removing $line"
+        rm -r "$line" 2>/dev/null
+    done < albumlist2_player.tmp
+
+    # remove empty folders, too
+    rm -d */ 2>/dev/null
+
+    # clean up
+    rm -f albumlist1_player.tmp albumlist2_player.tmp
+    echo -e "Sync step 1/2 done.\n"
+}
+
+
+# post-step for sync modus:
+# copy additional albums, update existing ones
+# (assumes, that check_free_space() has been run before for computing $FREE_SPACE)
+# NOTE: ALBUMLIST_NONUMBR will be modified in this function
+sync_copy() {
+    echo "Sync step 2/2..."
+
+    cd $LIBRARY
+    rm -f $COPYLIST
+    touch $COPYLIST
+
+    local free_space_left=$FREE_SPACE
+    local nextalbumsize=0
+    local counter=1  # for deleting lines in ALBUMLIST_NONUMBR
+
+    # work down the whole ALBUMLIST_NONUMBR for each PLAYER
+    while read nextalbum ; do
+        # check if nextalbum is already on PLAYER
+        if [[ `grep "$nextalbum" $ALBUMLIST_PLAYER` ]] ; then
+            # update folders, if necessary
+            # NOTE: possible "no-space-left-bug" here since we do not check size
+            echo "updating $nextalbum"
+            #cp -v -r --parents --update "$nextalbum" $PLAYER/
+            rsync -au --delete "$nextalbum/" "$PLAYER/$nextalbum/"
+
+            # delete that album from list
+            sed -i "$counter d" $ALBUMLIST_NONUMBR
+
+            ANOTHER_DISK="no"
+
+        else  # add to COPYLIST
+            nextalbumsize=`du --block-size=1K -s "$nextalbum" | cut -f1 | grep -o '[0-9]\+'`
+            if (( (free_space_left -= nextalbumsize) > 0 )) ; then
+                # add to COPYLIST
+                echo "$nextalbum" >> $COPYLIST
+
+                # delete that album from list
+                sed -i "$counter d" $ALBUMLIST_NONUMBR
+
+                ANOTHER_DISK="no"
+
+            else
+                # Not enough space on disk, set flag. Do not break here!
+                # Do not add to COPYLIST
+                ANOTHER_DISK="yes"
+
+                # skip one album
+                (( ++counter ))
+            fi
+        fi
+    done < $ALBUMLIST_NONUMBR
+
+    # use copy function with process bar here
+    copy
+
+    echo -e "Sync step 2/2 done.\n"
+}
+
+
+# sync-loop: using sync_delete() and sync_copy()
+sync() {
+    local disknumber=1
+    ANOTHER_DISK="yes"
+
+    while [[ $ANOTHER_DISK == yes ]] ; do
+        if (( disknumber > 1 )) ; then
+            echo "$0 not done yet. Please mount another disk."
+        fi
+        echo -e "Synchronizing disk number $disknumber?"
+        echo -n -e "Press <Enter> to continue. To abort, enter \"quit\": "
+        read answer
+        if [[ $answer == quit ]] ; then
+            break
+        else
+            diskscan
+            sync_delete
+            check_free_space
+            sync_copy
+            (( ++disknumber ))
+        fi
+    done
+
+    echo -e "$0 done."
+}
+
+
+
+###############################
+### main script starts here ###
+###############################
+libscan
+cd $LIBRARY || die "Directory $LIBRARY not available on this system."
+
+# distinguish sync modus from non-sync
+if [ -v SYNC ] ; then
+    # sync:
+    list_albums
+    sync
+    clean all
+elif [ -v LOGS ] ; then
+    # only albumlist
+    list_albums
+    clean all_but_albumlist_nonumber
+    echo "Logfiles can be found in $LIBRARY."
+else  
+    # non-sync:
+    diskscan
+    delete_all
+    check_free_space
+    list_albums
+    create_copy_list
+    copy
+    # handle logfiles
+    if [ -v DELETE ] ; then
+        clean all
+    else
+        clean light
+        echo "Logfiles can be found in $LIBRARY."
+    fi
+fi
+
+echo -e "\nEnjoy!"
+
+exit 0
+
+# vim: set ai et sw=4 ts=4 sts=4:

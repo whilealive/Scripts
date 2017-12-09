@@ -1,0 +1,8 @@
+#!/bin/bash
+
+while read nextalbum ; do
+    grep --invert-match "$nextalbum" file > file2
+    mv file2 file
+#    echo "$nextalbum"
+#    sed -i -e "#$nextalbum#d" file # delete that album from list
+done < albumlist_nonumbr.tmp
