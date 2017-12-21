@@ -1,0 +1,44 @@
+#!/bin/bash
+# ==================================================================
+# FILE     backup
+# MACHINE  all
+# INFO     rsnapshot wrapper
+#
+# DATE     19.12.2017
+# OWNER    Bischofberger
+# ==================================================================
+
+CONFIGFILE_QUICK="/etc/rsnapshot_quick.conf"
+CONFIGFILE_FULL="/etc/rsnapshot_full.conf"
+
+die() {
+  echo -e "$0: Error: $1" >&2
+  exit 1
+}
+
+backitup() {
+  sudo rsnapshot -c "$1" alpha
+}
+
+# no arguments given
+if [ -z "$1" ] ; then
+  echo -e "No argument given => doing quick backup"
+  backitup "$CONFIGFILE_QUICK"
+  exit 0
+fi
+
+# handle options
+while [ -n "$1" ]; do
+  case "$1" in
+    "-q"|"--quick")
+      backitup "$CONFIGFILE_QUICK"
+      shift;;
+    "-f"|"--full")
+      backitup "$CONFIGFILE_FULL"
+      shift;;
+    *)
+      echo "usage: $0 [-q|--quick] [-f|--full]"
+      die "unknown parameter '$1'"
+      ;;
+  esac
+done
