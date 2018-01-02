@@ -5,9 +5,11 @@
 # INFO     runs mbsync periodically with gpg security
 #          depends on script "vol"
 #
-# DATE     12.08.2017
+# DATE     02.01.2018
 # OWNER    Bischofberger
 # ==================================================================
+
+# TODO: put inboxes in array
 
 source $HOME/Scripts/tmuxHelpers
 
@@ -61,6 +63,7 @@ checkNewMail() {
 	echo -e   "uzh new:             $NEW4"
 
   # FIXME: this check fails in rare cases
+  #        --> check also "$NEWXX > 0"
 	if [[ $NEW1 != $UNREAD1 || $NEW2 != $UNREAD2 || $NEW3 != $UNREAD3 || $NEW4 != $UNREAD4 ]] ; then
 		mailAlert
 	fi
