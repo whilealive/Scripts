@@ -9,12 +9,13 @@
 # OWNER    Bischofberger
 # ==================================================================
 
-source $HOME/Scripts/tmuxHelpers
+source "$HOME/Scripts/tmuxHelpers"
 
 # variables ========================================================
 
 period=15
-let "period_sec = 60 * $period"
+period_sec=60
+(( "period_sec = 60 * $period" ))
 
 channels="-a"  # channels to be synched by mbsync
 
@@ -26,7 +27,7 @@ INBOX=("$HOME/Maildir/fastmail/INBOX/new/" \
 
 # number of unread messages before syncing
 UNREAD=()
-for index in ${!INBOX[@]}; do
+for index in "${!INBOX[@]}"; do
   UNREAD+=(0)
 done
 
@@ -36,11 +37,13 @@ VOLUME="40"
 # functions ========================================================
 
 mailAlert() {
-  local STAT=`vol --getStat`
+  local STAT
+  STAT=$(vol --getStat)
   if [[ "$STAT" == "on" ]] ; then  # we only want to play some sound if channel is unmuted
-    local VOL=`vol --getVol`  # save current volume
-    mplayer -mixer-channel Master -volume $VOLUME $SOUNDFILE >/dev/null 2>&1  # changes volume to $VOLUME
-    vol $VOL  # restore volume
+    local VOL
+    VOL=$(vol --getVol)  # save current volume
+    mplayer -mixer-channel Master -volume "$VOLUME" "$SOUNDFILE" >/dev/null 2>&1  # changes volume to $VOLUME
+    vol "$VOL"  # restore volume
   fi
 	tmux_DisplayMessageAllClients "You've got mail!"
 }
@@ -48,23 +51,27 @@ mailAlert() {
 # count messages in $2 and save number in $1
 countMessages() {
 	local -n ref="$1"  # call by reference
-	ref=`find $2 -type f | wc -l`
+	ref=$(find $2 -type f | wc -l)
 }
 
 # count unread messages and compare number to previously set UNREAD[] variables
 checkNewMail() {
   local NEW=()
-  for index in ${!INBOX[@]}; do
-    NEW[index]=0 && countMessages NEW[index] ${INBOX[index]}
+  for index in "${!INBOX[@]}"; do
+    NEW[index]=0 && countMessages NEW[index] "${INBOX[index]}"
   done
 
-  # FIXME: ATTENTION: adjust array indices manually here!!!
-	echo -e "\nfastmail new:        ${NEW[0]}"
+  # print some information to console (ATTENTION: adjust array indices manually here!!!)
+	echo -e "\\nfastmail new:        ${NEW[0]}"
 	echo -e   "bmz new:             ${NEW[1]}/${NEW[2]}"
 	echo -e   "uzh new:             ${NEW[3]}"
 
-  for index in ${!NEW[@]} ; do
-    if [[ ${NEW[index]} > 0 && ${NEW[index]} != ${UNREAD[index]} ]] ; then
+  # print some information to awesome titlebar
+  local AWESOME_INFO=" [${NEW[0]}|${NEW[1]}/${NEW[2]}|${NEW[3]}] "
+  echo -e "myemailwidget.text = '$AWESOME_INFO'" | awesome-client
+
+  for index in "${!NEW[@]}" ; do
+    if [[ "${NEW[index]}" -gt 0 && "${NEW[index]}" != "${UNREAD[index]}" ]] ; then
       mailAlert
       break
     fi
@@ -72,7 +79,7 @@ checkNewMail() {
 }
 
 printLastSync() {
-	echo -n -e "\nlast sync: "
+	echo -n -e "\\nlast sync: "
 	date +"%H:%M"
 	echo "next sync in $period minutes."
 }
@@ -80,7 +87,7 @@ printLastSync() {
 printOptions() {
 	echo -e "for a quick inbox sync, press \"s\"+[Enter]"
 	echo -e "for a complete sync, press [Enter]"
-	echo -e "to quit, press \"q\"+[Enter]\n"
+	echo -e "to quit, press \"q\"+[Enter]\\n"
 }
 
 # main loop ========================================================
@@ -90,8 +97,8 @@ do
 	echo "running mbsync..."
 
 	# count unread messages before sync
-  for index in ${!INBOX[@]}; do
-    countMessages UNREAD[index] ${INBOX[index]}
+  for index in "${!INBOX[@]}" ; do
+    countMessages UNREAD[index] "${INBOX[index]}"
   done
 
 	# run mbsync
@@ -102,17 +109,17 @@ do
 	printOptions
 
 	# either wait for 15 minutes or check again immediately by pressing Enter
-	read -t $period_sec input
+	read -t "$period_sec" input
 
 	# shortcut: only check fastmail inbox, see .mbsyncrc
-	if [[ $input == s ]] ; then
+	if [[ "$input" == s ]] ; then
 		channels="fastmail_in"
 	else
 		channels="-a"
 	fi
 
 	# quit script
-	if [[ $input == q ]] ; then
+	if [[ "$input" == q ]] ; then
 		break
 	fi
 done
