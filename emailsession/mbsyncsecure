@@ -9,8 +9,6 @@
 # OWNER    Bischofberger
 # ==================================================================
 
-# TODO: put inboxes in array
-
 source $HOME/Scripts/tmuxHelpers
 
 # variables ========================================================
@@ -20,15 +18,17 @@ let "period_sec = 60 * $period"
 
 channels="-a"  # channels to be synched by mbsync
 
-INBOX1=$HOME/Maildir/fastmail/INBOX/new/
-INBOX2=$HOME/Maildir/bmz/INBOX/new/
-INBOX3=$HOME/Maildir/bmz/Erstellungsteam/new/
-INBOX4=$HOME/Maildir/uzh-pseudo/uzh/new/
+# an array of inbox paths
+INBOX=("$HOME/Maildir/fastmail/INBOX/new/" \
+       "$HOME/Maildir/bmz/INBOX/new/" \
+       "$HOME/Maildir/bmz/Erstellungsteam/new/" \
+       "$HOME/Maildir/uzh-pseudo/uzh/new/")
 
-UNREAD1=0
-UNREAD2=0
-UNREAD3=0
-UNREAD4=0
+# number of unread messages before syncing
+UNREAD=()
+for index in ${!INBOX[@]}; do
+  UNREAD+=(0)
+done
 
 SOUNDFILE=$HOME/Scripts/data/mario1.wav
 VOLUME="40"
@@ -51,22 +51,24 @@ countMessages() {
 	ref=`find $2 -type f | wc -l`
 }
 
-# count unread messages and compare number to previously set UNREADXX variables
+# count unread messages and compare number to previously set UNREAD[] variables
 checkNewMail() {
-	local NEW1=0 && countMessages NEW1 $INBOX1
-	local NEW2=0 && countMessages NEW2 $INBOX2
-	local NEW3=0 && countMessages NEW3 $INBOX3
-	local NEW4=0 && countMessages NEW4 $INBOX4
+  local NEW=()
+  for index in ${!INBOX[@]}; do
+    NEW[index]=0 && countMessages NEW[index] ${INBOX[index]}
+  done
 
-	echo -e "\nfastmail new:        $NEW1"
-	echo -e   "bmz new:             $NEW2/$NEW3"
-	echo -e   "uzh new:             $NEW4"
+  # FIXME: ATTENTION: adjust array indices manually here!!!
+	echo -e "\nfastmail new:        ${NEW[0]}"
+	echo -e   "bmz new:             ${NEW[1]}/${NEW[2]}"
+	echo -e   "uzh new:             ${NEW[3]}"
 
-  # FIXME: this check fails in rare cases
-  #        --> check also "$NEWXX > 0"
-	if [[ $NEW1 != $UNREAD1 || $NEW2 != $UNREAD2 || $NEW3 != $UNREAD3 || $NEW4 != $UNREAD4 ]] ; then
-		mailAlert
-	fi
+  for index in ${!NEW[@]} ; do
+    if [[ ${NEW[index]} > 0 && ${NEW[index]} != ${UNREAD[index]} ]] ; then
+      mailAlert
+      break
+    fi
+  done
 }
 
 printLastSync() {
@@ -88,10 +90,9 @@ do
 	echo "running mbsync..."
 
 	# count unread messages before sync
-	countMessages UNREAD1 $INBOX1
-	countMessages UNREAD2 $INBOX2
-	countMessages UNREAD3 $INBOX3
-	countMessages UNREAD4 $INBOX4
+  for index in ${!INBOX[@]}; do
+    countMessages UNREAD[index] ${INBOX[index]}
+  done
 
 	# run mbsync
 	mbsync -V $channels
