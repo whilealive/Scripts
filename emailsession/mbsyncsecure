@@ -5,7 +5,7 @@
 # INFO     runs mbsync periodically with gpg security
 #          depends on script "vol"
 #
-# DATE     02.01.2018
+# DATE     03.01.2018
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -25,17 +25,25 @@ INBOX=("$HOME/Maildir/fastmail/INBOX/new/" \
        "$HOME/Maildir/bmz/Erstellungsteam/new/" \
        "$HOME/Maildir/uzh-pseudo/uzh/new/")
 
-# number of unread messages before syncing
-UNREAD=()
+UNREAD=()  # number of unread messages before syncing
+NEW=()     # number of new messages after syncing
 for index in "${!INBOX[@]}"; do
   UNREAD+=(0)
+  NEW+=(0)
 done
+
 
 SOUNDFILE=$HOME/Scripts/data/mario1.wav
 VOLUME="40"
 
 # functions ========================================================
 
+# helper: print some text into awesome title bar
+printMessageToAwesome() {
+  echo -e "myemailwidget.text = '$1'" | awesome-client
+}
+
+# audio/tmux mail alert
 mailAlert() {
   local STAT
   STAT=$(vol --getStat)
@@ -56,35 +64,35 @@ countMessages() {
 
 # count unread messages and compare number to previously set UNREAD[] variables
 checkNewMail() {
-  local NEW=()
   for index in "${!INBOX[@]}"; do
     NEW[index]=0 && countMessages NEW[index] "${INBOX[index]}"
   done
+}
 
-  # print some information to console (ATTENTION: adjust array indices manually here!!!)
+outputMailStatus() {
+  # output some information to console (ATTENTION: adjust array indices manually here!!!)
 	echo -e "\\nfastmail new:        ${NEW[0]}"
 	echo -e   "bmz new:             ${NEW[1]}/${NEW[2]}"
 	echo -e   "uzh new:             ${NEW[3]}"
 
-  # print some information to awesome titlebar
+  # output some information to awesome titlebar
   local AWESOME_INFO=" [${NEW[0]}|${NEW[1]}/${NEW[2]}|${NEW[3]}] "
-  echo -e "myemailwidget.text = '$AWESOME_INFO'" | awesome-client
+  printMessageToAwesome "$AWESOME_INFO"
 
+  # audio/tmux mail alert
   for index in "${!NEW[@]}" ; do
     if [[ "${NEW[index]}" -gt 0 && "${NEW[index]}" != "${UNREAD[index]}" ]] ; then
       mailAlert
       break
     fi
   done
-}
 
-printLastSync() {
+  # output time of last sync to console
 	echo -n -e "\\nlast sync: "
 	date +"%H:%M"
 	echo "next sync in $period minutes."
-}
 
-printOptions() {
+  # output some options
 	echo -e "for a quick inbox sync, press \"s\"+[Enter]"
 	echo -e "for a complete sync, press [Enter]"
 	echo -e "to quit, press \"q\"+[Enter]\\n"
@@ -95,6 +103,7 @@ printOptions() {
 while true
 do
 	echo "running mbsync..."
+  printMessageToAwesome " [running mbsync...] "
 
 	# count unread messages before sync
   for index in "${!INBOX[@]}" ; do
@@ -105,8 +114,7 @@ do
 	mbsync -V $channels
 
 	checkNewMail
-	printLastSync
-	printOptions
+  outputMailStatus
 
 	# either wait for 15 minutes or check again immediately by pressing Enter
 	read -t "$period_sec" input
@@ -120,6 +128,7 @@ do
 
 	# quit script
 	if [[ "$input" == q ]] ; then
+    printMessageToAwesome " [email] "
 		break
 	fi
 done
