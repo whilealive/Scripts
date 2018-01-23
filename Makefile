@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     19.12.2017
+# DATE     21.01.2018
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -27,7 +27,8 @@ SCRIPTS = nmgui \
 		  abookGroups\
 		  abookExport\
 		  notesd\
-		  backup
+		  backup\
+		  texsessioninit
 
 MUTTSESSIONDIR   = emailsession/
 MUTTSCRIPTS      = mbsyncsecure email emailsessioninit

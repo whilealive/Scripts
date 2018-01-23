@@ -1,0 +1,16 @@
+#!/bin/bash
+# ==================================================================
+# FILE     texsession
+# MACHINE  all
+# INFO     initializes a new tmux session with 3 windows
+#          for latex development
+#
+# DATE     21.01.2018
+# OWNER    Bischofberger
+# ==================================================================
+
+tmux new-session -d -s tex 
+tmux new-window -t tex:2
+tmux new-window -t tex:3
+tmux select-window -t tex:1
+tmux -2 attach-session -t tex
