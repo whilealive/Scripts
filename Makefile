@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     21.01.2018
+# DATE     28.01.2018
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -13,7 +13,6 @@ PREFIX:=/usr/local
 SCRIPTS = nmgui \
 		  pcsync \
 		  trash \
-		  zathuratab \
 		  vol \
 		  snippy \
 		  clipswap \
