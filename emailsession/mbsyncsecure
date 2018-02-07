@@ -3,9 +3,9 @@
 # FILE     mbsyncsecure
 # MACHINE  all
 # INFO     runs mbsync periodically with gpg security
-#          depends on script "vol"
+#          uses tmux to send a mail alert to all windows
 #
-# DATE     03.01.2018
+# DATE     05.02.2018
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -33,9 +33,6 @@ for index in "${!INBOX[@]}"; do
 done
 
 
-SOUNDFILE=$HOME/Scripts/data/mario1.wav
-VOLUME="40"
-
 # functions ========================================================
 
 # helper: print some text into awesome title bar
@@ -45,14 +42,6 @@ printMessageToAwesome() {
 
 # audio/tmux mail alert
 mailAlert() {
-  local STAT
-  STAT=$(vol --getStat)
-  if [[ "$STAT" == "on" ]] ; then  # we only want to play some sound if channel is unmuted
-    local VOL
-    VOL=$(vol --getVol)  # save current volume
-    mplayer -mixer-channel Master -volume "$VOLUME" "$SOUNDFILE" >/dev/null 2>&1  # changes volume to $VOLUME
-    vol "$VOL"  # restore volume
-  fi
 	tmux_DisplayMessageAllClients "You've got mail!"
 }
 

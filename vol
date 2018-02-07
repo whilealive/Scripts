@@ -1,11 +1,11 @@
 #!/bin/bash
 # ==================================================================
-# FILE     vol
+# FILE     vol2
 # MACHINE  all
-# INFO     just some amixer wrapper
-#          volume is controled over an integer between 0 and 10
+# INFO     just some pamixer (pulseaudio) wrapper
+#          requires pamixer package
 #
-# DATE     05.04.2016
+# DATE     01.02.2018
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -17,23 +17,9 @@ die() {
 # get volume and state [on|off]
 getMixerStatus() {
   echo -e -n "current volume: "
-  amixer sget Master | awk '/Mono:/ {print $4 " " $6}'
-}
-
-# get volume as a (reusable number between 0 and 10)
-getVolume(){
-  local VOL=`amixer sget Master | awk '/Mono:/ {gsub(/[\[\]%]/,""); print $4}'`
-  let "VOL /= 10"
-  echo $VOL
-}
-
-# get state only [on|off]
-getStat() {
-  amixer sget Master | awk '/Mono:/ {gsub(/[\[\]]/,""); print $6}'
-}
-
-setMixer() {
-  amixer -q sset Master $1
+  pamixer --get-volume
+  echo -e -n "mute: "
+  pamixer --get-mute
 }
 
 # main -------------------------------------------------
@@ -47,43 +33,28 @@ fi
 # toggle mute, increase, decrease
 case "$1" in
   "t")
-    setMixer toggle
+    pamixer --toggle-mute
     exit 0
     ;;
   "off")
-    setMixer off
+    pamixer --unmute
     exit 0
     ;;
   "on")
-    setMixer on
+    pamixer --mute
     exit 0
     ;;
   "+")
-    setMixer 5+
+    pamixer --increase 10
     exit 0
     ;;
   "-")
-    setMixer 5-
-    exit 0
-    ;;
-  "--getVol")
-    getVolume
-    exit 0
-    ;;
-  "--getStat")
-    getStat
+    pamixer --decrease 10
     exit 0
     ;;
   *)
     ;;
 esac
 
-# check if argument is not a number between 0 and 10
-regex='^[0-9]$'
-if ! [[ $1 =~ $regex ]] && [[ $1 != 10 ]] ; then
-  die "not a (valid) number."
-fi
-
 # set volume
-let "vol = 10 * $1"
-setMixer $vol% unmute
+pamixer --set-volume "$1"
