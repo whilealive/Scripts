@@ -8,9 +8,6 @@ Some shell scripts
 #### pcsync
 - rsync script for synchronizing my machines through an USB stick
 
-#### zathuratab
-- open pdfs in zathura within tabbed (suckless)
-
 #### beamer
 - tries to handle multi-monitor setup (mirror) with dwm through xrandr
 - Possible setups 
@@ -38,11 +35,14 @@ Some shell scripts
 #### pdfpsize
 - get page size of pdfs in mm
 
+#### pdfTojpg
+- convert multiple page pdf file to jpg's
+
 #### trash
 - ~/.trash/ folder support
 
 #### vol
-- volume handling
+- volume handling with pulseaudio
 
 #### pushemall/statemall
 - push to or get status of all my repos at github at once
@@ -62,16 +62,25 @@ Some shell scripts
 - sync option: "pseudo sync" of music library to more than one SD-card, mounting one after another
 - check `musictogo --help` for further details
 
-#### vimserv
-- start a vimserver with "vimserv" command (no argument)
-- to open files in that server, use "vimserv $file"
-- I use that to open text files from ranger in a unique vim server so that I have only one vim session running (copy/yank etc.)
-- Just modify this line in ranger's rifle.conf: `mime ^text,  label editor = "vimserv" -- "$@"`
-
 #### abookGroups
 - in abookrc, put: "field group = Group, list" to create a group entry as a list (of groups)
 - now run "abookGroups groupname1 groupname2 ..." to copy a comma-sperated list of all email addresses of the group members to CLIPBOARD
 - in mutt: simply do a Shift-Insert to paste them
 
+#### abookExport
+- export abook addresses to fastmail-readable format
+
 #### screenshot
 - uses imagemagick to capture screenshots
+
+#### backup
+- just some rsnapshot wrapper
+
+#### downsizeAlbumCovers
+- downsize album covers to a volumio-suitable format
+
+#### notesd
+- handle text notes by dmenu and st
+
+#### texsessioninit
+- just some tmux command to open a latex session on a specific awesome-wm tag
