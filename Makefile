@@ -36,15 +36,17 @@ ALLSCRIPTS = ${SCRIPTS} ${MUTTSCRIPTS}
 all:
 	@echo "Scripts installation"
 
-install:
+install: all
 	@echo "installing scripts to ${DESTDIR}${PREFIX}/bin"
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@cp -f -t ${DESTDIR}${PREFIX}/bin/ ${SCRIPTS}
-
 	@echo "installing emailsession scripts to ${DESTDIR}${PREFIX}/bin"
 	@cd ${MUTTSESSIONDIR} && cp -f -t ${DESTDIR}${PREFIX}/bin/ ${MUTTSCRIPTS}
-
 	@cd ${DESTDIR}${PREFIX}/bin && chmod 0755 ${ALLSCRIPTS}
 	@echo "done"
 
-.PHONY: all install
+uninstall:
+	@echo "removing scripts from ${DESTDIR}${PREFIX}/bin"
+	@cd ${DESTDIR}${PREFIX}/bin && rm -f ${ALLSCRIPTS}
+
+.PHONY: all install uninstall
