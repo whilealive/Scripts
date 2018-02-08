@@ -4,14 +4,13 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     28.01.2018
+# DATE     08.02.2018
 # OWNER    Bischofberger
 # ==================================================================
 
 PREFIX:=/usr/local
 
-SCRIPTS = nmgui \
-		  pcsync \
+SCRIPTS = pcsync \
 		  trash \
 		  vol \
 		  snippy \
