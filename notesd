@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     handle notes by dmenu
 #
-# DATE     19.09.2017
+# DATE     08.02.2018
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -15,7 +15,7 @@ die() {
 
 
 NOTESD_DB="$HOME/.notesd"
-NOTESD_EDITOR="st -g 100x30+20+40 -t notesd -e ${VISUAL:-${EDITOR:-vim}}"
+NOTESD_EDITOR="st -g 100x30+20+40 -c notesd -e ${VISUAL:-${EDITOR:-vim}}"
 
 
 cd "$NOTESD_DB"
