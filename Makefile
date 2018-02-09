@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     08.02.2018
+# DATE     09.02.2018
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -22,8 +22,6 @@ SCRIPTS = pcsync \
 		  pdfTojpg\
 		  beamer\
 		  screenshot\
-		  abookGroups\
-		  abookExport\
 		  notesd\
 		  backup\
 		  texsessioninit\
