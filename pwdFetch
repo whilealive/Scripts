@@ -1,0 +1,23 @@
+#!/bin/bash
+# ==================================================================
+# FILE     pwdFetch
+# MACHINE  all
+# INFO     get passwords for email/contacts/calendars sync
+#
+# DATE     08.02.2018
+# OWNER    Bischofberger
+# ==================================================================
+
+die() {
+  echo -e "$0: Error: $1" >&2
+  exit 1
+}
+
+PWDFILE="$HOME/Scripts/data/my-pwds.gpg"
+
+# no arguments given
+if [ -z "$1" ] ; then
+  die "no argument given"
+fi
+
+gpg2 -q --for-your-eyes-only --no-tty -d "$PWDFILE" | cut -c 40- | sed -n "$1"p

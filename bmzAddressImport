@@ -1,0 +1,111 @@
+#!/bin/bash
+# ==================================================================
+# FILE     bmzAddressImport
+# MACHINE  all
+# INFO     import school addresses to khard
+# INPUT    lastname,firstname,email
+#          lastname,firstname,email
+#          lastname,firstname,email
+#          lastname,firstname,email
+#
+# DATE     09.02.2018
+# OWNER    Bischofberger
+# ==================================================================
+
+die() {
+  echo -e "$0: Error: $1" >&2
+  exit 1
+}
+
+PREFIX="entry_"
+DELIMITER=","
+ADDRESSBOOK="BMZ-Lehrer"
+
+splitIntoFiles() {
+  echo "splitting..."
+  split --lines=1 -d "$1" "$PREFIX" || die "splitting aborted"
+  echo "...done."
+}
+
+formatFiles() {
+  echo "formatting files..."
+  shopt -s nullglob
+  for file in "$PREFIX"* ; do
+    # extract address information
+    read -r RAW<"$file"
+    local LASTNAME="$(echo "$RAW" | cut -d"$DELIMITER" -f1)"
+    local FIRSTNAME="$(echo "$RAW" | cut -d"$DELIMITER" -f2)"
+    local EMAIL="$(echo "$RAW" | cut -d"$DELIMITER" -f3)"
+
+    # reformat to khard yaml template
+    LASTNAME="Last name : ""$LASTNAME"
+    FIRSTNAME="First name : ""$FIRSTNAME"
+    EMAIL=$'Email :\n work : '"$EMAIL"
+
+    # save reformated string to file
+    echo -e "$LASTNAME\n$FIRSTNAME\n$EMAIL" > "$file"
+  done
+  echo "...done."
+}
+
+importIntoKhard() {  # arg: addressbook-name
+  echo "enter addressbook name "
+  read addressbook
+  echo -e "\nimporting..."
+  for file in "$PREFIX"* ; do
+    khard new -a "$addressbook" -i "$file"
+  done
+  echo "done."
+}
+
+
+# ----- main -----
+
+# no arguments given
+if [ -z "$1" ] ; then
+  die "no argument given"
+fi
+
+# step 1: split each line
+echo -n "step 1/4: split lines into seperate files? (y|n) "
+read answer
+if [[ "$answer" == y ]] ; then
+  splitIntoFiles "$1"
+elif [[ $answer == n ]] ; then
+  echo "skipping this step"
+else
+  die "invalid input"
+fi
+
+# step 2: format files according to khard yaml template
+echo -n "step 2/4: reformat files according to khard yaml template? (y|n) "
+read answer
+if [[ "$answer" == y ]] ; then
+  formatFiles
+elif [[ $answer == n ]] ; then
+  echo "skipping this step"
+else
+  die "invalid input"
+fi
+
+# step 3: format files according to khard yaml template
+echo -n "step 3/4: import all files into khard? (y|n) "
+read answer
+if [[ "$answer" == y ]] ; then
+  importIntoKhard
+elif [[ $answer == n ]] ; then
+  echo "skipping this step"
+else
+  die "invalid input"
+fi
+
+# step 4: cleaning
+echo -n "step 4/4: delete all seperated files? (y|n) "
+read answer
+if [[ "$answer" == y ]] ; then
+  rm "$PREFIX"*
+elif [[ $answer == n ]] ; then
+  echo "skipping this step"
+else
+  die "invalid input"
+fi

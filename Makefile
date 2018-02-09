@@ -26,7 +26,9 @@ SCRIPTS = pcsync \
 		  abookExport\
 		  notesd\
 		  backup\
-		  texsessioninit
+		  texsessioninit\
+		  pwdFetch\
+		  bmzAddressImport
 
 MUTTSESSIONDIR   = emailsession/
 MUTTSCRIPTS      = mbsyncsecure email emailsessioninit
