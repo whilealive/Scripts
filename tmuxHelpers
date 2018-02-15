@@ -4,10 +4,14 @@
 # MACHINE  all
 # INFO     various tmux helper functions
 #
-# DATE     06.04.2017
+# DATE     14.02.2018
 # OWNER    Bischofberger
 # ==================================================================
 
+die() {
+  echo -e "$0: Error: $1" >&2
+  exit 1
+}
 
 # params: $1 = message to be shown
 tmux_DisplayMessageAllClients(){
@@ -20,14 +24,29 @@ tmux_DisplayMessageAllClients(){
 }
 
 tmux_ExportCurrentPath(){
-  if [ -n "$1" ] ; then
-    local currentPath
-    local currentSession
-    currentPath="$(pwd)"
-    currentSession="$(tmux display-message -p "#S")"
-    tmux send-keys -t "$currentSession:$1" "cd $currentPath" "Enter"
-  fi
+  local currentPath
+  local currentSession
+  currentPath="$(pwd)"
+  currentSession="$(tmux display-message -p "#S")"
+  while [ -n "$1" ]; do
+    case "$1" in
+      "a"|"all")
+        tmux list-windows -t "$currentSession" \
+          | sed "/(active)/d" \
+          | cut -d: -f1 \
+          | xargs -I{} \
+          tmux send-keys -t "$currentSession":{} "cd $currentPath" "Enter"
+        shift;;
+      *[0-9]*)
+        tmux send-keys -t "$currentSession:$1" "cd $currentPath" "Enter"
+        shift;;
+      *)
+        die "unknown parameter '$1'"
+        ;;
+    esac
+  done
 }
+
 
 alias tmexp="tmux_ExportCurrentPath"
 
@@ -35,4 +54,4 @@ alias tmexp="tmux_ExportCurrentPath"
 # put functions below for testing
 # ==================================================================
 #tmux_DisplayMessageAllClients "blahblah"
-#tmux_ExportCurrentPath
+#tmux_ExportCurrentPath "$1"
