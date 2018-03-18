@@ -9,9 +9,18 @@
 # ==================================================================
 
 CONFIGS="$HOME/Scripts/data"
+
+# local
 CONFIGFILE_LOCAL_QUICK="$CONFIGS/rsnapshot_local_quick.conf"
 CONFIGFILE_LOCAL_FULL="$CONFIGS/rsnapshot_local_full.conf"
+
+# bmz
+EXTERNAL="/run/media/desktop/Other/Backup_webdav_BMZ"
 CONFIGFILE_BMZ="$CONFIGS/rsnapshot_bmz.conf"
+STATUSFILE="$EXTERNAL/backup-statusfile.txt"
+WEEKLY_LIMIT="4"
+MONTHLY_LIMIT="12"
+
 
 die() {
   echo -e "$0: Error: $1" >&2
@@ -39,26 +48,59 @@ privatebackup() {
   esac
 }
 
+create_statusfile() {
+  if [ ! -f "$STATUSFILE" ] ; then
+    echo -n "There is no statusfile. Creating one..."
+    touch $STATUSFILE
+    cat > "$STATUSFILE" <<'EOF'
+# ==================================================================
+# FILE     backup-statusfile
+# MACHINE  all
+# INFO     handle rsnapshot backup intervals (BMZ webdav)
+#
+# DATE     
+# OWNER    Bischofberger
+# ==================================================================
+
+# number of backups made:
+BMZ_WEEKLY=0
+BMZ_MONTHLY=0
+EOF
+    echo "done."
+  fi
+}
+
+update_statusfile() {
+  sed -i s/^BMZ_WEEKLY\=.*/BMZ_WEEKLY\="$BMZ_WEEKLY"/ $STATUSFILE
+  sed -i s/^BMZ_MONTHLY\=.*/BMZ_MONTHLY\="$BMZ_MONTHLY"/ $STATUSFILE
+}
+
 bmzbackup() {
   cd "$HOME"
   mount webdav
-  echo "Enter backup option:"
-  echo -e "1\tweekly\n2\tmonthly\n3\tyearly"
-  read level
-  case "$level" in
-    "1")
-      backitup "$CONFIGFILE_BMZ" "weekly" || return 1  # 0 = true, 1 = false
-      ;;
-    "2")
-      backitup "$CONFIGFILE_BMZ" "monthly" || return 1  # 0 = true, 1 = false
-      ;;
-    "3")
-      backitup "$CONFIGFILE_BMZ" "yearly" || return 1  # 0 = true, 1 = false
-      ;;
-    *)
-      die "unknown parameter '$level'"
-      ;;
-  esac
+
+  if [ ! -d "$EXTERNAL" ] ; then
+    die "mount external HD"
+  fi
+
+  create_statusfile
+  source "$STATUSFILE"
+
+  backitup "$CONFIGFILE_BMZ" "weekly" || return 1  # 0 = true, 1 = false
+  ((++BMZ_WEEKLY))
+
+  if [[ "$BMZ_WEEKLY" == "$WEEKLY_LIMIT" ]] ; then
+    backitup "$CONFIGFILE_BMZ" "monthly" || return 1  # 0 = true, 1 = false
+    ((++BMZ_MONTHLY))
+    BMZ_WEEKLY=0
+  fi
+
+  if [[ "$BMZ_MONTHLY" == "$MONTHLY_LIMIT" ]] ; then
+    backitup "$CONFIGFILE_BMZ" "yearly" || return 1  # 0 = true, 1 = false
+    BMZ_MONTHLY=0
+  fi
+
+  update_statusfile
 }
 
 
