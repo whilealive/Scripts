@@ -4,12 +4,14 @@
 # MACHINE  all
 # INFO     rsnapshot wrapper
 #
-# DATE     19.12.2017
+# DATE     18.03.2018
 # OWNER    Bischofberger
 # ==================================================================
 
-CONFIGFILE_QUICK="/etc/rsnapshot_quick.conf"
-CONFIGFILE_FULL="/etc/rsnapshot_full.conf"
+CONFIGS="$HOME/Scripts/data"
+CONFIGFILE_LOCAL_QUICK="$CONFIGS/rsnapshot_local_quick.conf"
+CONFIGFILE_LOCAL_FULL="$CONFIGS/rsnapshot_local_full.conf"
+CONFIGFILE_BMZ="$CONFIGS/rsnapshot_bmz.conf"
 
 die() {
   echo -e "$0: Error: $1" >&2
@@ -17,28 +19,65 @@ die() {
 }
 
 backitup() {
-  sudo rsnapshot -c "$1" alpha
+  sudo rsnapshot -c "$1" "$2"
 }
 
-# no arguments given
-if [ -z "$1" ] ; then
-  echo -e "No argument given => doing quick backup"
-  backitup "$CONFIGFILE_QUICK"
-  exit 0
-fi
-
-# handle options
-while [ -n "$1" ]; do
-  case "$1" in
-    "-q"|"--quick")
-      backitup "$CONFIGFILE_QUICK"
-      shift;;
-    "-f"|"--full")
-      backitup "$CONFIGFILE_FULL"
-      shift;;
+privatebackup() {
+  echo "Enter backup option:"
+  echo -e "1\tquick\n2\tfull"
+  read op
+  case "$op" in
+    "1")
+      backitup "$CONFIGFILE_LOCAL_QUICK" "alpha" || return 1  # 0 = true, 1 = false
+      ;;
+    "2")
+      backitup "$CONFIGFILE_LOCAL_FULL" "alpha" || return 1  # 0 = false, 1 = false
+      ;;
     *)
-      echo "usage: $0 [-q|--quick] [-f|--full]"
-      die "unknown parameter '$1'"
+      die "unknown parameter '$op'"
       ;;
   esac
-done
+}
+
+bmzbackup() {
+  cd "$HOME"
+  mount webdav
+  echo "Enter backup option:"
+  echo -e "1\tweekly\n2\tmonthly\n3\tyearly"
+  read level
+  case "$level" in
+    "1")
+      backitup "$CONFIGFILE_BMZ" "weekly" || return 1  # 0 = true, 1 = false
+      ;;
+    "2")
+      backitup "$CONFIGFILE_BMZ" "monthly" || return 1  # 0 = true, 1 = false
+      ;;
+    "3")
+      backitup "$CONFIGFILE_BMZ" "yearly" || return 1  # 0 = true, 1 = false
+      ;;
+    *)
+      die "unknown parameter '$level'"
+      ;;
+  esac
+}
+
+
+# main -----------------------------------
+echo "Enter backup option:"
+echo -e "1\tprivate\n2\tbmz"
+
+read number
+
+case "$number" in
+  "1")
+    privatebackup
+    exit 0
+    ;;
+  "2")
+    bmzbackup
+    exit 0
+    ;;
+  *)
+    die "unknown parameter '$number'"
+    ;;
+esac
