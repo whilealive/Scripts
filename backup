@@ -11,8 +11,9 @@
 CONFIGS="$HOME/Scripts/data"
 
 # local
-CONFIGFILE_LOCAL_QUICK="$CONFIGS/rsnapshot_local_quick.conf"
-CONFIGFILE_LOCAL_FULL="$CONFIGS/rsnapshot_local_full.conf"
+CONFIGFILE_LOCAL="$CONFIGS/rsnapshot_local.conf"
+VBOX="/$HOME/VirtualBox-VMs/"
+VBOX_BACKUP="/run/media/desktop/BackupDesktop/VirtualBox-VMs/"
 
 # bmz
 EXTERNAL="/run/media/desktop/Other/Backup_webdav_BMZ"
@@ -31,16 +32,21 @@ backitup() {
   sudo rsnapshot -c "$1" "$2"
 }
 
+vboxsync() {
+  rsync -avu "$VBOX" "$VBOX_BACKUP"
+}
+
 privatebackup() {
   echo "Enter backup option:"
   echo -e "1\tquick\n2\tfull"
   read op
   case "$op" in
-    "1")
-      backitup "$CONFIGFILE_LOCAL_QUICK" "alpha" || return 1  # 0 = true, 1 = false
+    "1")  # quick
+      backitup "$CONFIGFILE_LOCAL" "alpha" || return 1  # 0 = true, 1 = false
       ;;
-    "2")
-      backitup "$CONFIGFILE_LOCAL_FULL" "alpha" || return 1  # 0 = false, 1 = false
+    "2")  # full
+      backitup "$CONFIGFILE_LOCAL" "alpha" || return 1  # 0 = false, 1 = false
+      vboxsync || return 1
       ;;
     *)
       die "unknown parameter '$op'"
