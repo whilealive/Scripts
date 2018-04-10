@@ -4,23 +4,24 @@
 # MACHINE  all
 # INFO     rsnapshot wrapper
 #
-# DATE     18.03.2018
+# DATE     10.04.2018
 # OWNER    Bischofberger
 # ==================================================================
 
 CONFIGS="$HOME/Scripts/data"
 
 # local
-CONFIGFILE_LOCAL="$CONFIGS/rsnapshot_local.conf"
-VBOX="/$HOME/VirtualBox-VMs/"
-VBOX_BACKUP="/run/media/desktop/BackupDesktop/VirtualBox-VMs/"
+LOCAL_VBOX="/$HOME/VirtualBox-VMs/"
+LOCAL_VBOX_BACKUP="/run/media/desktop/BackupDesktop/VirtualBox-VMs/"
+LOCAL_CONFIGFILE="$CONFIGS/rsnapshot_local.conf"
 
 # bmz
-EXTERNAL="/run/media/desktop/Other/Backup_webdav_BMZ"
-CONFIGFILE_BMZ="$CONFIGS/rsnapshot_bmz.conf"
-STATUSFILE="$EXTERNAL/backup-statusfile.txt"
-WEEKLY_LIMIT="4"
-MONTHLY_LIMIT="12"
+BMZ_SOURCE="$HOME/webdav/Fachschaft Mathematik"
+BMZ_TARGET="/run/media/desktop/Other/Backup_webdav_BMZ"
+BMZ_CONFIGFILE="$CONFIGS/rsnapshot_bmz.conf"
+BMZ_STATUSFILE="$BMZ_TARGET/backup-statusfile.txt"
+BMZ_WEEKLY_LIMIT="4"
+BMZ_MONTHLY_LIMIT="12"
 
 
 die() {
@@ -33,7 +34,7 @@ backitup() {
 }
 
 vboxsync() {
-  rsync -avu "$VBOX" "$VBOX_BACKUP"
+  rsync -avu "$LOCAL_VBOX" "$LOCAL_VBOX_BACKUP"
 }
 
 privatebackup() {
@@ -42,10 +43,10 @@ privatebackup() {
   read op
   case "$op" in
     "1")  # quick
-      backitup "$CONFIGFILE_LOCAL" "alpha" || return 1  # 0 = true, 1 = false
+      backitup "$LOCAL_CONFIGFILE" "alpha" || return 1  # 0 = true, 1 = false
       ;;
     "2")  # full
-      backitup "$CONFIGFILE_LOCAL" "alpha" || return 1  # 0 = false, 1 = false
+      backitup "$LOCAL_CONFIGFILE" "alpha" || return 1  # 0 = false, 1 = false
       vboxsync || return 1
       ;;
     *)
@@ -55,10 +56,10 @@ privatebackup() {
 }
 
 create_statusfile() {
-  if [ ! -f "$STATUSFILE" ] ; then
+  if [ ! -f "$BMZ_STATUSFILE" ] ; then
     echo -n "There is no statusfile. Creating one..."
-    touch $STATUSFILE
-    cat > "$STATUSFILE" <<'EOF'
+    touch $BMZ_STATUSFILE
+    cat > "$BMZ_STATUSFILE" <<'EOF'
 # ==================================================================
 # FILE     backup-statusfile
 # MACHINE  all
@@ -77,32 +78,33 @@ EOF
 }
 
 update_statusfile() {
-  sed -i s/^BMZ_WEEKLY\=.*/BMZ_WEEKLY\="$BMZ_WEEKLY"/ $STATUSFILE
-  sed -i s/^BMZ_MONTHLY\=.*/BMZ_MONTHLY\="$BMZ_MONTHLY"/ $STATUSFILE
+  sed -i s/^BMZ_WEEKLY\=.*/BMZ_WEEKLY\="$BMZ_WEEKLY"/ "$BMZ_STATUSFILE"
+  sed -i s/^BMZ_MONTHLY\=.*/BMZ_MONTHLY\="$BMZ_MONTHLY"/ "$BMZ_STATUSFILE"
 }
 
 bmzbackup() {
-  cd "$HOME"
-  mount webdav
+  if [ ! -d "$BMZ_TARGET" ] ; then
+    die "please mount \"$BMZ_TARGET\" first"
+  fi
 
-  if [ ! -d "$EXTERNAL" ] ; then
-    die "mount external HD"
+  if [ ! -d "$BMZ_SOURCE" ] ; then
+    die "please mount \"$BMZ_SOURCE\" first"
   fi
 
   create_statusfile
-  source "$STATUSFILE"
+  source "$BMZ_STATUSFILE"
 
-  backitup "$CONFIGFILE_BMZ" "weekly" || return 1  # 0 = true, 1 = false
+  backitup "$BMZ_CONFIGFILE" "weekly" || return 1  # 0 = true, 1 = false
   ((++BMZ_WEEKLY))
 
-  if [[ "$BMZ_WEEKLY" == "$WEEKLY_LIMIT" ]] ; then
-    backitup "$CONFIGFILE_BMZ" "monthly" || return 1  # 0 = true, 1 = false
+  if [[ "$BMZ_WEEKLY" == "$BMZ_WEEKLY_LIMIT" ]] ; then
+    backitup "$BMZ_CONFIGFILE" "monthly" || return 1  # 0 = true, 1 = false
     ((++BMZ_MONTHLY))
     BMZ_WEEKLY=0
   fi
 
-  if [[ "$BMZ_MONTHLY" == "$MONTHLY_LIMIT" ]] ; then
-    backitup "$CONFIGFILE_BMZ" "yearly" || return 1  # 0 = true, 1 = false
+  if [[ "$BMZ_MONTHLY" == "$BMZ_MONTHLY_LIMIT" ]] ; then
+    backitup "$BMZ_CONFIGFILE" "yearly" || return 1  # 0 = true, 1 = false
     BMZ_MONTHLY=0
   fi
 
