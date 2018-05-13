@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     rsnapshot wrapper
 #
-# DATE     10.04.2018
+# DATE     09.05.2018
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -17,7 +17,7 @@ LOCAL_CONFIGFILE="$CONFIGS/rsnapshot_local.conf"
 
 # bmz
 BMZ_SOURCE="$HOME/webdav/Fachschaft Mathematik"
-BMZ_TARGET="/run/media/desktop/Other/Backup_webdav_BMZ"
+BMZ_TARGET="/run/media/desktop/Backup_webdav_BM"
 BMZ_CONFIGFILE="$CONFIGS/rsnapshot_bmz.conf"
 BMZ_STATUSFILE="$BMZ_TARGET/backup-statusfile.txt"
 BMZ_WEEKLY_LIMIT="4"
