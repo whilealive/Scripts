@@ -5,7 +5,7 @@
 # INFO     runs mbsync periodically with gpg security
 #          uses tmux to send a mail alert to all windows
 #
-# DATE     05.02.2018
+# DATE     14.06.2018
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -23,7 +23,7 @@ channels="-a"  # channels to be synched by mbsync
 INBOX=("$HOME/Maildir/fastmail/INBOX/new/" \
        "$HOME/Maildir/bmz/INBOX/new/" \
        "$HOME/Maildir/bmz/Erstellungsteam/new/" \
-       "$HOME/Maildir/uzh-pseudo/uzh/new/")
+       )
 
 UNREAD=()  # number of unread messages before syncing
 NEW=()     # number of new messages after syncing
@@ -60,12 +60,12 @@ checkNewMail() {
 
 outputMailStatus() {
   # output some information to console (ATTENTION: adjust array indices manually here!!!)
-	echo -e "\\nfastmail new:        ${NEW[0]}"
-	echo -e   "bmz new:             ${NEW[1]}/${NEW[2]}"
-	echo -e   "uzh new:             ${NEW[3]}"
+	echo -e "\\nFastmail new:         ${NEW[0]}"
+	echo -e   "BMZ new:              ${NEW[1]}"
+  echo -e "Erstellungsteam new:  ${NEW[2]}"
 
   # output some information to awesome titlebar
-  local AWESOME_INFO=" [${NEW[0]}|${NEW[1]}/${NEW[2]}|${NEW[3]}] "
+  local AWESOME_INFO=" [${NEW[0]}|${NEW[1]}|${NEW[2]}] "
   printMessageToAwesome "$AWESOME_INFO"
 
   # audio/tmux mail alert
