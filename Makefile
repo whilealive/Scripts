@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     09.02.2018
+# DATE     24.07.2018
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -25,6 +25,7 @@ SCRIPTS = pcsync \
 		  notesd\
 		  backup\
 		  texsessioninit\
+		  texlogfilefilter\
 		  pwdFetch\
 		  bmzAddressImport
 

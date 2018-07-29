@@ -1,0 +1,25 @@
+#!/usr/bin/env perl
+# ==================================================================
+# FILE     texlogfilefilter
+# MACHINE  all
+# INFO     filter latex logfiles
+#          copied from here: https://tex.stackexchange.com/questions/10558/use-latexmk-to-filter-the-log-file/18088#18088
+#
+# DATE     24.07.2018
+# OWNER    Bischofberger
+# ==================================================================
+
+use strict;
+use warnings;
+
+my $nobox = 0; # Should box warning be excluded
+my $nextlines = 0;
+
+while (<>) {
+  if ($nextlines > 0) { $nextlines--; print STDERR "$ARGV: $_"; }
+  elsif (/^(!\s+)?LaTeX (?:Warning|Error)/i) { print STDERR "$ARGV: $_"; }
+  elsif (/^! Undefined control sequence\./i) { chomp; print STDERR "$ARGV: $_", ": "; $nextlines = 1; }
+  elsif (/^! Use of .* doesn't match its definition\./i) { print STDERR "$ARGV: $_"; $nextlines = 3; }
+  elsif (/^!/i) { print STDERR "$ARGV: $_"; }
+  elsif (!$nobox && /(overfull|underfull|badbox)/i) { print STDERR "$ARGV: $_"; }
+}
