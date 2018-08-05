@@ -1,0 +1,111 @@
+#!/bin/bash
+# ==================================================================
+# FILE     tikzextract
+# MACHINE  all
+# INFO     extract all tikzpictures of a list of tex files 
+#          and put them in a latex standalone file ($OUTFILE).
+#          Then compile it with latexmk.
+#
+# DATE     05.08.2018
+# OWNER    Bischofberger
+# ==================================================================
+
+OUTDIR="tikzextract_out"
+OUTFILE="tikzextract.tex"
+
+
+die() {
+  echo -e "$0: Error: $1" >&2
+  exit 1
+}
+
+
+beginOutputfile() {
+  mkdir -p "$OUTDIR" || die "couldn't create outdir"
+
+  cat > "$OUTDIR/$OUTFILE" <<'EOF'
+% ==================================================================
+% FILE     tikzextract.tex
+% INFO     temporary file for tikzextract script
+% ==================================================================
+
+% temporary standalone-luatex fix
+\RequirePackage{luatex85}
+
+\documentclass[10pt,tikz]{standalone}
+
+% fonts
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{lmodern}
+
+% math
+\usepackage{mathtools}
+\usepackage{amssymb}
+
+% units
+\usepackage{siunitx}
+\sisetup{per-mode=symbol}
+
+\usepackage{basicMacrosLT}
+\usepackage{tikzStyle}
+\usepackage{tikzCollection}
+\usetikzlibrary{matrix,shapes.geometric,patterns}
+\usepackage{pgfplotsStyle}
+\usepackage{pgfplotsCollection}
+
+
+\begin{document}
+
+EOF
+}
+
+
+endOutputfile() {
+  echo -e "\\\end{document}" >>"$OUTDIR/$OUTFILE"
+}
+
+
+extractTikZ() {
+  if [[ ! -f "$1" ]] || [[ "$1" = *"$OUTFILE" ]] ; then
+    return 1  # return "false", do nothing
+  fi
+  echo -n "extracting tikz from $1..."
+  sed -n '/\\begin{tikzpicture}/,/\\end{tikzpicture}/p' "$1" >>"$OUTDIR/$OUTFILE"
+  #echo "" >>"$OUTDIR/$OUTFILE"  # add a blank line 
+  echo "done."
+}
+
+
+compile() {
+  cd "$OUTDIR" || die "couldn't change directory to \"$OUTDIR\""
+  latexmk -pdf -interaction=nonstopmode -file-line-error "$1"
+}
+
+
+
+# ========================================================
+# main routine
+
+# check for the compile-option
+if [[ "$1" == "-c" ]] || [[ "$1" == "--compile" ]] ; then
+  compile "$OUTFILE"
+  exit 0
+fi
+
+beginOutputfile
+
+# read from stdin if no argument is given
+if [ -z "$1" ] ; then
+  while read -r line ; do   # read from stdin
+    extractTikZ "$line"
+  done
+else
+  for texfile in "$@" ; do  # loop over argument list
+    extractTikZ "$texfile"
+  done
+fi
+
+endOutputfile
+
