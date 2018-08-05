@@ -49,11 +49,9 @@ beginOutputfile() {
 \sisetup{per-mode=symbol}
 
 \usepackage{basicMacrosLT}
-\usepackage{tikzStyle}
-\usepackage{tikzCollection}
+\usepackage{tikzStyle,tikzCollection}
 \usetikzlibrary{matrix,shapes.geometric,patterns}
-\usepackage{pgfplotsStyle}
-\usepackage{pgfplotsCollection}
+\usepackage{pgfplotsStyle,pgfplotsCollection}
 
 
 \begin{document}
@@ -64,6 +62,7 @@ EOF
 
 endOutputfile() {
   echo -e "\\\end{document}" >>"$OUTDIR/$OUTFILE"
+  vim -c "argdo setf latex | execute 'normal! gg=G' | update | quitall" "$OUTDIR/$OUTFILE"
 }
 
 
@@ -72,7 +71,11 @@ extractTikZ() {
     return 1  # return "false", do nothing
   fi
   echo -n "extracting tikz from $1..."
-  sed -n '/\\begin{tikzpicture}/,/\\end{tikzpicture}/p' "$1" >>"$OUTDIR/$OUTFILE"
+
+  awk '/\\begin{tikzpicture}/{f=1} f{print; if(/\\end{tikzpicture}/) {f=0; print ""}}' "$1" >>"$OUTDIR/$OUTFILE"
+  #echo "$1" | awk '/\\begin{tikzpicture}/{f=1} f{print; if(/\\end{tikzpicture}/) {f=0; print ""}}' >>"$OUTDIR/$OUTFILE"
+
+  #sed -n '/\\begin{tikzpicture}/,/\\end{tikzpicture}/p' "$1" >>"$OUTDIR/$OUTFILE"
   #echo "" >>"$OUTDIR/$OUTFILE"  # add a blank line 
   echo "done."
 }
