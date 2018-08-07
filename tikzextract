@@ -2,11 +2,14 @@
 # ==================================================================
 # FILE     tikzextract
 # MACHINE  all
-# INFO     extract all tikzpictures of a list of tex files 
-#          and put them in a latex standalone file ($OUTFILE).
-#          Then compile it with latexmk.
+# INFO     - Extract all tikzpictures of a bunch of tex files 
+#            and put them in a latex standalone file ($OUTFILE).
+#          - Compile it with latexmk (use -c option).
 #
-# DATE     05.08.2018
+#          To include all .tex files in some folder structure, just do:
+#          "find -name "*.tex" | tikzextract
+#
+# DATE     07.08.2018
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -62,7 +65,7 @@ EOF
 
 endOutputfile() {
   echo -e "\\\end{document}" >>"$OUTDIR/$OUTFILE"
-  vim -c "argdo setf latex | execute 'normal! gg=G' | update | quitall" "$OUTDIR/$OUTFILE"
+  vim -c "setf=tex | execute 'normal! gg=G' | update | quitall" "$OUTDIR/$OUTFILE"  # use vim to indent file
 }
 
 
@@ -71,12 +74,12 @@ extractTikZ() {
     return 1  # return "false", do nothing
   fi
   echo -n "extracting tikz from $1..."
-
-  awk '/\\begin{tikzpicture}/{f=1} f{print; if(/\\end{tikzpicture}/) {f=0; print ""}}' "$1" >>"$OUTDIR/$OUTFILE"
-  #echo "$1" | awk '/\\begin{tikzpicture}/{f=1} f{print; if(/\\end{tikzpicture}/) {f=0; print ""}}' >>"$OUTDIR/$OUTFILE"
-
-  #sed -n '/\\begin{tikzpicture}/,/\\end{tikzpicture}/p' "$1" >>"$OUTDIR/$OUTFILE"
-  #echo "" >>"$OUTDIR/$OUTFILE"  # add a blank line 
+  local begin_pattern="\\\begin{tikzpicture}"
+  local end_pattern="\\\end{tikzpicture}"
+  local docname_node="\\\node[below=10pt,font=\\\small\\\itshape] at (current bounding box.south) {($1)};\n"
+  awk '/'"$begin_pattern"'/ {f=1}
+       f                    {if(/'"$end_pattern"'/) {f=0; print "'"$docname_node$end_pattern"'\n"} else {print}}' "$1" >>"$OUTDIR/$OUTFILE"
+  #awk '/\\begin{tikzpicture}/{f=1} f{print; if(/\\end{tikzpicture}/) {f=0; print ""}}' "$1" >>"$OUTDIR/$OUTFILE"
   echo "done."
 }
 
