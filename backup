@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     rsnapshot wrapper
 #
-# DATE     09.05.2018
+# DATE     12.08.2018
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -94,17 +94,17 @@ bmzbackup() {
   create_statusfile
   source "$BMZ_STATUSFILE"
 
-  backitup "$BMZ_CONFIGFILE" "weekly" || return 1  # 0 = true, 1 = false
+  backitup "$BMZ_CONFIGFILE" "WeeksAgo" || return 1  # 0 = true, 1 = false
   ((++BMZ_WEEKLY))
 
   if [[ "$BMZ_WEEKLY" == "$BMZ_WEEKLY_LIMIT" ]] ; then
-    backitup "$BMZ_CONFIGFILE" "monthly" || return 1  # 0 = true, 1 = false
+    backitup "$BMZ_CONFIGFILE" "MonthsAgo" || return 1  # 0 = true, 1 = false
     ((++BMZ_MONTHLY))
     BMZ_WEEKLY=0
   fi
 
   if [[ "$BMZ_MONTHLY" == "$BMZ_MONTHLY_LIMIT" ]] ; then
-    backitup "$BMZ_CONFIGFILE" "yearly" || return 1  # 0 = true, 1 = false
+    backitup "$BMZ_CONFIGFILE" "YearsAgo" || return 1  # 0 = true, 1 = false
     BMZ_MONTHLY=0
   fi
 
