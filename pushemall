@@ -4,11 +4,11 @@
 # MACHINE  all
 # INFO     pushes all my git repositories at once
 #
-# DATE     03.03.2016
+# DATE     17.10.2018
 # OWNER    Bischofberger
 # ==================================================================
 
-GitHubReposFile="$HOME/Scripts/data/GitHubRepos.txt"
+GitHubReposFile="$HOME/Scripts/data/GitOnGitHub.txt"
 
 # my github repositories
 mapfile -t Repos <$GitHubReposFile
