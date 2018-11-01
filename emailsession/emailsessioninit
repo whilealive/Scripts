@@ -2,10 +2,10 @@
 # ==================================================================
 # FILE     emailsessioninit
 # MACHINE  all
-# INFO     initializes a new tmux session with mutt
-#          and mbsync-secure in seperate windows
+# INFO     initializes a new tmux session with mutt, mbsync-secure,
+#          ikhal and vdirsyncer,  in seperate windows
 #
-# DATE     07.12.2016
+# DATE     30.10.2018
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -14,6 +14,7 @@
 gpg -d ~/.my-pwds.gpg >/dev/null
 
 tmux new-session -d -n mail -s mail 'mutt'
-tmux new-window -n mbsyncsecure -t mail:2 'mbsyncsecure'
+tmux new-window -n cal -t mail:2 'ikhal'
+tmux new-window -n mbsyncsecure -t mail:3 'mbsyncsecure'
 tmux select-window -t mail:1
 tmux -2 attach-session -t mail

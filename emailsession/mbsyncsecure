@@ -4,8 +4,10 @@
 # MACHINE  all
 # INFO     runs mbsync periodically with gpg security
 #          uses tmux to send a mail alert to all windows
+#          also syncs calendars and contacts
+# DEPENDS  mbsync, vdirsyncer
 #
-# DATE     14.06.2018
+# DATE     30.10.2018
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -16,8 +18,6 @@ source "$HOME/Scripts/tmuxHelpers"
 period=10
 period_sec=60
 (( "period_sec = 60 * $period" ))
-
-channels="-a"  # channels to be synched by mbsync
 
 # an array of inbox paths
 INBOX=("$HOME/Maildir/fastmail/INBOX/new/" \
@@ -82,16 +82,14 @@ outputMailStatus() {
 	echo "next sync in $period minutes."
 
   # output some options
-	echo -e "for a quick inbox sync, press \"s\"+[Enter]"
-	echo -e "for a complete sync, press [Enter]"
-	echo -e "to quit, press \"q\"+[Enter]\\n"
+	echo -e "press [Enter] to sync email"
+	echo -e "press \"s\"+[Enter] to sync email and contacts/calendars"
+	echo -e "press \"q\"+[Enter] to quit"
 }
 
-# main loop ========================================================
-
-while true
-do
-	echo "running mbsync..."
+# bring it all together
+syncMail() {
+	echo -e "\nrunning mbsync..."
   printMessageToAwesome " [running mbsync...] "
 
 	# count unread messages before sync
@@ -100,19 +98,35 @@ do
   done
 
 	# run mbsync
-	mbsync -V $channels
+	mbsync -V -a
 
 	checkNewMail
   outputMailStatus
+}
 
-	# either wait for 15 minutes or check again immediately by pressing Enter
+# use vdirsyncer to sync contacts and calendars
+syncContactsAndCalendars() {
+  echo "running vdirsyncer..."
+  printMessageToAwesome " [running vdirsyncer...] "
+  vdirsyncer sync
+}
+
+
+# main =========================================================================
+
+# sync contacts and calendars only once
+syncContactsAndCalendars
+
+while true
+do
+  syncMail
+
+	# either wait for "$period_sec" or check again immediately by pressing Enter
 	read -t "$period_sec" input
 
-	# shortcut: only check fastmail inbox, see .mbsyncrc
+  # shortcut: run vdirsyncer sync (contacts and calendars)
 	if [[ "$input" == s ]] ; then
-		channels="fastmail_in"
-	else
-		channels="-a"
+    syncContactsAndCalendars
 	fi
 
 	# quit script
