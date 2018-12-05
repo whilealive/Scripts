@@ -5,7 +5,7 @@
 # INFO     - extract pages from pdf
 #          - use as pdfpextr 22 35 inputfile.pdf
 #
-# DATE     14.08.2015
+# DATE     27.11.2018
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -22,5 +22,5 @@ fi
 gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER \
 	-dFirstPage=${1} \
 	-dLastPage=${2} \
-	-sOutputFile=${3%.pdf}_p${1}-p${2}.pdf \
-	${3}
+	-sOutputFile="${3%.pdf}_p${1}-p${2}.pdf" \
+	"${3}"
