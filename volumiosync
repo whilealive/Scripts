@@ -1,0 +1,40 @@
+#!/bin/bash
+# ==================================================================
+# FILE     volumiosync
+# MACHINE  all
+# INFO     
+#
+# DATE     26.12.2018
+# OWNER    Bischofberger
+# ==================================================================
+
+VOLUMIO1="192.168.178.29"
+VOLUMIO2="192.168.178.46"
+
+SOURCE="$HOME/Music/Libraries/"
+
+VOLUMIODISK="/mnt/USB/Music/Libraries/"
+
+
+die() {
+  echo -e "$0: Error: $1" >&2
+  exit 1
+}
+
+sync() {
+  rsync -avu --delete "$SOURCE" --rsh=ssh volumio@"$1":"$VOLUMIODISK"
+}
+
+
+#############################
+## main script starts here ##
+#############################
+
+echo -n "sync volumio1 (1) or volumio2 (2)? "
+read answer
+
+if   [[ $answer == 1 ]] ; then sync "$VOLUMIO1"
+elif [[ $answer == 2 ]] ; then sync "$VOLUMIO2"
+else die "invalid number" 
+fi
+

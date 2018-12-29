@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     03.08.2018
+# DATE     26.12.2018
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -28,7 +28,8 @@ SCRIPTS = pcsync \
 		  texlogfilefilter\
 		  pwdFetch\
 		  bmzAddressImport\
-		  tikzextract
+		  tikzextract\
+		  volumiosync
 
 MUTTSESSIONDIR   = emailsession/
 MUTTSCRIPTS      = mbsyncsecure email emailsessioninit
