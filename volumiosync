@@ -4,12 +4,12 @@
 # MACHINE  all
 # INFO     
 #
-# DATE     26.12.2018
+# DATE     09.02.2019
 # OWNER    Bischofberger
 # ==================================================================
 
 VOLUMIO1="192.168.178.29"
-VOLUMIO2="192.168.178.46"
+VOLUMIO2="192.168.178.45"
 
 SOURCE="$HOME/Music/Libraries/"
 
