@@ -11,7 +11,7 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     14.02.2017
+# DATE     14.03.2019
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -19,7 +19,8 @@
 DRY=""
 FORCE=""
 
-RSYNC_OPS="-avu --delete"
+# default name of exchange-disk
+DEFAULT_DISK="transfer"
 
 die(){
     echo -e "$0: Error: $1" >&2
@@ -31,6 +32,19 @@ nothing_done(){
     echo -e "\nEither answered \"no\" or invalid input."
     echo "Nothing will be done."
     exit 1
+}
+
+# to speed up things and for extra safety,
+# first check if some disk of name $DEFAULT_DISK is available
+use_default_disk() {
+  REMOTE=$(mount | grep "$DEFAULT_DISK" | awk '$1 {print $3}')
+  echo -n -e "\nPotential disk found: \"$REMOTE\"\nWould you like to use it as remote disk (y|n)? "
+  read answer
+  case "$answer" in
+    "y") return 0 ;;  # 0 = success
+    "n") return 1 ;;  # 1 = failure
+    *  ) die "invalid answer" ;;
+  esac
 }
 
 # use "mount" to scan for mounted disks. 
@@ -54,7 +68,7 @@ diskscan() {
     echo -e "n)\t custom path" >> $MOUNTLIST1
 
     # for later check
-    local NUMBER_OF_DISKS=`wc -l < $MOUNTLIST1`
+    local NUMBER_OF_DISKS=$(wc -l < $MOUNTLIST1)
 
     # print list
     echo "List of mounted external disks:"
@@ -64,7 +78,7 @@ diskscan() {
     # input parser
     read answer
     if [[ $answer =~ ^[0-9]+$ ]] && (( answer > 0 && answer <= NUMBER_OF_DISKS )) ; then
-        REMOTE=`awk -F '\t' '$1 ~ /^'$answer\)'$/ {print $2}' $MOUNTLIST1`
+        REMOTE=$(awk -F '\t' '$1 ~ /^'$answer\)'$/ {print $2}' $MOUNTLIST1)
         echo "Your chosen target: $REMOTE"
     elif [[ $answer == n ]] ; then
         echo -n -e "\nEnter custom path: "
@@ -73,26 +87,28 @@ diskscan() {
     else
         die "No valid disk path chosen."
     fi
+}
 
-    # create remote data folder if not existent
-    if [ -d $REMOTE/pcsync_data ] ; then
-        echo "Using existing folder $REMOTE/pcsync_data."
+# create remote data folder if not existent
+check_remote_data_folder() {
+    if [ -d "$REMOTE/pcsync_data" ] ; then
+        echo -e "\nUsing existing folder $REMOTE/pcsync_data.\n"
     else
-        echo -n "Folder $REMOTE/pcsync_data not existent. Making one...."
-        mkdir $REMOTE/pcsync_data
-        echo "done."
+        echo -e -n "\nFolder $REMOTE/pcsync_data not existent. Making one...."
+        mkdir "$REMOTE/pcsync_data"
+        echo -e "done.\n"
     fi
 
-    mkdir $REMOTE/pcsync_extra 2>/dev/null
+    mkdir "$REMOTE/pcsync_extra" 2>/dev/null
     STATUSFILE="$REMOTE/pcsync_extra/pcsync-statusfile.txt"
     INCLUDEFILE="$REMOTE/pcsync_extra/pcsync-inclexcl.txt"
     REMOTE="$REMOTE/pcsync_data"
 }
 
 create_statusfile(){
-    if [ ! -f $STATUSFILE ] ; then
+    if [ ! -f "$STATUSFILE" ] ; then
         echo -n "There is no statusfile. Creating one..."
-        touch $STATUSFILE
+        touch "$STATUSFILE"
         cat > "$STATUSFILE" <<'EOF'
 # ==================================================================
 # FILE     pcsync-statusfile
@@ -113,13 +129,13 @@ EOF
 # allowed arguments: "up"/"down"
 update_statusfile(){
     if [ -n "$1" ] ; then
-        sed -i s/^LAST_RUN\=.*/LAST_RUN\=$1/ $STATUSFILE  # reset LAST_RUN variable
+        sed -i s/^LAST_RUN\=.*/LAST_RUN\="$1"/ "$STATUSFILE"  # reset LAST_RUN variable
     fi
 
 }
 
 check_includefile() {
-    if [ ! -e $INCLUDEFILE ] ; then
+    if [ ! -e "$INCLUDEFILE" ] ; then
         die "pcsync is a rsync wrapper. Therefore it needs a proper includefile to work.
                Create a file called \"$INCLUDEFILE\" 
                according to the rsync includefile specifications and run pcsync
@@ -162,11 +178,16 @@ else
 fi
 
 # set the paths
-diskscan
+if ! use_default_disk ; then
+  diskscan
+fi
+
+# handle data folder on remote disk
+check_remote_data_folder
 
 # extra protection through statusfile
 create_statusfile
-source $STATUSFILE
+source "$STATUSFILE"
 if [[ $DIRECTION == up && $LAST_RUN == up && $FORCE != -f ]] ; then
     die "You must sync down since your last sync direction was up.
          Use the \"-f\" option to force direction."
@@ -179,10 +200,10 @@ fi
 # sync
 check_includefile
 if [[ $DIRECTION == up ]] ; then
-    rsync $RSYNC_OPS $DRY --include-from="$INCLUDEFILE" $HOME/ $REMOTE/ \
+    rsync -avu --delete $DRY --include-from="$INCLUDEFILE" "$HOME/" "$REMOTE/" \
         || die "rsync error"
 elif [[ $DIRECTION == down ]] ; then
-    rsync $RSYNC_OPS $DRY --include-from="$INCLUDEFILE" $REMOTE/ $HOME/ \
+    rsync -avu --delete $DRY --include-from="$INCLUDEFILE" "$REMOTE/" "$HOME/" \
         || die "rsync error"
 else
     die "direction unknown."
