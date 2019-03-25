@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     rsnapshot wrapper
 #
-# DATE     12.08.2018
+# DATE     19.03.2019
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -34,7 +34,7 @@ backitup() {
 }
 
 vboxsync() {
-  rsync -avu "$LOCAL_VBOX" "$LOCAL_VBOX_BACKUP"
+  rsync -avu --exclude=lost+found "$LOCAL_VBOX" "$LOCAL_VBOX_BACKUP"
 }
 
 privatebackup() {
