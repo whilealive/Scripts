@@ -15,12 +15,12 @@
 # OWNER    Bischofberger
 # ==================================================================
 
+source "$HOME/Scripts/diskscan"
+DEFAULT_DISK="transfer"
+
 # default options
 DRY=""
 FORCE=""
-
-# default name of exchange-disk
-DEFAULT_DISK="transfer"
 
 die(){
     echo -e "$0: Error: $1" >&2
@@ -32,59 +32,6 @@ nothing_done(){
     echo -e "\nEither answered \"no\" or invalid input."
     echo "Nothing will be done."
     exit 1
-}
-
-# to speed up things and for extra safety,
-# first check if some disk of name $DEFAULT_DISK is available
-use_default_disk() {
-  REMOTE=$(mount | grep "$DEFAULT_DISK" | awk '$1 {print $3}')
-  echo -n -e "\nPotential disk found: \"$REMOTE\"\nWould you like to use it as remote disk (y|n)? "
-  read answer
-  case "$answer" in
-    "y") return 0 ;;  # 0 = success
-    "n") return 1 ;;  # 1 = failure
-    *  ) die "invalid answer" ;;
-  esac
-}
-
-# use "mount" to scan for mounted disks. 
-# Give a choice of possible targets to choose from.
-# ---------------------
-# $REMOTE       (path of music player/SD-card)
-# ---------------------
-diskscan() {
-    local MOUNTLIST0=/tmp/mountlist0.tmp
-    local MOUNTLIST1=/tmp/mountlist1.tmp
-
-    # list all possibly mounted external disks and save them into a tempfile
-    mount | grep 'sd[bcd]\|truecrypt' | awk '$1 {print $3}' > $MOUNTLIST0
-
-    # put line numbers in front
-    awk '{ printf("%d)\t%s\n", NR, $0) }' $MOUNTLIST0 > $MOUNTLIST1
-
-    # the custom choice, last line
-    echo -e "n)\t custom path" >> $MOUNTLIST1
-
-    # for later check
-    local NUMBER_OF_DISKS=$(wc -l < $MOUNTLIST1)
-
-    # print list
-    echo "List of mounted external disks:"
-    cat $MOUNTLIST1 || die "Mountlist not found."
-    echo -n -e "\nPlease enter the number of your disk or hit \"n\" for entering a custom path: "
-
-    # input parser
-    read answer
-    if [[ $answer =~ ^[0-9]+$ ]] && (( answer > 0 && answer <= NUMBER_OF_DISKS )) ; then
-        REMOTE=$(awk -F '\t' '$1 ~ /^'$answer\)'$/ {print $2}' $MOUNTLIST1)
-        echo "Your chosen target: $REMOTE"
-    elif [[ $answer == n ]] ; then
-        echo -n -e "\nEnter custom path: "
-        read -e REMOTE  # -e is for autocomplete
-        echo "Your chosen target: $REMOTE"
-    else
-        die "No valid disk path chosen."
-    fi
 }
 
 # create remote data folder if not existent
@@ -154,6 +101,7 @@ check_includefile() {
 while [ -n "$1" ]; do
     case "$1" in
         "-n"|"--dry-run")
+            echo "rsync in dry-run mode"
             DRY="-n"
             shift;;
         "-f"|"--force")
@@ -178,9 +126,15 @@ else
 fi
 
 # set the paths
-if ! use_default_disk ; then
+if ! use_default_disk "$DEFAULT_DISK" ; then
   diskscan
 fi
+
+if [ -z "$CHOSEN_DISK" ] ; then 
+  die "no disk found"
+fi
+
+REMOTE="$CHOSEN_DISK"
 
 # handle data folder on remote disk
 check_remote_data_folder

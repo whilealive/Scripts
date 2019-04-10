@@ -8,6 +8,9 @@
 # OWNER    Bischofberger
 # ==================================================================
 
+source "$HOME/Scripts/diskscan"
+DEFAULT_DISK="Volumiodisk"
+
 INCLUDEFILE="$HOME/Scripts/data/volumiosync-inclexcl.txt"
 
 die() {
@@ -23,7 +26,9 @@ sshsync() {
   echo -n "syncto \"Volumio-balanced\" (1) or \"Volumio-revox\" (2)? "
   read answer
 
-  if [[ $answer != 1 && $answer != 2 ]] ; then die "invalid option '$answer'" ; fi
+  if [[ $answer != 1 && $answer != 2 ]] ; then
+    die "invalid option '$answer'"
+  fi
 
   local VOLUMIO1="192.168.178.29"
   local VOLUMIO2="192.168.178.45"
@@ -34,9 +39,15 @@ sshsync() {
 }
 
 usbsync() {
-  local volumiodiskUSB="/run/media/desktop/Volumiodisk/"
-  syncto "$volumiodiskUSB"
+  if ! use_default_disk "$DEFAULT_DISK" ; then
+    diskscan
+  fi
+
+  if [ -n "$CHOSEN_DISK" ] ; then 
+    syncto "$CHOSEN_DISK"
+  fi
 }
+
 
 
 #############################
