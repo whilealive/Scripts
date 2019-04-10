@@ -11,7 +11,7 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     14.03.2019
+# DATE     10.04.2019
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -51,8 +51,6 @@ use_default_disk() {
 # Give a choice of possible targets to choose from.
 # ---------------------
 # $REMOTE       (path of music player/SD-card)
-# $STATUSFILE   (for extra protection)
-# $INCLUDEFILE  (for rsync)
 # ---------------------
 diskscan() {
     local MOUNTLIST0=/tmp/mountlist0.tmp
@@ -90,6 +88,8 @@ diskscan() {
 }
 
 # create remote data folder if not existent
+# $STATUSFILE   (for extra protection)
+# $INCLUDEFILE  (for rsync)
 check_remote_data_folder() {
     if [ -d "$REMOTE/pcsync_data" ] ; then
         echo -e "\nUsing existing folder $REMOTE/pcsync_data.\n"
