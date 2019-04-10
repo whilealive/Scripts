@@ -2,27 +2,40 @@
 # ==================================================================
 # FILE     volumiosync
 # MACHINE  all
-# INFO     
+# INFO     USB-disks on Volumio have to be labeled as "Volumiodisk"
 #
-# DATE     09.02.2019
+# DATE     10.04.2019
 # OWNER    Bischofberger
 # ==================================================================
 
-VOLUMIO1="192.168.178.29"
-VOLUMIO2="192.168.178.45"
-
-SOURCE="$HOME/Music/Libraries/"
-
-VOLUMIODISK="/mnt/USB/Music/Libraries/"
-
+INCLUDEFILE="$HOME/Scripts/data/volumiosync-inclexcl.txt"
 
 die() {
   echo -e "$0: Error: $1" >&2
   exit 1
 }
 
-sync() {
-  rsync -avu --delete "$SOURCE" --rsh=ssh volumio@"$1":"$VOLUMIODISK"
+syncto() {
+  rsync -avu --delete --include-from="$INCLUDEFILE" "$HOME/" $1 || die "couldn't sync"
+}
+
+sshsync() {
+  echo -n "syncto \"Volumio-balanced\" (1) or \"Volumio-revox\" (2)? "
+  read answer
+
+  if [[ $answer != 1 && $answer != 2 ]] ; then die "invalid option '$answer'" ; fi
+
+  local VOLUMIO1="192.168.178.29"
+  local VOLUMIO2="192.168.178.45"
+  local volumiodiskSSH="/mnt/USB/Volumiodisk/"
+
+  if [[ $answer == 1 ]] ; then syncto "--rsh=ssh volumio@$VOLUMIO1:$volumiodiskSSH" ; fi
+  if [[ $answer == 2 ]] ; then syncto "--rsh=ssh volumio@$VOLUMIO2:$volumiodiskSSH" ; fi
+}
+
+usbsync() {
+  local volumiodiskUSB="/run/media/desktop/Volumiodisk/"
+  syncto "$volumiodiskUSB"
 }
 
 
@@ -30,11 +43,20 @@ sync() {
 ## main script starts here ##
 #############################
 
-echo -n "sync volumio1 (1) or volumio2 (2)? "
-read answer
+echo -n "SSH (1) or USB (2)? "
+read number
 
-if   [[ $answer == 1 ]] ; then sync "$VOLUMIO1"
-elif [[ $answer == 2 ]] ; then sync "$VOLUMIO2"
-else die "invalid number" 
-fi
+case "$number" in
+  "1")
+    sshsync
+    exit 0
+    ;;
+  "2")
+    usbsync
+    exit 0
+    ;;
+  *)
+    die "invalid option '$number'"
+    ;;
+esac
 
