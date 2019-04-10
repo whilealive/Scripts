@@ -2,8 +2,18 @@
 # ==================================================================
 # FILE     diskscan
 # MACHINE  all
-# INFO     use "mount" to scan for mounted disks. 
-# j        Give a choice of possible targets to choose from.
+# INFO     Use "mount" to scan for mounted disks. 
+#          Give a choice of possible targets to choose from.
+#          Will be used within other scripts.
+#          Possible use-case:
+#          
+#          if ! use_default_disk "$DEFAULT_DISK" ; then
+#            diskscan
+#          fi
+#          if [ -z "$CHOSEN_DISK" ] ; then 
+#            die "no disk found"
+#          fi
+#          do something with $CHOSEN_DISK here...
 #
 # DATE     10.04.2019
 # OWNER    Bischofberger
