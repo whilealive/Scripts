@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==================================================================
-# FILE     volumiosync
+# FILE     musicsync
 # MACHINE  all
 # INFO     USB-disks on Volumio have to be labeled as "Volumiodisk"
 #
@@ -9,6 +9,11 @@
 # ==================================================================
 
 source "$HOME/Scripts/diskscan"
+
+# volumio
+VOLUMIO1="192.168.178.29"
+VOLUMIO2="192.168.178.45"
+volumiodiskSSH="/mnt/USB/Volumiodisk/"
 
 INCLUDEFILE_FLAC="$HOME/Scripts/data/musicsync-inclexcl-flac.txt"
 INCLUDEFILE_OGG="$HOME/Scripts/data/musicsync-inclexcl-ogg.txt"
@@ -58,10 +63,6 @@ sshsync() {
     die "invalid option '$answer'"
   fi
 
-  local VOLUMIO1="192.168.178.29"
-  local VOLUMIO2="192.168.178.45"
-  local volumiodiskSSH="/mnt/USB/Volumiodisk/"
-
   if [[ $answer == 1 ]] ; then syncto "--rsh=ssh volumio@$VOLUMIO1:$volumiodiskSSH" || die "something went wrong" ; fi
   if [[ $answer == 2 ]] ; then syncto "--rsh=ssh volumio@$VOLUMIO2:$volumiodiskSSH" || die "something went wrong" ; fi
 }
@@ -69,10 +70,7 @@ sshsync() {
 usbsync() {
   choose_includefile
 
-  local default_disk="MUSIC"
-  if ! use_default_disk "$default_disk" ; then
-    diskscan
-  fi
+  diskscan  # declares $CHOSEN_DISK
 
   if [ -n "$CHOSEN_DISK" ] ; then syncto "$CHOSEN_DISK" "--modify-window=1" || die "something went wrong" ; fi
 }
