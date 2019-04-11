@@ -4,25 +4,53 @@
 # MACHINE  all
 # INFO     USB-disks on Volumio have to be labeled as "Volumiodisk"
 #
-# DATE     10.04.2019
+# DATE     11.04.2019
 # OWNER    Bischofberger
 # ==================================================================
 
 source "$HOME/Scripts/diskscan"
-DEFAULT_DISK="Volumiodisk"
 
-INCLUDEFILE="$HOME/Scripts/data/volumiosync-inclexcl.txt"
+INCLUDEFILE_FLAC="$HOME/Scripts/data/musicsync-inclexcl-flac.txt"
+INCLUDEFILE_OGG="$HOME/Scripts/data/musicsync-inclexcl-ogg.txt"
+INCLUDEFILE=""
 
 die() {
   echo -e "$0: Error: $1" >&2
   exit 1
 }
 
+choose_includefile() {
+  if [[ "$1" == "flac" ]] ; then INCLUDEFILE="$INCLUDEFILE_FLAC" ; return 0 ; fi
+  if [[ "$1" == "ogg" ]]  ; then INCLUDEFILE="$INCLUDEFILE_OGG"  ; return 0 ; fi
+
+  echo -n "sync flac (1) or ogg (2)? "
+  read number
+
+  case "$number" in
+    "1")
+      INCLUDEFILE="$INCLUDEFILE_FLAC"
+      ;;
+    "2")
+      INCLUDEFILE="$INCLUDEFILE_OGG"
+      ;;
+    *)
+      die "invalid option '$answer'"
+      ;;
+  esac
+}
+
+# With $2 we can give rsync some extra options
 syncto() {
-  rsync -avu --delete --include-from="$INCLUDEFILE" "$HOME/" $1 || die "couldn't sync"
+  if [ -z "$INCLUDEFILE" ] ; then return 1 ; fi
+
+  rsync -avu --delete $2 --include-from="$INCLUDEFILE" "$HOME/" $1 || return 1
+
+  return 0
 }
 
 sshsync() {
+  choose_includefile "flac"
+
   echo -n "syncto \"Volumio-balanced\" (1) or \"Volumio-revox\" (2)? "
   read answer
 
@@ -34,18 +62,19 @@ sshsync() {
   local VOLUMIO2="192.168.178.45"
   local volumiodiskSSH="/mnt/USB/Volumiodisk/"
 
-  if [[ $answer == 1 ]] ; then syncto "--rsh=ssh volumio@$VOLUMIO1:$volumiodiskSSH" ; fi
-  if [[ $answer == 2 ]] ; then syncto "--rsh=ssh volumio@$VOLUMIO2:$volumiodiskSSH" ; fi
+  if [[ $answer == 1 ]] ; then syncto "--rsh=ssh volumio@$VOLUMIO1:$volumiodiskSSH" || die "something went wrong" ; fi
+  if [[ $answer == 2 ]] ; then syncto "--rsh=ssh volumio@$VOLUMIO2:$volumiodiskSSH" || die "something went wrong" ; fi
 }
 
 usbsync() {
-  if ! use_default_disk "$DEFAULT_DISK" ; then
+  choose_includefile
+
+  local default_disk="MUSIC"
+  if ! use_default_disk "$default_disk" ; then
     diskscan
   fi
 
-  if [ -n "$CHOSEN_DISK" ] ; then 
-    syncto "$CHOSEN_DISK"
-  fi
+  if [ -n "$CHOSEN_DISK" ] ; then syncto "$CHOSEN_DISK" "--modify-window=1" || die "something went wrong" ; fi
 }
 
 
