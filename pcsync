@@ -11,11 +11,11 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     10.04.2019
+# DATE     12.04.2019
 # OWNER    Bischofberger
 # ==================================================================
 
-source "$HOME/Scripts/diskscan"
+source "$HOME/Scripts/f_diskscan"
 DEFAULT_DISK="transfer"
 
 # default options
@@ -126,8 +126,8 @@ else
 fi
 
 # set the paths
-if ! use_default_disk "$DEFAULT_DISK" ; then
-  diskscan
+if ! f_use_default_disk "$DEFAULT_DISK" ; then
+  f_diskscan
 fi
 
 if [ -z "$CHOSEN_DISK" ] ; then 

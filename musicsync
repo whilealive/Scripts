@@ -4,11 +4,11 @@
 # MACHINE  all
 # INFO     USB-disks on Volumio have to be labeled as "Volumiodisk"
 #
-# DATE     11.04.2019
+# DATE     12.04.2019
 # OWNER    Bischofberger
 # ==================================================================
 
-source "$HOME/Scripts/diskscan"
+source "$HOME/Scripts/f_diskscan"
 
 # volumio
 VOLUMIO1="192.168.178.29"
@@ -70,7 +70,7 @@ sshsync() {
 usbsync() {
   choose_includefile
 
-  diskscan  # declares $CHOSEN_DISK
+  f_diskscan  # declares $CHOSEN_DISK
 
   if [ -n "$CHOSEN_DISK" ] ; then syncto "$CHOSEN_DISK" "--modify-window=1" || die "something went wrong" ; fi
 }

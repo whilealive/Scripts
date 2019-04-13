@@ -1,20 +1,15 @@
 #!/bin/bash
 # ==================================================================
-# FILE     tmuxHelpers
+# FILE     f_tmuxHelpers
 # MACHINE  all
 # INFO     various tmux helper functions
 #
-# DATE     14.02.2018
+# DATE     12.04.2019
 # OWNER    Bischofberger
 # ==================================================================
 
-die() {
-  echo -e "$0: Error: $1" >&2
-  exit 1
-}
-
 # params: $1 = message to be shown
-tmux_DisplayMessageAllClients(){
+f_tmux_DisplayMessageAllClients(){
 	local clientsList
 	clientsList=$(tmux list-clients -F "#{client_tty}")
 	readarray -t clientsArray <<<"$clientsList"
@@ -23,7 +18,7 @@ tmux_DisplayMessageAllClients(){
 	done
 }
 
-tmux_ExportCurrentPath(){
+f_tmux_ExportCurrentPath(){
   local currentPath
   local currentSession
   currentPath="$(pwd)"
@@ -47,11 +42,4 @@ tmux_ExportCurrentPath(){
   done
 }
 
-
-alias tmexp="tmux_ExportCurrentPath"
-
-
-# put functions below for testing
-# ==================================================================
-#tmux_DisplayMessageAllClients "blahblah"
-#tmux_ExportCurrentPath "$1"
+alias tmexp="f_tmux_ExportCurrentPath"

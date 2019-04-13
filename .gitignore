@@ -3,11 +3,11 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     09.12.2017
+# DATE     12.04.2019
 # OWNER    Bischofberger
 # ==================================================================
 
 # git shall ignore the following
-#old/
+old/
 data/
 test/

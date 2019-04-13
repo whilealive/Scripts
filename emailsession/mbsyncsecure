@@ -7,11 +7,11 @@
 #          also syncs calendars and contacts
 # DEPENDS  mbsync, vdirsyncer
 #
-# DATE     30.10.2018
+# DATE     12.04.2019
 # OWNER    Bischofberger
 # ==================================================================
 
-source "$HOME/Scripts/tmuxHelpers"
+source "$HOME/Scripts/f_tmuxHelpers"
 
 # variables ========================================================
 
@@ -42,7 +42,7 @@ printMessageToAwesome() {
 
 # audio/tmux mail alert
 mailAlert() {
-	tmux_DisplayMessageAllClients "You've got mail!"
+	f_tmux_DisplayMessageAllClients "You've got mail!"
 }
 
 # count messages in $2 and save number in $1

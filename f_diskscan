@@ -1,21 +1,21 @@
 #!/bin/bash
 # ==================================================================
-# FILE     diskscan
+# FILE     f_diskscan
 # MACHINE  all
 # INFO     Use "mount" to scan for mounted disks. 
 #          Give a choice of possible targets to choose from.
 #          Will be used within other scripts.
 #          Possible use-case:
 #          
-#          if ! use_default_disk "$DEFAULT_DISK" ; then
-#            diskscan
+#          if ! f_use_default_disk "$DEFAULT_DISK" ; then
+#            f_diskscan
 #          fi
 #          if [ -z "$CHOSEN_DISK" ] ; then 
 #            die "no disk found"
 #          fi
 #          do something with $CHOSEN_DISK here...
 #
-# DATE     10.04.2019
+# DATE     12.04.2019
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -36,7 +36,7 @@ reallysure() {
 # first check if some disk of name $DEFAULT_DISK is available
 # $1: default disk name
 # defines the variable $CHOSEN_DISK
-use_default_disk() {
+f_use_default_disk() {
   local disk=$(mount | grep "$1" | awk '$1 {print $3}')
 
   if [ -z "$disk" ] ; then
@@ -61,7 +61,7 @@ use_default_disk() {
 }
 
 # defines the variable $CHOSEN_DISK
-diskscan() {
+f_diskscan() {
   local MOUNTLIST0=/tmp/mountlist0.tmp
   local MOUNTLIST1=/tmp/mountlist1.tmp
 
@@ -99,18 +99,3 @@ diskscan() {
     die "No valid disk path chosen."
   fi
 }
-
-
-
-# put functions below for testing
-# ==================================================================
-
-# die() hast to be defined in the calling script
-#die() {
-#  echo -e "$0: Error: $1" >&2
-#  exit 1
-#}
-
-#diskscan
-#echo "chosen disk: '$CHOSEN_DISK'"
-#use_default_disk "transfer"
