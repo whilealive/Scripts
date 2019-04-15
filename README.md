@@ -50,25 +50,17 @@ Some shell scripts
 #### snippy
 - see: [https://bbs.archlinux.org/](https://bbs.archlinux.org/viewtopic.php?id=71938&p=2)
 
-#### tmux-helpers
+#### f_diskscan
+- search for mounted disks to choose from
+
+#### f_tmux-helpers
 - collection of tmux helper functions, e.g.
   - send message to all clients
   - (...)
 
-#### musictogo/
-- randomly chooses albums of your music library and copies them to an SD-card which goes into your phone or player.
-- always copies whole albums either until card is full or up to a maximal number of albums to be replaced
-- can also distribute music to more than one disk
-- sync option: "pseudo sync" of music library to more than one SD-card, mounting one after another
-- check `musictogo --help` for further details
-
-#### abookGroups
-- in abookrc, put: "field group = Group, list" to create a group entry as a list (of groups)
-- now run "abookGroups groupname1 groupname2 ..." to copy a comma-sperated list of all email addresses of the group members to CLIPBOARD
-- in mutt: simply do a Shift-Insert to paste them
-
-#### abookExport
-- export abook addresses to fastmail-readable format
+#### musicsync/
+- sync my volumio instances
+- sync SD cards for my mobile player
 
 #### screenshot
 - uses imagemagick to capture screenshots
@@ -84,3 +76,7 @@ Some shell scripts
 
 #### texsessioninit
 - just some tmux command to open a latex session on a specific awesome-wm tag
+
+### tikzextract
+- extract all tikz environments in a .tex file and put it into a seperate compilable file
+- compile the output file with latexmk
