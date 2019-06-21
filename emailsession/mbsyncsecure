@@ -7,9 +7,11 @@
 #          also syncs calendars and contacts
 # DEPENDS  mbsync, vdirsyncer
 #
-# DATE     12.04.2019
+# DATE     21.06.2019
 # OWNER    Bischofberger
 # ==================================================================
+# IDEA: folder watch (there might never be a good implemenation for this)
+#       "while true ; do inotifywait -e move -e create -e delete -r Maildir && mbsync -V -a ; done"
 
 source "$HOME/Scripts/f_tmuxHelpers"
 
