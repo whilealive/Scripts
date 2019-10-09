@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     various tmux helper functions
 #
-# DATE     12.04.2019
+# DATE     09.10.2019
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -30,10 +30,10 @@ f_tmux_ExportCurrentPath(){
           | sed "/(active)/d" \
           | cut -d: -f1 \
           | xargs -I{} \
-          tmux send-keys -t "$currentSession":{} "cd $currentPath" "Enter"
+          tmux send-keys -t "$currentSession":{} "cd \"$currentPath\"" "Enter"
         shift;;
       *[0-9]*)
-        tmux send-keys -t "$currentSession:$1" "cd $currentPath" "Enter"
+        tmux send-keys -t "$currentSession:$1" "cd \"$currentPath\"" "Enter"
         shift;;
       *)
         die "unknown parameter '$1'"
