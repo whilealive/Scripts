@@ -2,10 +2,10 @@
 # ==================================================================
 # FILE     beamer
 # MACHINE  all
-# INFO     handles resolution in multi-monitor setup with dwm
-#					 when mirroring is involved
+# INFO     handles resolution in multi-monitor setup with dwm-type
+#					 window managers when mirroring is involved
 #
-# DATE     11.04.2016
+# DATE     31.08.2020
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -13,11 +13,13 @@
 # set the following two according to your system
 # ----------------------------------------------
 INTERNAL="eDP1"
-EXTERNAL="DP2"
+EXTERNAL_HDMI="HDMI1"
+EXTERNAL_VGA="DP1"
 # ----------------------------------------------
 
 
 # global vars (will be set automatically later)
+EXTERNAL=""
 RES_INT_x="1"
 RES_INT_y="1"
 RES_INT_LIST=()
@@ -83,6 +85,23 @@ fillListOfInternalResolutions(){
 	RES_INT_LIST=($res)
 }
 
+chooseOutput(){
+  echo "Enter Output option:"
+  echo -e "1\tHDMI\n2\tVGA"
+  read op
+  case "$op" in
+    "1")
+      EXTERNAL="$EXTERNAL_HDMI"
+      ;;
+    "2")
+      EXTERNAL="$EXTERNAL_VGA"
+      ;;
+    *)
+      die "unknown parameter '$op'"
+      ;;
+  esac
+}
+
 fillListOfExternalResolutions(){
 	local res=`xrandr | awk '/'^$EXTERNAL$'/ {m=1; next} m==1 && !/'^\ '/ {exit} m==1 && /'^\ '/ {print $1}'`
 	RES_EXT_LIST=($res)
@@ -137,7 +156,7 @@ xrandr_activateDualMode(){
 
 # TODO: workaround for getting out of panning...
 xrandr_deactivateDualMode(){
-	#xrandr --output $EXTERNAL --primary
+	#xrandr --output $EXTERNAL_VGA --primary
 	#xrandr --output $INTERNAL --primary
 	read -p "Plug out external monitor and press [Enter]."
   fillListOfInternalResolutions
@@ -210,6 +229,7 @@ automatic_panning(){
 # manually but with some tests
 setup_m(){
 	showAllResolutions
+  chooseOutput
 	getCurrentInternalResolution
 	readDesiredExternalResolution
 	if usePanning ; then
@@ -230,6 +250,7 @@ setup_m(){
 # no tests here
 setup_force(){
 	showAllResolutions
+  chooseOutput
 	getCurrentInternalResolution
 	readDesiredExternalResolution
 	if usePanning ; then
@@ -242,6 +263,7 @@ setup_force(){
 # fully automatic
 setup_a(){
   showAllResolutions
+  chooseOutput
   fillListOfInternalResolutions
   fillListOfExternalResolutions
   if compareLists ; then
@@ -284,7 +306,7 @@ case "$1" in
     setup_m
     ;;
   "-f"|"--force")
-    setup_f
+    setup_force
     ;;
   "-h"|"--help")
     usage
