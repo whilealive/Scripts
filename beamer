@@ -5,7 +5,7 @@
 # INFO     handles resolution in multi-monitor setup with dwm-type
 #					 window managers when mirroring is involved
 #
-# DATE     31.08.2020
+# DATE     01.09.2020
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -27,6 +27,7 @@ RES_EXT_x="1"
 RES_EXT_y="1"
 RES_EXT_LIST=()
 COMMON_RES="1"
+SCALING_FACTOR_xy=("1" "1")
 
 die(){
 	echo -e "$0: Error: $1" >&2
@@ -57,6 +58,8 @@ You must kill the Xserver to do so.\n\
 -m, --manually        Manually enter desired external monitor resolution.
                       Additional size checks give extra security in this mode.
 -f, --force           Same as the \"-m\"-flag but no size checks here.
+-s, --scale           Some different approach here: use the xrandr \"scale\" option
+                      to downscale the smaller resolution from the larger
 -d, --deactivate      Get out of dual-mode. (not working properly for panning yet)
 "
 }
@@ -155,13 +158,14 @@ xrandr_activateDualMode(){
 }
 
 # TODO: workaround for getting out of panning...
+# FIXME: get out of scale mode when external is base resolution
 xrandr_deactivateDualMode(){
 	#xrandr --output $EXTERNAL_VGA --primary
 	#xrandr --output $INTERNAL --primary
 	read -p "Plug out external monitor and press [Enter]."
   fillListOfInternalResolutions
   getHighestInternalResolutionFromList
-	xrandr --output $INTERNAL --mode `printResolution $RES_INT_x $RES_INT_y`  || die "xrandr failure"
+	xrandr --output $INTERNAL --mode `printResolution $RES_INT_x $RES_INT_y` --scale 1x1 || die "xrandr failure"
 	xrandr >/dev/null
 	xrandr --auto
 }
@@ -224,6 +228,12 @@ automatic_panning(){
     die "Hightest external resolution (`printResolution $RES_EXT_x $RES_EXT_y`) is smaller than
     highest internal (`printResolution $RES_INT_x $RES_INT_y`). No solution yet..."
   fi
+}
+
+# arg1/arg2: base_x/base_y, arg3/arg4: target_x/target_y
+computeScalingFactor(){
+  eval "SCALING_FACTOR_xy[0]="$(echo "$1/$3" | bc -l)""
+  eval "SCALING_FACTOR_xy[1]="$(echo "$2/$4" | bc -l)""
 }
 
 # manually but with some tests
@@ -292,6 +302,32 @@ setup_a(){
   fi
 }
 
+setup_scale(){
+  showAllResolutions
+  chooseOutput
+  fillListOfInternalResolutions
+  fillListOfExternalResolutions
+  getHighestInternalResolutionFromList  # TODO: to be simplified...
+  getHighestExternalResolutionFromList
+	if (( "$RES_EXT_x" > "$RES_INT_x" || "$RES_EXT_y" > "$RES_INT_y" )) ; then
+  #if isExternalGreaterThanInternal ; then
+    echo "Max external resolution is greater than internal -> using external as base resolution..."
+    computeScalingFactor "$RES_EXT_x" "$RES_EXT_y" "$RES_INT_x" "$RES_INT_y" 
+    xrandr --output $EXTERNAL --auto \
+           --output $INTERNAL --same-as $EXTERNAL --mode `printResolution $RES_INT_x $RES_INT_y` \
+           --scale "${SCALING_FACTOR_xy[0]}x${SCALING_FACTOR_xy[1]}" \
+           || die "xrandr (scaling) failure"
+  else
+    echo "Max external resolution is smaler or equal to internal -> using internal as base resolution..."
+    computeScalingFactor "$RES_INT_x" "$RES_INT_y" "$RES_EXT_x" "$RES_EXT_y"
+    xrandr --output $INTERNAL --auto \
+           --output $EXTERNAL --same-as $INTERNAL --mode `printResolution $RES_EXT_x $RES_EXT_y` \
+           --scale "${SCALING_FACTOR_xy[0]}x${SCALING_FACTOR_xy[1]}" \
+           || die "xrandr (scaling) failure"
+  fi
+  echo "done."
+}
+
 # Main ------------------------------------------------
 
 if [ -z "$1" ] ; then
@@ -307,6 +343,9 @@ case "$1" in
     ;;
   "-f"|"--force")
     setup_force
+    ;;
+  "-s"|"--scale")
+    setup_scale
     ;;
   "-h"|"--help")
     usage
