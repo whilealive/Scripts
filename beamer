@@ -5,7 +5,7 @@
 # INFO     handles resolution in multi-monitor setup with dwm-type
 #					 window managers when mirroring is involved
 #
-# DATE     01.09.2020
+# DATE     10.09.2020
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -88,6 +88,7 @@ fillListOfInternalResolutions(){
 	RES_INT_LIST=($res)
 }
 
+# TODO: let choose from HDMI1, HDMI2, DP1, DP2 and so on...
 chooseOutput(){
   echo "Enter Output option:"
   echo -e "1\tHDMI\n2\tVGA"
@@ -311,14 +312,14 @@ setup_scale(){
   getHighestExternalResolutionFromList
 	if (( "$RES_EXT_x" > "$RES_INT_x" || "$RES_EXT_y" > "$RES_INT_y" )) ; then
   #if isExternalGreaterThanInternal ; then
-    echo "Max external resolution is greater than internal -> using external as base resolution..."
+    echo "Scaling mode: external resolution > internal -> using external as base..."
     computeScalingFactor "$RES_EXT_x" "$RES_EXT_y" "$RES_INT_x" "$RES_INT_y" 
     xrandr --output $EXTERNAL --auto \
            --output $INTERNAL --same-as $EXTERNAL --mode `printResolution $RES_INT_x $RES_INT_y` \
            --scale "${SCALING_FACTOR_xy[0]}x${SCALING_FACTOR_xy[1]}" \
            || die "xrandr (scaling) failure"
   else
-    echo "Max external resolution is smaler or equal to internal -> using internal as base resolution..."
+    echo "Scaling mode: external resolution <= internal -> using internal as base..."
     computeScalingFactor "$RES_INT_x" "$RES_INT_y" "$RES_EXT_x" "$RES_EXT_y"
     xrandr --output $INTERNAL --auto \
            --output $EXTERNAL --same-as $INTERNAL --mode `printResolution $RES_EXT_x $RES_EXT_y` \
