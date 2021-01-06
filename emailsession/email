@@ -6,12 +6,12 @@
 #          script in it.
 #          use terminus font instead of standard
 #
-# DATE     14.01.2017
+# DATE     22.12.2020
 # OWNER    Bischofberger
 # ==================================================================
 
 HOST_DESKTOP="desktop"
-HOST_LAPTOP="laptop2"
+HOST_LAPTOP="laptop3"
 
 FONTSIZE_LARGE="18"
 FONTSIZE_MEDIUM="16"
