@@ -13,13 +13,11 @@
 # set the following two according to your system
 # ----------------------------------------------
 INTERNAL="eDP-1"
-EXTERNAL_HDMI="HDMI-1"
-EXTERNAL_VGA="DP1"
+EXTERNAL="HDMI-1"
 # ----------------------------------------------
 
 
 # global vars (will be set automatically later)
-EXTERNAL=""
 RES_INT_x="1"
 RES_INT_y="1"
 RES_INT_LIST=()
@@ -45,7 +43,7 @@ isValidRes(){
 usage(){
 	echo -e "Usage: $0 [OPTION]
 
-Handles dual-monitor setup with suckless dwm.
+Handles dual-monitor setup with suckless dwm-like window managers.
 
 If no argument is given, automatic setup ist being executed. In automatic mode
 a common resolution will be searched by default and activated if user wishes
@@ -86,24 +84,6 @@ fillListOfInternalResolutions(){
 	#						the beginning (see output of xrandr)
 	local res=`xrandr | awk '!/'^\ '/ {++n;next} n<3 {print $1}'`
 	RES_INT_LIST=($res)
-}
-
-# TODO: let choose from HDMI1, HDMI2, DP1, DP2 and so on...
-chooseOutput(){
-  echo "Enter Output option:"
-  echo -e "1\tHDMI\n2\tVGA"
-  read op
-  case "$op" in
-    "1")
-      EXTERNAL="$EXTERNAL_HDMI"
-      ;;
-    "2")
-      EXTERNAL="$EXTERNAL_VGA"
-      ;;
-    *)
-      die "unknown parameter '$op'"
-      ;;
-  esac
 }
 
 fillListOfExternalResolutions(){
@@ -240,7 +220,6 @@ computeScalingFactor(){
 # manually but with some tests
 setup_m(){
 	showAllResolutions
-  chooseOutput
 	getCurrentInternalResolution
 	readDesiredExternalResolution
 	if usePanning ; then
@@ -261,7 +240,6 @@ setup_m(){
 # no tests here
 setup_force(){
 	showAllResolutions
-  chooseOutput
 	getCurrentInternalResolution
 	readDesiredExternalResolution
 	if usePanning ; then
@@ -274,7 +252,6 @@ setup_force(){
 # fully automatic
 setup_a(){
   showAllResolutions
-  chooseOutput
   fillListOfInternalResolutions
   fillListOfExternalResolutions
   if compareLists ; then
@@ -305,7 +282,6 @@ setup_a(){
 
 setup_scale(){
   showAllResolutions
-  chooseOutput
   fillListOfInternalResolutions
   fillListOfExternalResolutions
   getHighestInternalResolutionFromList  # TODO: to be simplified...
