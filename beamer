@@ -5,15 +5,15 @@
 # INFO     handles resolution in multi-monitor setup with dwm-type
 #					 window managers when mirroring is involved
 #
-# DATE     10.09.2020
+# DATE     03.03.2021
 # OWNER    Bischofberger
 # ==================================================================
 
 
 # set the following two according to your system
 # ----------------------------------------------
-INTERNAL="eDP1"
-EXTERNAL_HDMI="HDMI1"
+INTERNAL="eDP-1"
+EXTERNAL_HDMI="HDMI-1"
 EXTERNAL_VGA="DP1"
 # ----------------------------------------------
 
