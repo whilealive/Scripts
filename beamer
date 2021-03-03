@@ -45,20 +45,22 @@ usage(){
 
 Handles dual-monitor setup with suckless dwm-like window managers.
 
-If no argument is given, automatic setup ist being executed. In automatic mode
-a common resolution will be searched by default and activated if user wishes
-to.  If there is no match and hightest external is higher than internal
-resolution, panning mode will be activated.\n
-Note, that by now (03.2016) there is no proper way to get out of panning mode.
-You must kill the Xserver to do so.\n\
+If no argument is given, the xrandr \"scale\" option is used to downscale 
+the lower resolution from the higher one.
 
--h, --help            Show this help.
--m, --manually        Manually enter desired external monitor resolution.
-                      Additional size checks give extra security in this mode.
--f, --force           Same as the \"-m\"-flag but no size checks here.
--s, --scale           Some different approach here: use the xrandr \"scale\" option
-                      to downscale the smaller resolution from the larger
--d, --deactivate      Get out of dual-mode. (not working properly for panning yet)
+-h, --help          Show this help.
+-a, --auto          Automatic setup ist being executed. In automatic mode
+                    a COMMON RESOLUTION will be searched by default and 
+                    activated on both screens. If there is no match and 
+                    hightest external is higher than internal resolution, 
+                    panning mode will be activated.\n
+                    Note, that by now (03.2016) there is no proper way to 
+                    get out of panning mode. You must kill the Xserver to do so.\n\
+-m, --manual        Same as auto but manually enter desired external monitor 
+                    resolution. Additional size checks give extra security in 
+                    this mode.
+-f, --force         Same as the \"-m\"-flag but no size checks here.
+-d, --deactivate    Get out of dual-mode. (not working properly for panning yet)
 "
 }
 
@@ -217,7 +219,7 @@ computeScalingFactor(){
   eval "SCALING_FACTOR_xy[1]="$(echo "$2/$4" | bc -l)""
 }
 
-# manually but with some tests
+# manual but with some tests
 setup_m(){
 	showAllResolutions
 	getCurrentInternalResolution
@@ -308,21 +310,21 @@ setup_scale(){
 # Main ------------------------------------------------
 
 if [ -z "$1" ] ; then
-  # if no argument is given do automatic setup
-  setup_a
+  # if no argument is given do scaling
+  setup_scale
   exit 0
 fi
 
 # handle options
 case "$1" in
-  "-m"|"--manually")
+  "-a"|"--auto")
+    setup_a
+    ;;
+  "-m"|"--manual")
     setup_m
     ;;
   "-f"|"--force")
     setup_force
-    ;;
-  "-s"|"--scale")
-    setup_scale
     ;;
   "-h"|"--help")
     usage
@@ -331,7 +333,7 @@ case "$1" in
     xrandr_deactivateDualMode
     ;;
   *)
-    echo "usage: $0 [-m|--manually] [-f|--force] [-d|--deactivate] [-h|--help]"
+    echo "usage: $0 [-a|--auto] [-m|--manual] [-f|--force] [-d|--deactivate] [-h|--help]"
     die "unknown parameter '$1'"
     ;;
 esac
