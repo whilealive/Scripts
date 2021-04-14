@@ -1,10 +1,10 @@
 # vim: set ai noet sw=4 ts=4:
 # ==================================================================
-# FILE     Makefile (for Scripts all install)
+# FILE     Makefile
 # MACHINE  all
 # INFO     -
 #
-# DATE     11.04.2019
+# DATE     14.04.2021
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -29,7 +29,8 @@ SCRIPTS = pcsync \
 		  pwdFetch\
 		  bmzAddressImport\
 		  tikzextract\
-		  musicsync
+		  musicsync\
+		  extract
 
 MUTTSESSIONDIR   = emailsession/
 MUTTSCRIPTS      = mbsyncsecure email emailsessioninit

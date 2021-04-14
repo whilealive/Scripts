@@ -1,0 +1,38 @@
+#!/bin/bash
+# ==================================================================
+# FILE     extract
+# MACHINE  all
+# INFO     extract all types of compressed files
+#
+# DATE     14.04.2021
+# OWNER    Bischofberger
+# ==================================================================
+
+die() {
+  echo -e "$0: Error: $1" >&2
+  exit 1
+}
+
+for file in "$@" ; do
+  if [ -f "$file" ] ; then
+    case "$file" in
+      *.tar.bz2)   tar xvjf "$file"                           ;;
+      *.tar.gz)    tar xvzf "$file"                           ;;
+      *.tar.xz)    tar xvJf "$file"                           ;;
+      *.bz2)       bunzip2 "$file"                            ;;
+      *.rar)       unrar x "$file"                            ;;
+      *.gz)        gunzip "$file"                             ;;
+      *.tar)       tar xvf "$file"                            ;;
+      *.tbz2)      tar xvjf "$file"                           ;;
+      *.tgz)       tar xvzf "$file"                           ;;
+      *.zip)       unzip -d "${file%.*}" "$file"              ;;
+      *.Z)         uncompress "$file"                         ;;
+      *.7z)        7z x "$file"                               ;;
+      *.xz)        unxz "$file"                               ;;
+      *.exe)       cabextract "$file"                         ;;
+      *)           die "$file: unrecognized file compression" ;;
+    esac
+  else
+    die "$file is not a valid file"
+  fi
+done
