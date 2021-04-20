@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     14.04.2021
+# DATE     20.04.2021
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -19,7 +19,6 @@ SCRIPTS = pcsync \
 		  statemall \
 		  pdfpsize \
 		  pdfpextr\
-		  pdfTojpg\
 		  beamer\
 		  screenshot\
 		  notesd\
@@ -28,9 +27,8 @@ SCRIPTS = pcsync \
 		  texlogfilefilter\
 		  pwdFetch\
 		  bmzAddressImport\
-		  tikzextract\
 		  musicsync\
-		  extract
+		  extract\
 
 MUTTSESSIONDIR   = emailsession/
 MUTTSCRIPTS      = mbsyncsecure email emailsessioninit
