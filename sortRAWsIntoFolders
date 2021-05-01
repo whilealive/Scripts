@@ -6,7 +6,7 @@
 #          of the form "year-month" according to their CreateDate.
 #          Makes use of exiftool.
 #
-# DATE     20.04.2021
+# DATE     01.05.2021
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -21,6 +21,7 @@ for file in "$@" ; do
     YEAR="$(echo "$FULLDATE" | awk -F ":" '{print $1}')"
     MONTH="$(echo "$FULLDATE" | awk -F ":" '{print $2}')"
     FOLDER="$YEAR"-"$MONTH"
+    echo "$file -> $FOLDER"
     mkdir -p "$FOLDER"
     mv "$file" "$FOLDER"
   else
