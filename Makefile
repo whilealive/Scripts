@@ -4,14 +4,13 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     20.04.2021
+# DATE     02.05.2021
 # OWNER    Bischofberger
 # ==================================================================
 
 PREFIX:=/usr/local
 
 SCRIPTS = pcsync \
-		  trash \
 		  vol \
 		  snippy \
 		  clipswap \
@@ -26,9 +25,9 @@ SCRIPTS = pcsync \
 		  texsessioninit\
 		  texlogfilefilter\
 		  pwdFetch\
-		  bmzAddressImport\
 		  musicsync\
 		  extract\
+		  photosort\
 
 MUTTSESSIONDIR   = emailsession/
 MUTTSCRIPTS      = mbsyncsecure email emailsessioninit

@@ -1,12 +1,12 @@
 #!/bin/bash
 # ==================================================================
-# FILE     sortRAWsIntoFolders
+# FILE     photosort
 # MACHINE  all
 # INFO     This one puts all my messy RAW-files into seperate folders
 #          of the form "year-month" according to their CreateDate.
 #          Makes use of exiftool.
 #
-# DATE     01.05.2021
+# DATE     02.05.2021
 # OWNER    Bischofberger
 # ==================================================================
 
