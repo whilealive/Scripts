@@ -1,0 +1,32 @@
+#!/bin/bash
+# ==================================================================
+# FILE     photocollate
+# MACHINE  all
+# INFO     usage: "photocollate [jpg-folder] [raw-folder-uncollated] [raw-collated]
+#
+# DATE     10.05.2021
+# OWNER    Bischofberger
+# ==================================================================
+
+EXT_FUJIRAW="RAF"
+EXT_JPG="JPG"
+
+die() {
+  echo -e "$0: Error: $1" >&2
+  exit 1
+}
+
+for folder in "$@" ; do
+  if [ ! -d "$folder" ] ; then
+    die "$folder is not a folder"
+  fi
+done
+
+for jpgfile in "$1"/* ; do
+  if [ -f "$jpgfile" ] && [[ $(file -b "$jpgfile") =~ JPEG ]] ; then
+    RAWFILE="$(basename "$jpgfile" ."$EXT_JPG").$EXT_FUJIRAW"
+    cp -v "$2/$RAWFILE" "$3/"
+  else
+    die "$jpgfile is not a file"
+  fi
+done
