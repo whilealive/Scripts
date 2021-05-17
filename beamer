@@ -5,7 +5,7 @@
 # INFO     handles resolution in multi-monitor setup with dwm-type
 #					 window managers when mirroring is involved
 #
-# DATE     03.03.2021
+# DATE     17.05.2021
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -142,15 +142,23 @@ xrandr_activateDualMode(){
 
 # TODO: workaround for getting out of panning...
 # FIXME: get out of scale mode when external is base resolution
+#        maybe xrandr -s 0 is the solution to it all...
+# is it really necessary to do a "beamer -d" ? Maybe this can be
+# automated?
+# TODO: test this code with an external that has higher resolution than this screen (1920x1080)!
+#       use "beamer -m" as well
 xrandr_deactivateDualMode(){
-	#xrandr --output $EXTERNAL_VGA --primary
-	#xrandr --output $INTERNAL --primary
+	##xrandr --output $EXTERNAL_VGA --primary
+	##xrandr --output $INTERNAL --primary
 	read -p "Plug out external monitor and press [Enter]."
-  fillListOfInternalResolutions
-  getHighestInternalResolutionFromList
-	xrandr --output $INTERNAL --mode `printResolution $RES_INT_x $RES_INT_y` --scale 1x1 || die "xrandr failure"
-	xrandr >/dev/null
-	xrandr --auto
+  #fillListOfInternalResolutions
+  #getHighestInternalResolutionFromList
+	#xrandr --output $INTERNAL --mode `printResolution $RES_INT_x $RES_INT_y` --scale 1x1 || die "xrandr failure"
+	#xrandr >/dev/null
+	#xrandr --auto
+	xrandr --auto  # disable disconnected outputs
+  xrandr -s 0    # reset internal screen to first available size
+  xrandr --output $INTERNAL --scale 1  # rescale internal to 100%
 }
 
 readDesiredExternalResolution(){
@@ -162,7 +170,7 @@ readDesiredExternalResolution(){
 
 # Test in Funktion scheint nicht zu gehen...
 isExternalGreaterThanInternal(){
-	if (( "$RES_EXT_x" > "$RES_INT_x" && "$RES_EXT_y" > "$RES_INT_y" )) ; then
+	if (( "$RES_EXT_x" > "$RES_INT_x" || "$RES_EXT_y" > "$RES_INT_y" )) ; then
 		return 0  # 0 = true
 	else
 		return 1  # 1 = false
@@ -286,10 +294,9 @@ setup_scale(){
   showAllResolutions
   fillListOfInternalResolutions
   fillListOfExternalResolutions
-  getHighestInternalResolutionFromList  # TODO: to be simplified...
+  getHighestInternalResolutionFromList  # TODO: to be simplified... (get current resolution...)
   getHighestExternalResolutionFromList
-	if (( "$RES_EXT_x" > "$RES_INT_x" || "$RES_EXT_y" > "$RES_INT_y" )) ; then
-  #if isExternalGreaterThanInternal ; then
+  if isExternalGreaterThanInternal ; then
     echo "Scaling mode: external resolution > internal -> using external as base..."
     computeScalingFactor "$RES_EXT_x" "$RES_EXT_y" "$RES_INT_x" "$RES_INT_y" 
     xrandr --output $EXTERNAL --auto \
