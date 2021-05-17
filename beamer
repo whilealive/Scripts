@@ -49,18 +49,16 @@ If no argument is given, the xrandr \"scale\" option is used to downscale
 the lower resolution from the higher one.
 
 -h, --help          Show this help.
+-s, --scale         (Default) Downscale the lower resolution from the higher one.
 -a, --auto          Automatic setup ist being executed. In automatic mode
                     a COMMON RESOLUTION will be searched by default and 
-                    activated on both screens. If there is no match and 
-                    hightest external is higher than internal resolution, 
-                    panning mode will be activated.\n
-                    Note, that by now (03.2016) there is no proper way to 
-                    get out of panning mode. You must kill the Xserver to do so.\n\
+                    activated on both screens. If there is no match one should
+                    use scale-mode (default).\n
 -m, --manual        Same as auto but manually enter desired external monitor 
                     resolution. Additional size checks give extra security in 
                     this mode.
 -f, --force         Same as the \"-m\"-flag but no size checks here.
--d, --deactivate    Get out of dual-mode. (not working properly for panning yet)
+-d, --deactivate    Get out of dual-mode.
 "
 }
 
@@ -125,37 +123,15 @@ compareLists(){
 	return 1  # 1 = false
 }
 
-xrandr_activateDualMode_panning(){
-	xrandr	--output $INTERNAL --mode $RES_INT_MAX --fb $RES_EXT --panning $RES_EXT* \
-					--output $EXTERNAL --mode $RES_EXT --same-as $INTERNAL \
-          || die "xrandr failure"
-	echo "In order to get out of panning mode, you must kill dwm (Mod1-Shift-q)
-				and therefore kill the X-server. (Bug in xrandr, 03.2016)"
-}
-
-xrandr_activateDualMode(){
+xrandr_activateCommonResDualMode(){
 	xrandr --output $EXTERNAL --auto --same-as $INTERNAL --mode `printResolution $RES_EXT_x $RES_EXT_y` \
     || die "xrandr failure"
 	xrandr --output $INTERNAL --mode `printResolution $RES_EXT_x $RES_EXT_y` \
     || die "xrandr failure"
 }
 
-# TODO: workaround for getting out of panning...
-# FIXME: get out of scale mode when external is base resolution
-#        maybe xrandr -s 0 is the solution to it all...
-# is it really necessary to do a "beamer -d" ? Maybe this can be
-# automated?
-# TODO: test this code with an external that has higher resolution than this screen (1920x1080)!
-#       use "beamer -m" as well
 xrandr_deactivateDualMode(){
-	##xrandr --output $EXTERNAL_VGA --primary
-	##xrandr --output $INTERNAL --primary
 	read -p "Plug out external monitor and press [Enter]."
-  #fillListOfInternalResolutions
-  #getHighestInternalResolutionFromList
-	#xrandr --output $INTERNAL --mode `printResolution $RES_INT_x $RES_INT_y` --scale 1x1 || die "xrandr failure"
-	#xrandr >/dev/null
-	#xrandr --auto
 	xrandr --auto  # disable disconnected outputs
   xrandr -s 0    # reset internal screen to first available size
   xrandr --output $INTERNAL --scale 1  # rescale internal to 100%
@@ -190,37 +166,6 @@ isExternalInInternalList(){
 	return 1  # 1 = false
 }
 
-usePanning(){
-	echo "panning? [y|n]"
-	read panning
-	case "$panning" in
-		"y")
-			unset panning
-			return 0  # 0 = true
-			;;
-		"n")
-			unset panning
-			return 1  # 1 = false
-			;;
-		*)
-			die "unknown parameter '$panning"
-			;;
-	esac
-}
-
-automatic_panning(){
-  getCurrentInternalResolution
-  getHighestExternalResolutionFromList
-  if isExternalGreaterThanInternal ; then
-    echo "We are lucky. External resolution is greater than hightest internal."
-    echo "Activating dual-mode with panning..."
-    xrandr_activateDualMode_panning
-  else
-    die "Hightest external resolution (`printResolution $RES_EXT_x $RES_EXT_y`) is smaller than
-    highest internal (`printResolution $RES_INT_x $RES_INT_y`). No solution yet..."
-  fi
-}
-
 # arg1/arg2: base_x/base_y, arg3/arg4: target_x/target_y
 computeScalingFactor(){
   eval "SCALING_FACTOR_xy[0]="$(echo "$1/$3" | bc -l)""
@@ -231,20 +176,12 @@ computeScalingFactor(){
 setup_m(){
 	showAllResolutions
 	getCurrentInternalResolution
-	readDesiredExternalResolution
-	if usePanning ; then
-		if isExternalGreaterThanInternal ; then
-			xrandr_activateDualMode_panning
-		else
-			die "External screen resolution smaller than internal. Panning not allowed."
-		fi
-	else  # no panning
-		if isExternalInInternalList ; then
-			xrandr_activateDualMode
-		else
-			die "No common screen resolution found. Try \"-f|-force\"."
-		fi
-	fi
+  readDesiredExternalResolution
+  if isExternalInInternalList ; then
+    xrandr_activateCommonResDualMode
+  else
+    die "No common screen resolution found. Try \"-f|-force\" or scale-mode (default)."
+  fi
 }
 
 # no tests here
@@ -252,11 +189,7 @@ setup_force(){
 	showAllResolutions
 	getCurrentInternalResolution
 	readDesiredExternalResolution
-	if usePanning ; then
-		xrandr_activateDualMode_panning
-	else
-		xrandr_activateDualMode
-	fi
+  xrandr_activateCommonResDualMode
 }
 
 # fully automatic
@@ -271,22 +204,14 @@ setup_a(){
     case "$answer" in
       "y")
         extractResolution RES_EXT_x RES_EXT_y $COMMON_RES
-        xrandr_activateDualMode
-        ;;
-      "n")
-        echo "Do you want to try panning then? [y|n]"
-        read answer
-        if [[ "$answer" == "y" ]] ; then
-          automatic_panning
-        fi
+        xrandr_activateCommonResDualMode
         ;;
       *)
         die "unknown parameter '$answer"
         ;;
     esac
   else
-    echo "No common resolution found. Taking highest external resolution."
-    automatic_panning
+    die "No common resolution found. Try scale-mode (default)."
   fi
 }
 
@@ -324,6 +249,9 @@ fi
 
 # handle options
 case "$1" in
+  "-s"|"--scale")
+    setup_scale
+    ;;
   "-a"|"--auto")
     setup_a
     ;;
