@@ -5,7 +5,7 @@
 # INFO     handles resolution in multi-monitor setup with dwm-type
 #					 window managers when mirroring is involved
 #
-# DATE     17.05.2021
+# DATE     19.05.2021
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -45,11 +45,12 @@ usage(){
 
 Handles dual-monitor setup with suckless dwm-like window managers.
 
-If no argument is given, the xrandr \"scale\" option is used to downscale 
-the lower resolution from the higher one.
+If no argument is given, the \"--scale\" option will be performed.
 
 -h, --help          Show this help.
--s, --scale         (Default) Downscale the lower resolution from the higher one.
+-s, --scale         (Default) Down- or upscale one resolution from the other.
+                    Lets the user choose an \"origin\" - this will be the
+                    output that won't get scaled.
 -a, --auto          Automatic setup ist being executed. In automatic mode
                     a COMMON RESOLUTION will be searched by default and 
                     activated on both screens. If there is no match one should
@@ -94,7 +95,7 @@ fillListOfExternalResolutions(){
 extractResolution(){
 	eval "$1="$(echo $3 | awk -F "x" '{print $1}')""
 	eval "$2="$(echo $3 | awk -F "x" '{print $2}')""
-	if !(isValidRes ${!1} && isValidRes ${!2}) ; then
+	if ! (isValidRes ${!1} && isValidRes ${!2}) ; then
 		die "failed to extract resolution: ${!1} x ${!2}."
 	fi
 }
@@ -142,15 +143,6 @@ readDesiredExternalResolution(){
 	read res  # local not possible due to "read"
   extractResolution RES_EXT_x RES_EXT_y $res
 	unset res
-}
-
-# Test in Funktion scheint nicht zu gehen...
-isExternalGreaterThanInternal(){
-	if (( "$RES_EXT_x" > "$RES_INT_x" || "$RES_EXT_y" > "$RES_INT_y" )) ; then
-		return 0  # 0 = true
-	else
-		return 1  # 1 = false
-	fi
 }
 
 isExternalInInternalList(){
@@ -207,7 +199,7 @@ setup_a(){
         xrandr_activateCommonResDualMode
         ;;
       *)
-        die "unknown parameter '$answer"
+        die "unknown parameter $answer"
         ;;
     esac
   else
@@ -221,22 +213,32 @@ setup_scale(){
   fillListOfExternalResolutions
   getHighestInternalResolutionFromList  # TODO: to be simplified... (get current resolution...)
   getHighestExternalResolutionFromList
-  if isExternalGreaterThanInternal ; then
-    echo "Scaling mode: external resolution > internal -> using external as base..."
-    computeScalingFactor "$RES_EXT_x" "$RES_EXT_y" "$RES_INT_x" "$RES_INT_y" 
-    xrandr --output $EXTERNAL --auto \
-           --output $INTERNAL --same-as $EXTERNAL --mode `printResolution $RES_INT_x $RES_INT_y` \
-           --scale "${SCALING_FACTOR_xy[0]}x${SCALING_FACTOR_xy[1]}" \
-           || die "xrandr (scaling) failure"
+  if (( "$RES_EXT_x" > "$RES_INT_x" || "$RES_EXT_y" > "$RES_INT_y" )) ; then
+    echo "Scaling mode: External resolution ($(printResolution $RES_EXT_x $RES_EXT_y)) is HIGHER than internal ($(printResolution $RES_INT_x $RES_INT_y))."
   else
-    echo "Scaling mode: external resolution <= internal -> using internal as base..."
-    computeScalingFactor "$RES_INT_x" "$RES_INT_y" "$RES_EXT_x" "$RES_EXT_y"
-    xrandr --output $INTERNAL --auto \
-           --output $EXTERNAL --same-as $INTERNAL --mode `printResolution $RES_EXT_x $RES_EXT_y` \
-           --scale "${SCALING_FACTOR_xy[0]}x${SCALING_FACTOR_xy[1]}" \
-           || die "xrandr (scaling) failure"
+    echo "Scaling mode: External resolution ($(printResolution $RES_EXT_x $RES_EXT_y)) is LOWER than internal ($(printResolution $RES_INT_x $RES_INT_y))."
   fi
-  echo "done."
+  echo -e "Choose origin:\n(1) External output\n(2) Internal output"
+  read answer
+  case "$answer" in
+    "1")
+      computeScalingFactor "$RES_EXT_x" "$RES_EXT_y" "$RES_INT_x" "$RES_INT_y" 
+      xrandr --output $EXTERNAL --auto \
+             --output $INTERNAL --same-as $EXTERNAL --mode `printResolution $RES_INT_x $RES_INT_y` \
+             --scale "${SCALING_FACTOR_xy[0]}x${SCALING_FACTOR_xy[1]}" \
+             || die "xrandr (scaling) failure"
+      ;;
+    "2")
+      computeScalingFactor "$RES_INT_x" "$RES_INT_y" "$RES_EXT_x" "$RES_EXT_y"
+      xrandr --output $INTERNAL --auto \
+             --output $EXTERNAL --same-as $INTERNAL --mode `printResolution $RES_EXT_x $RES_EXT_y` \
+             --scale "${SCALING_FACTOR_xy[0]}x${SCALING_FACTOR_xy[1]}" \
+             || die "xrandr (scaling) failure"
+      ;;
+    *)
+      die "unknown parameter $answer"
+      ;;
+  esac
 }
 
 # Main ------------------------------------------------
