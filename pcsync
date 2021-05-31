@@ -11,7 +11,7 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     12.04.2019
+# DATE     31.05.2021
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -23,40 +23,40 @@ DRY=""
 FORCE=""
 
 die(){
-    echo -e "$0: Error: $1" >&2
-    exit 1
+  echo -e "$0: Error: $1" >&2
+  exit 1
 }
 
 # just a message
 nothing_done(){
-    echo -e "\nEither answered \"no\" or invalid input."
-    echo "Nothing will be done."
-    exit 1
+  echo -e "\nEither answered \"no\" or invalid input."
+  echo "Nothing will be done."
+  exit 1
 }
 
 # create remote data folder if not existent
 # $STATUSFILE   (for extra protection)
 # $INCLUDEFILE  (for rsync)
 check_remote_data_folder() {
-    if [ -d "$REMOTE/pcsync_data" ] ; then
-        echo -e "\nUsing existing folder $REMOTE/pcsync_data.\n"
-    else
-        echo -e -n "\nFolder $REMOTE/pcsync_data not existent. Making one...."
-        mkdir "$REMOTE/pcsync_data"
-        echo -e "done.\n"
-    fi
+  if [ -d "$REMOTE/pcsync_data" ] ; then
+    echo -e "\nUsing existing folder $REMOTE/pcsync_data.\n"
+  else
+    echo -e -n "\nFolder $REMOTE/pcsync_data not existent. Making one...."
+    mkdir "$REMOTE/pcsync_data"
+    echo -e "done.\n"
+  fi
 
-    mkdir "$REMOTE/pcsync_extra" 2>/dev/null
-    STATUSFILE="$REMOTE/pcsync_extra/pcsync-statusfile.txt"
-    INCLUDEFILE="$REMOTE/pcsync_extra/pcsync-inclexcl.txt"
-    REMOTE="$REMOTE/pcsync_data"
+  mkdir "$REMOTE/pcsync_extra" 2>/dev/null
+  STATUSFILE="$REMOTE/pcsync_extra/pcsync-statusfile.txt"
+  INCLUDEFILE="$REMOTE/pcsync_extra/pcsync-inclexcl.txt"
+  REMOTE="$REMOTE/pcsync_data"
 }
 
 create_statusfile(){
-    if [ ! -f "$STATUSFILE" ] ; then
-        echo -n "There is no statusfile. Creating one..."
-        touch "$STATUSFILE"
-        cat > "$STATUSFILE" <<'EOF'
+  if [ ! -f "$STATUSFILE" ] ; then
+    echo -n "There is no statusfile. Creating one..."
+    touch "$STATUSFILE"
+    cat > "$STATUSFILE" <<'EOF'
 # ==================================================================
 # FILE     pcsync-statusfile
 # MACHINE  all
@@ -69,25 +69,25 @@ create_statusfile(){
 # last action:
 LAST_RUN="init"
 EOF
-        echo "done."
-    fi
+echo "done."
+  fi
 }
 
 # allowed arguments: "up"/"down"
 update_statusfile(){
-    if [ -n "$1" ] ; then
-        sed -i s/^LAST_RUN\=.*/LAST_RUN\="$1"/ "$STATUSFILE"  # reset LAST_RUN variable
-    fi
+  if [ -n "$1" ] ; then
+    sed -i s/^LAST_RUN\=.*/LAST_RUN\="$1"/ "$STATUSFILE"  # reset LAST_RUN variable
+  fi
 
 }
 
 check_includefile() {
-    if [ ! -e "$INCLUDEFILE" ] ; then
-        die "pcsync is a rsync wrapper. Therefore it needs a proper includefile to work.
-               Create a file called \"$INCLUDEFILE\" 
-               according to the rsync includefile specifications and run pcsync
-               again."
-    fi
+  if [ ! -e "$INCLUDEFILE" ] ; then
+    die "pcsync is a rsync wrapper. Therefore it needs a proper includefile to work.
+    Create a file called \"$INCLUDEFILE\" 
+    according to the rsync includefile specifications and run pcsync
+    again."
+  fi
 }
 
 
@@ -99,30 +99,30 @@ check_includefile() {
 
 # handle options
 while [ -n "$1" ]; do
-    case "$1" in
-        "-n"|"--dry-run")
-            echo "rsync in dry-run mode"
-            DRY="-n"
-            shift;;
-        "-f"|"--force")
-            FORCE="-f"
-            shift;;
-        *)
-            echo "usage: $0 [-n|--dry-run] [-f|--force]"
-            die "unknown parameter '$1'"
-            ;;
-    esac
+  case "$1" in
+    "-n"|"--dry-run")
+      echo "rsync in dry-run mode"
+      DRY="-n"
+      shift;;
+    "-f"|"--force")
+      FORCE="-f"
+      shift;;
+    *)
+      echo "usage: $0 [-n|--dry-run] [-f|--force]"
+      die "unknown parameter '$1'"
+      ;;
+  esac
 done
 
 # better ask twice...
 echo -n "Syncup (up) or Syncdown (down)? "
 read answer
 if [[ $answer == up ]] ; then
-    DIRECTION=up
+  DIRECTION=up
 elif [[ $answer == down ]] ; then
-    DIRECTION=down
+  DIRECTION=down
 else
-    nothing_done
+  nothing_done
 fi
 
 # set the paths
@@ -143,29 +143,27 @@ check_remote_data_folder
 create_statusfile
 source "$STATUSFILE"
 if [[ $DIRECTION == up && $LAST_RUN == up && $FORCE != -f ]] ; then
-    die "You must sync down since your last sync direction was up.
-         Use the \"-f\" option to force direction."
+  die "You must sync down since your last sync direction was up.
+  Use the \"-f\" option to force direction."
 fi
 if [[ $DIRECTION == down && $LAST_RUN == down && $FORCE != -f ]] ; then
-    die "You must sync up since your last sync direction was down
-         Use the \"-f\" option to force direction."
+  die "You must sync up since your last sync direction was down
+  Use the \"-f\" option to force direction."
 fi
 
 # sync
 check_includefile
 if [[ $DIRECTION == up ]] ; then
-    rsync -avu --delete $DRY --include-from="$INCLUDEFILE" "$HOME/" "$REMOTE/" \
-        || die "rsync error"
+  rsync -avu --delete $DRY --include-from="$INCLUDEFILE" "$HOME/" "$REMOTE/" || die "rsync error"
 elif [[ $DIRECTION == down ]] ; then
-    rsync -avu --delete $DRY --include-from="$INCLUDEFILE" "$REMOTE/" "$HOME/" \
-        || die "rsync error"
+  rsync -avu --delete $DRY --include-from="$INCLUDEFILE" "$REMOTE/" "$HOME/" || die "rsync error"
 else
-    die "direction unknown."
+  die "direction unknown."
 fi
 
 # update statusfile
 if [[ $DRY != -n ]] ; then
-    update_statusfile $DIRECTION
+  update_statusfile $DIRECTION
 fi
 
 # end of sync
