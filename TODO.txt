@@ -10,7 +10,6 @@
 ----
 TODO
 ----
-- pcsync: let "up|down" be given as optional argument, keep -n -f
 - pcsync: include "-h" option for some help
 - backup: backing up of vbox is broken (has never been working), vboxes need to be detached first...
 
@@ -19,3 +18,4 @@ TODO
 ----
 DONE
 ----
+- pcsync: let "up|down" be given as optional argument, keep -n -f

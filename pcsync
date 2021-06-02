@@ -27,13 +27,6 @@ die(){
   exit 1
 }
 
-# just a message
-nothing_done(){
-  echo -e "\nEither answered \"no\" or invalid input."
-  echo "Nothing will be done."
-  exit 1
-}
-
 # create remote data folder if not existent
 # $STATUSFILE   (for extra protection)
 # $INCLUDEFILE  (for rsync)
@@ -97,9 +90,17 @@ check_includefile() {
 ## main script starts here ##
 #############################
 
+DIRECTION=""
+
 # handle options
 while [ -n "$1" ]; do
   case "$1" in
+    "up")
+      DIRECTION=up
+      break;;
+    "down")
+      DIRECTION=down
+      break;;
     "-n"|"--dry-run")
       echo "rsync in dry-run mode"
       DRY="-n"
@@ -108,21 +109,25 @@ while [ -n "$1" ]; do
       FORCE="-f"
       shift;;
     *)
-      echo "usage: $0 [-n|--dry-run] [-f|--force]"
+      echo "usage: $0 [-n|--dry-run] [-f|--force] [up|down]"
       die "unknown parameter '$1'"
       ;;
   esac
 done
 
-# better ask twice...
-echo -n "Syncup (up) or Syncdown (down)? "
-read answer
-if [[ $answer == up ]] ; then
-  DIRECTION=up
-elif [[ $answer == down ]] ; then
-  DIRECTION=down
-else
-  nothing_done
+# if no argument "up|down" was given, ask for direction
+if [[ "$DIRECTION" != up && "$DIRECTION" != down ]] ; then 
+  echo -n "Syncup (up) or Syncdown (down)? "
+  read answer
+  if [[ $answer == up ]] ; then
+    DIRECTION=up
+  elif [[ $answer == down ]] ; then
+    DIRECTION=down
+  else
+    echo -e "\nEither answered \"no\" or invalid input."
+    echo "Nothing will be done."
+    exit 1
+  fi
 fi
 
 # set the paths
