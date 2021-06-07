@@ -4,15 +4,13 @@
 # MACHINE  all
 # INFO     rsnapshot wrapper
 #
-# DATE     19.03.2019
+# DATE     02.06.2021
 # OWNER    Bischofberger
 # ==================================================================
 
 CONFIGS="$HOME/Scripts/data"
 
 # local
-LOCAL_VBOX="/$HOME/VirtualBox-VMs/"
-LOCAL_VBOX_BACKUP="/run/media/desktop/BackupDesktop/VirtualBox-VMs/"
 LOCAL_CONFIGFILE="$CONFIGS/rsnapshot_local.conf"
 
 # bmz
@@ -33,26 +31,8 @@ backitup() {
   sudo rsnapshot -c "$1" "$2"
 }
 
-vboxsync() {
-  rsync -avu --exclude=lost+found "$LOCAL_VBOX" "$LOCAL_VBOX_BACKUP"
-}
-
 privatebackup() {
-  echo "Enter backup option:"
-  echo -e "1\tquick\n2\tfull"
-  read op
-  case "$op" in
-    "1")  # quick
-      backitup "$LOCAL_CONFIGFILE" "alpha" || return 1  # 0 = true, 1 = false
-      ;;
-    "2")  # full
-      backitup "$LOCAL_CONFIGFILE" "alpha" || return 1  # 0 = false, 1 = false
-      vboxsync || return 1
-      ;;
-    *)
-      die "unknown parameter '$op'"
-      ;;
-  esac
+  backitup "$LOCAL_CONFIGFILE" "alpha" || return 1  # 0 = true, 1 = false
 }
 
 create_statusfile() {
