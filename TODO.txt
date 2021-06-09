@@ -3,19 +3,19 @@
 # INFO     Scripts/TODO.txt
 #          A list of TODOs, Bugfixes etc. for my bash scripts
 #
-# DATE     07.06.2021
+# DATE     09.06.2021
 # OWNER    Bischofberger
 # ==================================================================
 
 ----
 TODO
 ----
-- pcsync: include "-h" option for some help
 
 
 
 ----
 DONE
 ----
-- pcsync: let "up|down" be given as optional argument, keep -n -f
+- pcsync: include "-h" option for some help
 - backup: backing up of vbox is broken (has never been working), vboxes need to be detached first... Therefore, remove vbox backup option
+- pcsync: let "up|down" be given as optional argument, keep -n -f

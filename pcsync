@@ -7,11 +7,13 @@
 #          - USB stick in ext4-format needs user rights after 
 #            formatting: cd /run/media/, login as root with su, 
 #            chown -R $(hostname):users $(hostname)
+#          - If the external harddrive is named "transfer"
+#            it will speed up things a bit.
 #          - NOTE: It is assumed that all participating users are 
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     31.05.2021
+# DATE     09.06.2021
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -25,6 +27,23 @@ FORCE=""
 die(){
   echo -e "$0: Error: $1" >&2
   exit 1
+}
+
+usage(){
+	echo -e "Usage: $0 [OPTION] [up|down]
+
+Syncs stuff from external to internal harddrive and back using rsync.
+
+If the external harddrive is named \"transfer\" it will speed up things a bit.
+External harddrive in ext4-format needs user rights after formatting.
+It is assumed that all participating users are members of the group "users".
+
+-h, --help          show this help.
+-n, --dry-run       rsync in dry-run mode
+-f, --force         force sync, even if it contradicts direction check
+up                  sync up   (from internal to external)
+down                sync down (from external to internal)
+"
 }
 
 # create remote data folder if not existent
@@ -108,6 +127,9 @@ while [ -n "$1" ]; do
     "-f"|"--force")
       FORCE="-f"
       shift;;
+    "-h"|"--help")
+      usage
+      exit 0;;
     *)
       echo "usage: $0 [-n|--dry-run] [-f|--force] [up|down]"
       die "unknown parameter '$1'"
