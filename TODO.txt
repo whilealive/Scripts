@@ -10,6 +10,8 @@
 ----
 TODO
 ----
+- photosort: sort by camera model
+- photosort: video sorting
 
 
 

@@ -5,29 +5,30 @@ Some shell scripts
 #### emailsession/
 - folder consists of some bash scripts to start a mutt/mbsync session with gpg key security in a tmux window
 
-#### pcsync
-- rsync script for synchronizing my machines through an USB stick
+#### backup
+- rsnapshot wrapper
 
 #### beamer
-- tries to handle multi-monitor setup (mirror) with dwm through xrandr
-- Possible setups 
-  1. *there exists a common (and reasonnably high) resolution between external and laptop monitor*<br>
-  this is being handled well without further tweaking by dwm [suckless.org/multi-monitor](http://dwm.suckless.org/multi-monitor)
-  2. *external resolution is higher (in x and y) than laptop screen*<br>
-  only acceptable way I know of by now is the xrandr "panning" mode which works quite nicely. However, there seems to be a bug [Bug #1326688](https://bugs.launchpad.net/ubuntu/+source/xorg-server/+bug/1326688) which prevents from getting out of panning mode. Therefore we must quit dwm (which quits xserver) and restart it with startx.
-  3. *external resolution is smaller (in x or y) than laptop screen*<br>
-  hasn't happened yet, no solution yet.
+- tries to handle multi-monitor setup (mirror) with awesome wm through xrandr
 - type `beamer --help` to get all the options
 
-#### albumartinflac
-- includes albumart in .flac files
-- uses "metaflac" program
-- How it works:
-  1. save album cover as "cover.jpg" in album folder
-  2. run: albumartinflac /path/to/album/
-
 #### clipswap
-- swap PRIMARY and CLIPBOARD
+- use xclip to swap PRIMARY and CLIPBOARD
+
+#### downsizeAlbumCovers
+- downsizes all cover.jpg files (basicly for my bandcamp downloads) to a reasonable size
+
+#### extract
+- unzip, unrar etc.
+
+#### musicsync
+- sync music folders to external flash drives, hds etc.
+
+#### notesd
+- handle text notes by dmenu and st
+
+#### pcsync
+- rsync wrapper for synchronizing my two machines through a simple (and portable) USB stick
 
 #### pdfpextr
 - extract pages from pdf files
@@ -38,11 +39,12 @@ Some shell scripts
 #### pdfTojpg
 - convert multiple page pdf file to jpg's
 
-#### trash
-- ~/.trash/ folder support
+#### photocollate
+- too hard to explain, check out code
 
-#### vol
-- volume handling with pulseaudio
+#### photosort
+- This one puts all my messy RAW-files into seperate folders of the form "year-month" according to their CreateDate.
+- Makes use of exiftool.
 
 #### pushemall/statemall
 - push to or get status of all my repos at github at once
@@ -58,21 +60,8 @@ Some shell scripts
   - send message to all clients
   - (...)
 
-#### musicsync/
-- sync my volumio instances
-- sync SD cards for my mobile player
-
 #### screenshot
 - uses imagemagick to capture screenshots
-
-#### backup
-- just some rsnapshot wrapper
-
-#### downsizeAlbumCovers
-- downsize album covers to a volumio-suitable format
-
-#### notesd
-- handle text notes by dmenu and st
 
 #### texsessioninit
 - just some tmux command to open a latex session on a specific awesome-wm tag
@@ -80,3 +69,7 @@ Some shell scripts
 ### tikzextract
 - extract all tikz environments in a .tex file and put it into a seperate compilable file
 - compile the output file with latexmk
+
+#### vol
+- volume handling with pulseaudio
+
