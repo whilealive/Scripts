@@ -7,7 +7,7 @@
 #          also syncs calendars and contacts
 # DEPENDS  mbsync, vdirsyncer
 #
-# DATE     11.07.2020
+# DATE     25.07.2021
 # OWNER    Bischofberger
 # ==================================================================
 # IDEA: folder watch (there might never be a good implemenation for this)
@@ -23,7 +23,7 @@ period_sec=60
 
 # an array of inbox paths
 INBOX=("$HOME/Maildir/fastmail/INBOX/new/" \
-       "$HOME/Maildir/bmz/INBOX/new/" \
+       #"$HOME/Maildir/bmz/INBOX/new/" \
        )
 
 UNREAD=()  # number of unread messages before syncing
@@ -62,10 +62,11 @@ checkNewMail() {
 outputMailStatus() {
   # output some information to console (ATTENTION: adjust array indices manually here!!!)
 	echo -e "\\nFastmail new:         ${NEW[0]}"
-	echo -e   "BMZ new:              ${NEW[1]}"
+	#echo -e   "BMZ new:              ${NEW[1]}"
 
   # output some information to awesome titlebar
-  local AWESOME_INFO=" [${NEW[0]}|${NEW[1]}] "
+  #local AWESOME_INFO=" [${NEW[0]}|${NEW[1]}] "
+  local AWESOME_INFO=" [mail ${NEW[0]}] "
   printMessageToAwesome "$AWESOME_INFO"
 
   # audio/tmux mail alert
