@@ -7,7 +7,7 @@
 #          also syncs calendars and contacts
 # DEPENDS  mbsync, vdirsyncer
 #
-# DATE     25.07.2021
+# DATE     27.07.2021
 # OWNER    Bischofberger
 # ==================================================================
 # IDEA: folder watch (there might never be a good implemenation for this)
@@ -24,7 +24,7 @@ period_sec=60
 # an array of inbox paths
 INBOX=("$HOME/Maildir/fastmail/INBOX/new/" \
        #"$HOME/Maildir/bmz/INBOX/new/" \
-       )
+      )
 
 UNREAD=()  # number of unread messages before syncing
 NEW=()     # number of new messages after syncing
@@ -35,16 +35,6 @@ done
 
 
 # functions ========================================================
-
-# helper: print some text into awesome title bar
-printMessageToAwesome() {
-  echo -e "myemailwidget.text = '$1'" | awesome-client
-}
-
-# audio/tmux mail alert
-mailAlert() {
-	f_tmux_DisplayMessageAllClients "You've got mail!"
-}
 
 # count messages in $2 and save number in $1
 countMessages() {
@@ -64,15 +54,10 @@ outputMailStatus() {
 	echo -e "\\nFastmail new:         ${NEW[0]}"
 	#echo -e   "BMZ new:              ${NEW[1]}"
 
-  # output some information to awesome titlebar
-  #local AWESOME_INFO=" [${NEW[0]}|${NEW[1]}] "
-  local AWESOME_INFO=" [mail ${NEW[0]}] "
-  printMessageToAwesome "$AWESOME_INFO"
-
-  # audio/tmux mail alert
+  # tmux mail alert
   for index in "${!NEW[@]}" ; do
     if [[ "${NEW[index]}" -gt 0 && "${NEW[index]}" != "${UNREAD[index]}" ]] ; then
-      mailAlert
+      f_tmux_DisplayMessageAllClients "You've got mail!"
       break
     fi
   done
@@ -91,7 +76,6 @@ outputMailStatus() {
 # bring it all together
 syncMail() {
 	echo -e "\nrunning mbsync..."
-  printMessageToAwesome " [running mbsync...] "
 
 	# count unread messages before sync
   for index in "${!INBOX[@]}" ; do
@@ -108,7 +92,6 @@ syncMail() {
 # use vdirsyncer to sync contacts and calendars
 syncContactsAndCalendars() {
   echo "running vdirsyncer..."
-  printMessageToAwesome " [running vdirsyncer...] "
   vdirsyncer sync
 }
 
@@ -132,7 +115,6 @@ do
 
 	# quit script
 	if [[ "$input" == q ]] ; then
-    printMessageToAwesome " [email] "
 		break
 	fi
 done
