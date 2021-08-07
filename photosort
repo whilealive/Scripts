@@ -1,0 +1,78 @@
+#!/bin/bash
+# ==================================================================
+# FILE     photosort
+# MACHINE  all
+# INFO     This one puts all my messy RAW-files into seperate folders
+#          of the form "year-month" or "CameraModel" according to their 
+#          CreateDate or Model.
+#          Makes use of exiftool.
+#
+# DATE     07.08.2021
+# OWNER    Bischofberger
+# ==================================================================
+
+die() {
+  echo -e "$0: Error: $1" >&2
+  exit 1
+}
+
+moveFileToFolder() {
+  echo "$1 -> $2"
+  mkdir -p "$2"
+  mv "$1" "$2"
+}
+
+photoDateSort() {
+  if [ -f "$1" ] ; then
+    local FULLDATE="$(exiftool -CreateDate "$1" | awk '{print $4; exit}')"
+    local YEAR="$(echo "$FULLDATE" | awk -F ":" '{print $1}')"
+    local MONTH="$(echo "$FULLDATE" | awk -F ":" '{print $2}')"
+    local FOLDER="$YEAR"-"$MONTH"
+    moveFileToFolder "$1" "$FOLDER"
+  else
+    echo "$file is not a valid file. Skipping."
+  fi
+}
+
+photoModelSort() {
+  if [ -f "$1" ] ; then
+    local FOLDER="$(exiftool -Model "$1" | awk '{print $5; exit}')"
+    moveFileToFolder "$1" "$FOLDER"
+  else
+    echo "$file is not a valid file. Skipping."
+  fi
+}
+
+
+
+# ---------------------
+# main part starts here
+
+# if no arguments are given, exit
+if [ -z "$1" ] ; then
+  echo "No arguments given. I'll quit."
+  exit 0
+fi
+
+# if first argument is a file, treat all following arguments as potential files and do photoDateSort as default
+if [ -f "$1" ] ; then
+  for file in "$@" ; do photoDateSort "$file" ; done
+  exit 0
+fi
+
+# first argument is not a file, so check if it's a valid option, e.g. "-d|--date" or "-m|--model"
+# and treat all following arguments as potential files with photoDateSort or photoModelSort
+# depending on the option given.
+case "$1" in
+  "-d"|"--date")
+    shift
+    for file in "$@" ; do photoDateSort "$file" ; done
+    ;;
+  "-m"|"--model")
+    shift
+    for file in "$@" ; do photoModelSort "$file" ; done
+    ;;
+  *)
+    die "unknown parameter '$1'"
+    ;;
+esac
