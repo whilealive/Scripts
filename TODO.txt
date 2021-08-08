@@ -3,7 +3,7 @@
 # INFO     Scripts/TODO.txt
 #          A list of TODOs, Bugfixes etc. for my bash scripts
 #
-# DATE     26.07.2021
+# DATE     08.08.2021
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -11,9 +11,8 @@
 TODO
 ----
 - pcsync: put $hostname in statusfile as "from" and "to"
-- pcsync: print statusfile
-- photomodelsort/photodatesort: merge the two.
 - add a general options/arguments handler to the helper scripts
+- f_diskscan: check if path really exists!
 
 
 
@@ -25,3 +24,5 @@ DONE
 - pcsync: let "up|down" be given as optional argument, keep -n -f
 - photosort: video sorting
 - photosort: sort by camera model
+- photomodelsort/photodatesort: merge the two.
+- pcsync: print statusfile

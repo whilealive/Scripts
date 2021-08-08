@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     syncs stuff from external HD to local HD and back, 
 #          using rsync
-#          - USB stick in ext4-format needs user rights after 
+#          - external drive in ext4-format needs user rights after 
 #            formatting: cd /run/media/, login as root with su, 
 #            chown -R $(hostname):users $(hostname)
 #          - If the external harddrive is named "transfer"
@@ -13,12 +13,17 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     09.06.2021
+# DATE     08.08.2021
 # OWNER    Bischofberger
 # ==================================================================
 
 source "$HOME/Scripts/f_diskscan"
+
 DEFAULT_DISK="transfer"
+DATA_FOLDER="pcsync_data"
+EXTRA_FOLDER="pcsync_extra"
+STATUSFILE="pcsync-statusfile.txt"
+INCLUDEFILE="pcsync-inclexcl.txt"
 
 # default options
 DRY=""
@@ -38,37 +43,50 @@ If the external harddrive is named \"transfer\" it will speed up things a bit.
 External harddrive in ext4-format needs user rights after formatting.
 It is assumed that all participating users are members of the group "users".
 
--h, --help          show this help.
+-h, --help          show this help and exit
 -n, --dry-run       rsync in dry-run mode
 -f, --force         force sync, even if it contradicts direction check
+-s, --status        print statusfile and exit
 up                  sync up   (from internal to external)
 down                sync down (from external to internal)
 "
 }
 
-# create remote data folder if not existent
-# $STATUSFILE   (for extra protection)
-# $INCLUDEFILE  (for rsync)
-check_remote_data_folder() {
-  if [ -d "$REMOTE/pcsync_data" ] ; then
-    echo -e "\nUsing existing folder $REMOTE/pcsync_data.\n"
-  else
-    echo -e -n "\nFolder $REMOTE/pcsync_data not existent. Making one...."
-    mkdir "$REMOTE/pcsync_data"
-    echo -e "done.\n"
+# get the external drive and save its path to CHOSEN_DISK
+connect_to_remote_disk(){
+  if ! f_use_default_disk "$DEFAULT_DISK" ; then
+    f_diskscan
   fi
 
-  mkdir "$REMOTE/pcsync_extra" 2>/dev/null
-  STATUSFILE="$REMOTE/pcsync_extra/pcsync-statusfile.txt"
-  INCLUDEFILE="$REMOTE/pcsync_extra/pcsync-inclexcl.txt"
-  REMOTE="$REMOTE/pcsync_data"
+  if [ -z "$CHOSEN_DISK" ] ; then 
+    die "no disk found"
+  fi
 }
 
-create_statusfile(){
-  if [ ! -f "$STATUSFILE" ] ; then
+# create remote data folder if not existent
+# arg1: path of remote folder to be checked
+check_remote_folder() {
+  if [ -d "$1" ] ; then
+    echo "Using existing folder $1"
+  else
+    echo -n "Folder $1 not existent. Should I create one? [y|n]"
+    read answer
+    if [[ "$answer" == "y" ]] ; then
+      echo "Creating folder $1."
+      mkdir -p "$1" || die "could not create folder $1"
+    else
+      die "Folder $1 must be present to sync."
+    fi
+  fi
+}
+
+load_statusfile(){
+  if [ -f "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE" ] ; then
+    echo "Using existing statusfile $CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE"
+  else
     echo -n "There is no statusfile. Creating one..."
-    touch "$STATUSFILE"
-    cat > "$STATUSFILE" <<'EOF'
+    touch "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE"
+    cat > "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE" <<'EOF'
 # ==================================================================
 # FILE     pcsync-statusfile
 # MACHINE  all
@@ -81,20 +99,45 @@ create_statusfile(){
 # last action:
 LAST_RUN="init"
 EOF
-echo "done."
+  fi
+
+  source "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE" || die "failed to load/create $STATUSFILE"
+  if [[ $DIRECTION == up && $LAST_RUN == up && $FORCE != -f ]] ; then
+    die "You must sync down since your last sync direction was up.
+          Use the \"-f|--force\" option to force direction.
+          Use the \"-s|--status\" option to print the statusfile."
+  fi
+  if [[ $DIRECTION == down && $LAST_RUN == down && $FORCE != -f ]] ; then
+    die "You must sync up since your last sync direction was down
+          Use the \"-f|--force\" option to force direction.
+          Use the \"-s|--status\" option to print the statusfile."
   fi
 }
 
 # allowed arguments: "up"/"down"
 update_statusfile(){
   if [ -n "$1" ] ; then
-    sed -i s/^LAST_RUN\=.*/LAST_RUN\="$1"/ "$STATUSFILE"  # reset LAST_RUN variable
+    sed -i s/^LAST_RUN\=.*/LAST_RUN\="$1"/ "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE"  # reset LAST_RUN variable
   fi
+}
 
+print_statusfile(){
+  echo "printing statusfile on remote disk..."
+  connect_to_remote_disk
+  check_remote_folder "$CHOSEN_DISK/$EXTRA_FOLDER"
+  if [ -f "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE" ] ; then
+    echo -e "statusfile: $CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE\n"
+    cat "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE"
+    echo ""
+  else
+    die "There is no statusfile."
+  fi
 }
 
 check_includefile() {
-  if [ ! -e "$INCLUDEFILE" ] ; then
+  if [ -e "$CHOSEN_DISK/$EXTRA_FOLDER/$INCLUDEFILE" ] ; then
+    echo "Using existing includefile $CHOSEN_DISK/$EXTRA_FOLDER/$INCLUDEFILE"
+  else
     die "pcsync is a rsync wrapper. Therefore it needs a proper includefile to work.
     Create a file called \"$INCLUDEFILE\" 
     according to the rsync includefile specifications and run pcsync
@@ -102,6 +145,15 @@ check_includefile() {
   fi
 }
 
+sync() {
+  if [[ $DIRECTION == up ]] ; then
+    rsync -avu --delete $DRY --include-from="$CHOSEN_DISK/$EXTRA_FOLDER/$INCLUDEFILE" "$HOME/" "$CHOSEN_DISK/$DATA_FOLDER/" || die "rsync error"
+  elif [[ $DIRECTION == down ]] ; then
+    rsync -avu --delete $DRY --include-from="$CHOSEN_DISK/$EXTRA_FOLDER/$INCLUDEFILE" "$CHOSEN_DISK/$DATA_FOLDER/" "$HOME/" || die "rsync error"
+  else
+    die "direction unknown."
+  fi
+}
 
 
 
@@ -127,12 +179,14 @@ while [ -n "$1" ]; do
     "-f"|"--force")
       FORCE="-f"
       shift;;
+    "-s"|"--status")
+      print_statusfile
+      exit 0;;
     "-h"|"--help")
       usage
       exit 0;;
     *)
-      echo "usage: $0 [-n|--dry-run] [-f|--force] [up|down]"
-      die "unknown parameter '$1'"
+      die "Unknown parameter '$1'. Use the -h|--help flag for more information."
       ;;
   esac
 done
@@ -146,47 +200,17 @@ if [[ "$DIRECTION" != up && "$DIRECTION" != down ]] ; then
   elif [[ $answer == down ]] ; then
     DIRECTION=down
   else
-    echo -e "\nEither answered \"no\" or invalid input."
-    echo "Nothing will be done."
+    echo -e "Either answered \"no\" or invalid input."
     exit 1
   fi
 fi
 
-# set the paths
-if ! f_use_default_disk "$DEFAULT_DISK" ; then
-  f_diskscan
-fi
-
-if [ -z "$CHOSEN_DISK" ] ; then 
-  die "no disk found"
-fi
-
-REMOTE="$CHOSEN_DISK"
-
-# handle data folder on remote disk
-check_remote_data_folder
-
-# extra protection through statusfile
-create_statusfile
-source "$STATUSFILE"
-if [[ $DIRECTION == up && $LAST_RUN == up && $FORCE != -f ]] ; then
-  die "You must sync down since your last sync direction was up.
-  Use the \"-f\" option to force direction."
-fi
-if [[ $DIRECTION == down && $LAST_RUN == down && $FORCE != -f ]] ; then
-  die "You must sync up since your last sync direction was down
-  Use the \"-f\" option to force direction."
-fi
-
-# sync
+connect_to_remote_disk
+check_remote_folder "$CHOSEN_DISK/$DATA_FOLDER"
+check_remote_folder "$CHOSEN_DISK/$EXTRA_FOLDER"
+load_statusfile
 check_includefile
-if [[ $DIRECTION == up ]] ; then
-  rsync -avu --delete $DRY --include-from="$INCLUDEFILE" "$HOME/" "$REMOTE/" || die "rsync error"
-elif [[ $DIRECTION == down ]] ; then
-  rsync -avu --delete $DRY --include-from="$INCLUDEFILE" "$REMOTE/" "$HOME/" || die "rsync error"
-else
-  die "direction unknown."
-fi
+sync
 
 # update statusfile
 if [[ $DRY != -n ]] ; then
@@ -194,4 +218,4 @@ if [[ $DRY != -n ]] ; then
 fi
 
 # end of sync
-echo -e "\npcsync ($DIRECTION) successful"
+echo "$0: ($DIRECTION) successful"

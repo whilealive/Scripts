@@ -15,9 +15,10 @@
 #          fi
 #          do something with $CHOSEN_DISK here...
 #
-# DATE     12.04.2019
+# DATE     24.06.2021
 # OWNER    Bischofberger
 # ==================================================================
+# FIXME: check if given path really exists!
 
 CHOSEN_DISK=""
 
@@ -43,8 +44,8 @@ f_use_default_disk() {
     return 1  # 1 = failure
   fi
 
-  echo -n -e "\nPotential disk found: \"$disk\"\nWould you like to use it as remote disk (y|n)? "
-
+  echo "Potential disk found: \"$disk\""
+  echo -n "Would you like to use it as remote disk (y|n)? "
   read answer
   case "$answer" in
     "y") 
