@@ -43,7 +43,8 @@ Some shell scripts
 - too hard to explain, check out code
 
 #### photosort
-- This one puts all my messy RAW-files into seperate folders of the form "year-month" according to their CreateDate.
+- This one puts all my messy RAW-files into seperate folders of the form "year-month" according to their CreateDate. 
+- Optional sorting for camera model etc.
 - Makes use of exiftool.
 
 #### pushemall/statemall
@@ -66,7 +67,7 @@ Some shell scripts
 #### texsessioninit
 - just some tmux command to open a latex session on a specific awesome-wm tag
 
-### tikzextract
+#### tikzextract
 - extract all tikz environments in a .tex file and put it into a seperate compilable file
 - compile the output file with latexmk
 
