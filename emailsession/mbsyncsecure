@@ -3,17 +3,15 @@
 # FILE     mbsyncsecure
 # MACHINE  all
 # INFO     runs mbsync periodically with gpg security
-#          uses tmux to send a mail alert to all windows
 #          also syncs calendars and contacts
 # DEPENDS  mbsync, vdirsyncer
 #
-# DATE     27.07.2021
+# DATE     27.08.2021
 # OWNER    Bischofberger
 # ==================================================================
 # IDEA: folder watch (there might never be a good implemenation for this)
 #       "while true ; do inotifywait -e move -e create -e delete -r Maildir && mbsync -V -a ; done"
 
-source "$HOME/Scripts/f_tmuxHelpers"
 
 # variables ========================================================
 
@@ -53,14 +51,6 @@ outputMailStatus() {
   # output some information to console (ATTENTION: adjust array indices manually here!!!)
 	echo -e "\\nFastmail new:         ${NEW[0]}"
 	#echo -e   "BMZ new:              ${NEW[1]}"
-
-  # tmux mail alert
-  for index in "${!NEW[@]}" ; do
-    if [[ "${NEW[index]}" -gt 0 && "${NEW[index]}" != "${UNREAD[index]}" ]] ; then
-      f_tmux_DisplayMessageAllClients "You've got mail!"
-      break
-    fi
-  done
 
   # output time of last sync to console
 	echo -n -e "\\nlast sync: "
