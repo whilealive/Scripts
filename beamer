@@ -5,7 +5,7 @@
 # INFO     handles resolution in multi-monitor setup with dwm-type
 #					 window managers when mirroring is involved
 #
-# DATE     19.05.2021
+# DATE     27.08.2021
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -135,7 +135,7 @@ xrandr_deactivateDualMode(){
 	read -p "Plug out external monitor and press [Enter]."
 	xrandr --auto  # disable disconnected outputs
   xrandr -s 0    # reset internal screen to first available size
-  xrandr --output $INTERNAL --scale 1  # rescale internal to 100%
+  xrandr --output $INTERNAL --scale 1x1  # rescale internal to 100%
 }
 
 readDesiredExternalResolution(){
