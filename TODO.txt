@@ -3,16 +3,16 @@
 # INFO     Scripts/TODO.txt
 #          A list of TODOs, Bugfixes etc. for my bash scripts
 #
-# DATE     08.08.2021
+# DATE     21.09.2021
 # OWNER    Bischofberger
 # ==================================================================
 
 ----
 TODO
 ----
-- pcsync: put $hostname in statusfile as "from" and "to"
 - add a general options/arguments handler to the helper scripts
 - f_diskscan: check if path really exists!
+- pcsync: put rsync output in extra-file, provide -c|--clear option to flush it
 
 
 
@@ -26,3 +26,4 @@ DONE
 - photosort: sort by camera model
 - photomodelsort/photodatesort: merge the two.
 - pcsync: print statusfile
+- pcsync: put $hostname in statusfile as "from" and "to"

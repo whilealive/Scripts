@@ -13,7 +13,7 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     08.08.2021
+# DATE     20.09.2021
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -98,6 +98,9 @@ load_statusfile(){
 
 # last action:
 LAST_RUN="init"
+LAST_RUN_FROM="init"
+LAST_RUN_TO="init"
+LAST_RUN_DATE="init"
 EOF
   fi
 
@@ -116,9 +119,20 @@ EOF
 
 # allowed arguments: "up"/"down"
 update_statusfile(){
-  if [ -n "$1" ] ; then
-    sed -i s/^LAST_RUN\=.*/LAST_RUN\="$1"/ "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE"  # reset LAST_RUN variable
+  if [[ "$1" != "up" && "$1" != "down" ]] ; then
+    die "unknown direction: $1"
   fi
+  sed -i s/^LAST_RUN\=.*/LAST_RUN\="\"$1\""/ "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE"
+  sed -i s/^LAST_RUN_DATE\=.*/LAST_RUN_DATE\="\"$(date +%d.%m.%Y-%R)\""/ "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE"
+  case "$1" in
+    "up")
+      sed -i s/^LAST_RUN_FROM\=.*/LAST_RUN_FROM\="\"$(hostname)\""/ "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE"
+      sed -i s/^LAST_RUN_TO\=.*/LAST_RUN_TO\="\"__transfer__\""/ "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE"
+      ;;
+    "down")
+      sed -i s/^LAST_RUN_TO\=.*/LAST_RUN_TO\="\"$(hostname)\""/ "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE"
+      ;;
+  esac
 }
 
 print_statusfile(){
