@@ -12,7 +12,6 @@ TODO
 ----
 - add a general options/arguments handler to the helper scripts
 - f_diskscan: check if path really exists!
-- pcsync: put rsync output in extra-file, provide -c|--clear option to flush it
 
 
 
@@ -27,3 +26,4 @@ DONE
 - photomodelsort/photodatesort: merge the two.
 - pcsync: print statusfile
 - pcsync: put $hostname in statusfile as "from" and "to"
+- pcsync: put rsync output in extra-file, provide -c|--clear option to flush it

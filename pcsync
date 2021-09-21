@@ -13,7 +13,7 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     20.09.2021
+# DATE     21.09.2021
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -24,6 +24,8 @@ DATA_FOLDER="pcsync_data"
 EXTRA_FOLDER="pcsync_extra"
 STATUSFILE="pcsync-statusfile.txt"
 INCLUDEFILE="pcsync-inclexcl.txt"
+LOGFILE="pcsync-logfile.txt"
+TIMESTAMP="$(date +%d.%m.%Y-%R)"
 
 # default options
 DRY=""
@@ -123,7 +125,7 @@ update_statusfile(){
     die "unknown direction: $1"
   fi
   sed -i s/^LAST_RUN\=.*/LAST_RUN\="\"$1\""/ "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE"
-  sed -i s/^LAST_RUN_DATE\=.*/LAST_RUN_DATE\="\"$(date +%d.%m.%Y-%R)\""/ "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE"
+  sed -i s/^LAST_RUN_DATE\=.*/LAST_RUN_DATE\="\"$TIMESTAMP\""/ "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE"
   case "$1" in
     "up")
       sed -i s/^LAST_RUN_FROM\=.*/LAST_RUN_FROM\="\"$(hostname)\""/ "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE"
@@ -159,11 +161,16 @@ check_includefile() {
   fi
 }
 
+timestamp_logfile(){
+  echo -e "\n------------------" >> "$CHOSEN_DISK/$EXTRA_FOLDER/$LOGFILE"
+  echo "$TIMESTAMP" >> "$CHOSEN_DISK/$EXTRA_FOLDER/$LOGFILE"
+}
+
 sync() {
   if [[ $DIRECTION == up ]] ; then
-    rsync -avu --delete $DRY --include-from="$CHOSEN_DISK/$EXTRA_FOLDER/$INCLUDEFILE" "$HOME/" "$CHOSEN_DISK/$DATA_FOLDER/" || die "rsync error"
+    rsync -avu --delete $DRY --include-from="$CHOSEN_DISK/$EXTRA_FOLDER/$INCLUDEFILE" "$HOME/" "$CHOSEN_DISK/$DATA_FOLDER/" 2>&1 | tee -a "$CHOSEN_DISK/$EXTRA_FOLDER/$LOGFILE" || die "rsync error"
   elif [[ $DIRECTION == down ]] ; then
-    rsync -avu --delete $DRY --include-from="$CHOSEN_DISK/$EXTRA_FOLDER/$INCLUDEFILE" "$CHOSEN_DISK/$DATA_FOLDER/" "$HOME/" || die "rsync error"
+    rsync -avu --delete $DRY --include-from="$CHOSEN_DISK/$EXTRA_FOLDER/$INCLUDEFILE" "$CHOSEN_DISK/$DATA_FOLDER/" "$HOME/" 2>&1 | tee -a "$CHOSEN_DISK/$EXTRA_FOLDER/$LOGFILE" || die "rsync error"
   else
     die "direction unknown."
   fi
@@ -224,6 +231,7 @@ check_remote_folder "$CHOSEN_DISK/$DATA_FOLDER"
 check_remote_folder "$CHOSEN_DISK/$EXTRA_FOLDER"
 load_statusfile
 check_includefile
+timestamp_logfile
 sync
 
 # update statusfile
