@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     07.08.2021
+# DATE     07.12.2021
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -28,6 +28,7 @@ SCRIPTS = pcsync \
 		  musicsync\
 		  extract\
 		  photosort\
+		  mxergo\
 
 MUTTSESSIONDIR   = emailsession/
 MUTTSCRIPTS      = mbsyncsecure email emailsessioninit

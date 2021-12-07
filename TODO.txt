@@ -3,13 +3,14 @@
 # INFO     Scripts/TODO.txt
 #          A list of TODOs, Bugfixes etc. for my bash scripts
 #
-# DATE     21.09.2021
+# DATE     01.12.2021
 # OWNER    Bischofberger
 # ==================================================================
 
 ----
 TODO
 ----
+- musicsync: update paths
 - add a general options/arguments handler to the helper scripts
 - f_diskscan: check if path really exists!
 
