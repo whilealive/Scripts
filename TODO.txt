@@ -3,14 +3,13 @@
 # INFO     Scripts/TODO.txt
 #          A list of TODOs, Bugfixes etc. for my bash scripts
 #
-# DATE     01.12.2021
+# DATE     08.12.2021
 # OWNER    Bischofberger
 # ==================================================================
 
 ----
 TODO
 ----
-- musicsync: update paths
 - add a general options/arguments handler to the helper scripts
 - f_diskscan: check if path really exists!
 
@@ -28,3 +27,4 @@ DONE
 - pcsync: print statusfile
 - pcsync: put $hostname in statusfile as "from" and "to"
 - pcsync: put rsync output in extra-file, provide -c|--clear option to flush it
+- musicsync: update paths

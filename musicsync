@@ -4,45 +4,24 @@
 # MACHINE  all
 # INFO     USB-disks on Volumio have to be labeled as "Volumiodisk"
 #
-# DATE     12.04.2019
+# DATE     08.12.2021
 # OWNER    Bischofberger
 # ==================================================================
 
-source "$HOME/Scripts/f_diskscan"
 
 # volumio
 VOLUMIO1="192.168.178.29"
 VOLUMIO2="192.168.178.45"
 volumiodiskSSH="/mnt/USB/Volumiodisk/"
 
-INCLUDEFILE_FLAC="$HOME/Scripts/data/musicsync-inclexcl-flac.txt"
-INCLUDEFILE_OGG="$HOME/Scripts/data/musicsync-inclexcl-ogg.txt"
-INCLUDEFILE=""
+INCLUDEFILE="$HOME/Scripts/data/musicsync-inclexcl.txt"
+
 
 die() {
   echo -e "$0: Error: $1" >&2
   exit 1
 }
 
-choose_includefile() {
-  if [[ "$1" == "flac" ]] ; then INCLUDEFILE="$INCLUDEFILE_FLAC" ; return 0 ; fi
-  if [[ "$1" == "ogg" ]]  ; then INCLUDEFILE="$INCLUDEFILE_OGG"  ; return 0 ; fi
-
-  echo -n "sync flac (1) or ogg (2)? "
-  read number
-
-  case "$number" in
-    "1")
-      INCLUDEFILE="$INCLUDEFILE_FLAC"
-      ;;
-    "2")
-      INCLUDEFILE="$INCLUDEFILE_OGG"
-      ;;
-    *)
-      die "invalid option '$answer'"
-      ;;
-  esac
-}
 
 # With $2 we can give rsync some extra options
 syncto() {
@@ -53,9 +32,8 @@ syncto() {
   return 0
 }
 
-sshsync() {
-  choose_includefile "flac"
 
+sshsync() {
   echo -n "syncto \"Volumio-balanced\" (1) or \"Volumio-revox\" (2)? "
   read answer
 
@@ -67,9 +45,9 @@ sshsync() {
   if [[ $answer == 2 ]] ; then syncto "--rsh=ssh volumio@$VOLUMIO2:$volumiodiskSSH" || die "something went wrong" ; fi
 }
 
-usbsync() {
-  choose_includefile
 
+usbsync() {
+  source "$HOME/Scripts/f_diskscan"
   f_diskscan  # declares $CHOSEN_DISK
 
   if [ -n "$CHOSEN_DISK" ] ; then syncto "$CHOSEN_DISK" "--modify-window=1" || die "something went wrong" ; fi
@@ -81,16 +59,16 @@ usbsync() {
 ## main script starts here ##
 #############################
 
-echo -n "SSH (1) or USB (2)? "
+echo -n "USB (1) or SSH (2)? "
 read number
 
 case "$number" in
   "1")
-    sshsync
+    usbsync
     exit 0
     ;;
   "2")
-    usbsync
+    sshsync
     exit 0
     ;;
   *)
