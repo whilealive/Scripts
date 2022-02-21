@@ -64,6 +64,9 @@ Some shell scripts
 #### screenshot
 - uses imagemagick to capture screenshots
 
+#### skriptsplit.lua
+- Lua script to split my school math theory into chapters
+
 #### texsessioninit
 - just some tmux command to open a latex session on a specific awesome-wm tag
 

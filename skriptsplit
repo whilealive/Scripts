@@ -1,0 +1,31 @@
+#!/usr/bin/lua
+-- ==================================================================
+-- FILE      skriptsplit
+-- TYPE      Lua
+-- INFO      Split my school math theory script into chapters
+--           requires a "chapter"-module in the folder containing
+--           the source pdf file
+--
+-- DATE      21.02.2022
+-- OWNER     Bischofberger
+-- ==================================================================
+--
+-- TODO: module als Argument: "skriptsplit chaptersTALS.lua", "skriptsplit chaptersDL.lua" usw.
+
+local chapters = require("chapters")
+
+local function extractChapter(inputFile, from, to, outputFile)
+  local cmd = string.format(
+    "gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER " .. 
+    "-dFirstPage=%s " .. 
+    "-dLastPage=%s " ..
+    "-sOutputFile=%s " ..
+    "%s", 
+    from, to, outputFile, inputFile)
+  os.execute(cmd)
+end
+
+for i=1, #chapters.chapterlist do 
+  extractChapter(chapters.inputfile, chapters.chapterlist[i].range.from, chapters.chapterlist[i].range.to, chapters.chapterlist[i].filename)
+end
+
