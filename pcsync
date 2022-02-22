@@ -13,7 +13,7 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     21.09.2021
+# DATE     21.02.2022
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -168,9 +168,9 @@ timestamp_logfile(){
 
 sync() {
   if [[ $DIRECTION == up ]] ; then
-    rsync -avu --delete $DRY --include-from="$CHOSEN_DISK/$EXTRA_FOLDER/$INCLUDEFILE" "$HOME/" "$CHOSEN_DISK/$DATA_FOLDER/" 2>&1 | tee -a "$CHOSEN_DISK/$EXTRA_FOLDER/$LOGFILE" || die "rsync error"
+    rsync -av --delete $DRY --include-from="$CHOSEN_DISK/$EXTRA_FOLDER/$INCLUDEFILE" "$HOME/" "$CHOSEN_DISK/$DATA_FOLDER/" 2>&1 | tee -a "$CHOSEN_DISK/$EXTRA_FOLDER/$LOGFILE" || die "rsync error"
   elif [[ $DIRECTION == down ]] ; then
-    rsync -avu --delete $DRY --include-from="$CHOSEN_DISK/$EXTRA_FOLDER/$INCLUDEFILE" "$CHOSEN_DISK/$DATA_FOLDER/" "$HOME/" 2>&1 | tee -a "$CHOSEN_DISK/$EXTRA_FOLDER/$LOGFILE" || die "rsync error"
+    rsync -av --delete $DRY --include-from="$CHOSEN_DISK/$EXTRA_FOLDER/$INCLUDEFILE" "$CHOSEN_DISK/$DATA_FOLDER/" "$HOME/" 2>&1 | tee -a "$CHOSEN_DISK/$EXTRA_FOLDER/$LOGFILE" || die "rsync error"
   else
     die "direction unknown."
   fi
