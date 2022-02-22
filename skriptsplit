@@ -1,31 +1,36 @@
-#!/usr/bin/lua
--- ==================================================================
--- FILE      skriptsplit
--- TYPE      Lua
--- INFO      Split my school math theory script into chapters
---           requires a "chapter"-module in the folder containing
---           the source pdf file
---
--- DATE      21.02.2022
--- OWNER     Bischofberger
--- ==================================================================
---
--- TODO: module als Argument: "skriptsplit chaptersTALS.lua", "skriptsplit chaptersDL.lua" usw.
+#!/bin/bash
+# ==================================================================
+# FILE     skriptsplit
+# MACHINE  all
+# INFO     Split my school math theory script into chapters
+#
+# DATE     22.02.2022
+# OWNER    Bischofberger
+# ==================================================================
 
-local chapters = require("chapters")
+die() {
+  echo -e "$0: Error: $1" >&2
+  exit 1
+}
 
-local function extractChapter(inputFile, from, to, outputFile)
-  local cmd = string.format(
-    "gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER " .. 
-    "-dFirstPage=%s " .. 
-    "-dLastPage=%s " ..
-    "-sOutputFile=%s " ..
-    "%s", 
-    from, to, outputFile, inputFile)
-  os.execute(cmd)
-end
+# import chapter file
+if [ -f "$1" ] ; then
+  source "$1"
+else
+  die "missing or invalid argument"
+fi
 
-for i=1, #chapters.chapterlist do 
-  extractChapter(chapters.inputfile, chapters.chapterlist[i].range.from, chapters.chapterlist[i].range.to, chapters.chapterlist[i].filename)
-end
+# check if variables are set in chapter file
+if [ -z "${CHAPTERLIST+x}" ] || [ -z "${INPUTFILE+x}" ] ; then
+  die "given file is corrupted"
+fi
+
+declare -n chapter
+for chapter in "${CHAPTERLIST[@]}" ; do
+  gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER \
+    -dFirstPage=${chapter[1]} \
+    -dLastPage=${chapter[2]} \
+    -sOutputFile="${chapter[0]}" \
+    "$INPUTFILE"
+done
 
