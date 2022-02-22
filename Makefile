@@ -4,14 +4,13 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     21.02.2022
+# DATE     22.02.2022
 # OWNER    Bischofberger
 # ==================================================================
 
 PREFIX:=/usr/local
 
 SCRIPTS = pcsync \
-		  vol \
 		  snippy \
 		  clipswap \
 		  pushemall \

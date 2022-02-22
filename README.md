@@ -64,8 +64,8 @@ Some shell scripts
 #### screenshot
 - uses imagemagick to capture screenshots
 
-#### skriptsplit.lua
-- Lua script to split my school math theory into chapters
+#### skriptsplit
+- split my school math theory into chapters
 
 #### texsessioninit
 - just some tmux command to open a latex session on a specific awesome-wm tag
@@ -73,7 +73,4 @@ Some shell scripts
 #### tikzextract
 - extract all tikz environments in a .tex file and put it into a seperate compilable file
 - compile the output file with latexmk
-
-#### vol
-- volume handling with pulseaudio
 
