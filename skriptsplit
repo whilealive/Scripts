@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     Split my school math theory script into chapters
 #
-# DATE     22.02.2022
+# DATE     23.02.2022
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -25,12 +25,14 @@ if [ -z "${CHAPTERLIST+x}" ] || [ -z "${INPUTFILE+x}" ] ; then
   die "given file is corrupted"
 fi
 
+mkdir -p "$DESTFOLDER"
+
 declare -n chapter
 for chapter in "${CHAPTERLIST[@]}" ; do
   gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER \
-    -dFirstPage=${chapter[1]} \
-    -dLastPage=${chapter[2]} \
-    -sOutputFile="${chapter[0]}" \
-    "$INPUTFILE"
+     -dFirstPage=${chapter[1]} \
+     -dLastPage=${chapter[2]} \
+     -sOutputFile="${chapter[0]}" \
+     "$INPUTFILE"
 done
 
