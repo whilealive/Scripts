@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     Split my school math theory script into chapters
 #
-# DATE     23.02.2022
+# DATE     24.02.2022
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -21,18 +21,26 @@ else
 fi
 
 # check if variables are set in chapter file
-if [ -z "${CHAPTERLIST+x}" ] || [ -z "${INPUTFILE+x}" ] ; then
+if [ -z "${CHAPTERLIST+x}" ] || [ -z "${INPUTFILE+x}" ] || [ -z "${nPages+x}" ] || [ -z "${DESTFOLDER+x}" ] ; then
   die "given file is corrupted"
 fi
 
 mkdir -p "$DESTFOLDER"
 
+# CHAPTERLIST is in reversed order. So the last page of the current chapter
+# (ENDOFCHAPTER) is given by the first page of the previous chapter in the list
+# (which is actually the next one), minus one.
+ENDOFCHAPTER=$nPages
+
 declare -n chapter
+
 for chapter in "${CHAPTERLIST[@]}" ; do
   gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER \
      -dFirstPage=${chapter[1]} \
-     -dLastPage=${chapter[2]} \
+     -dLastPage=$ENDOFCHAPTER \
      -sOutputFile="${chapter[0]}" \
      "$INPUTFILE"
+
+  (( ENDOFCHAPTER=${chapter[1]} - 1 ))
 done
 
