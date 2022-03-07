@@ -2,9 +2,6 @@
 
 Some shell scripts
 
-#### emailsession/
-- folder consists of some bash scripts to start a mutt/mbsync session with gpg key security in a tmux window
-
 #### backup
 - rsnapshot wrapper
 
@@ -45,7 +42,6 @@ Some shell scripts
 #### photosort
 - This one puts all my messy RAW-files into seperate folders of the form "year-month" according to their CreateDate. 
 - Optional sorting for camera model etc.
-- Makes use of exiftool.
 
 #### pushemall/statemall
 - push to or get status of all my repos at github at once
