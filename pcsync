@@ -13,9 +13,10 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     21.02.2022
+# DATE     25.03.2022
 # OWNER    Bischofberger
 # ==================================================================
+# TODO: check if last action was "up" from same machine as now "down"... (accidently overwrite with old version)
 
 source "$HOME/Scripts/f_diskscan"
 
@@ -107,13 +108,21 @@ EOF
   fi
 
   source "$CHOSEN_DISK/$EXTRA_FOLDER/$STATUSFILE" || die "failed to load/create $STATUSFILE"
+
+  # do some safety tests here
   if [[ $DIRECTION == up && $LAST_RUN == up && $FORCE != -f ]] ; then
     die "You must sync down since your last sync direction was up.
           Use the \"-f|--force\" option to force direction.
           Use the \"-s|--status\" option to print the statusfile."
   fi
   if [[ $DIRECTION == down && $LAST_RUN == down && $FORCE != -f ]] ; then
-    die "You must sync up since your last sync direction was down
+    die "You must sync up since your last sync direction was down.
+          Use the \"-f|--force\" option to force direction.
+          Use the \"-s|--status\" option to print the statusfile."
+  fi
+  if [[ $DIRECTION == down && $LAST_RUN == up && $LAST_RUN_FROM == $(hostname) && $FORCE != -f ]] ; then
+    die "You are trying to sync down to the same machine that was last synced up from.
+          This will possibly overwrite current files with older versions from transfer disk.
           Use the \"-f|--force\" option to force direction.
           Use the \"-s|--status\" option to print the statusfile."
   fi
