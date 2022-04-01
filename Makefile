@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     04.03.2022
+# DATE     01.04.2022
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -28,6 +28,7 @@ SCRIPTS = pcsync \
 		  photosort\
 		  mxergo\
 		  skriptsplit\
+		  vol\
 
 all:
 	@echo "Scripts installation"
