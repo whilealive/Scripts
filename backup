@@ -1,113 +1,13 @@
 #!/bin/bash
 # ==================================================================
 # FILE     backup
-# MACHINE  all
+# MACHINE  desktop
 # INFO     rsnapshot wrapper
 #
-# DATE     02.06.2021
+# DATE     18.04.2022
 # OWNER    Bischofberger
 # ==================================================================
 
-CONFIGS="$HOME/Scripts/data"
+CONFIGS="/home/desktop/Scripts/data"
 
-# local
-LOCAL_CONFIGFILE="$CONFIGS/rsnapshot_local.conf"
-
-# bmz
-BMZ_SOURCE="$HOME/webdav/Fachschaft Mathematik"
-BMZ_TARGET="/run/media/desktop/Backup_webdav_BM"
-BMZ_CONFIGFILE="$CONFIGS/rsnapshot_bmz.conf"
-BMZ_STATUSFILE="$BMZ_TARGET/backup-statusfile.txt"
-BMZ_WEEKLY_LIMIT="4"
-BMZ_MONTHLY_LIMIT="12"
-
-
-die() {
-  echo -e "$0: Error: $1" >&2
-  exit 1
-}
-
-backitup() {
-  sudo rsnapshot -c "$1" "$2"
-}
-
-privatebackup() {
-  backitup "$LOCAL_CONFIGFILE" "alpha" || return 1  # 0 = true, 1 = false
-}
-
-create_statusfile() {
-  if [ ! -f "$BMZ_STATUSFILE" ] ; then
-    echo -n "There is no statusfile. Creating one..."
-    touch $BMZ_STATUSFILE
-    cat > "$BMZ_STATUSFILE" <<'EOF'
-# ==================================================================
-# FILE     backup-statusfile
-# MACHINE  all
-# INFO     handle rsnapshot backup intervals (BMZ webdav)
-#
-# DATE     
-# OWNER    Bischofberger
-# ==================================================================
-
-# number of backups made:
-BMZ_WEEKLY=0
-BMZ_MONTHLY=0
-EOF
-    echo "done."
-  fi
-}
-
-update_statusfile() {
-  sed -i s/^BMZ_WEEKLY\=.*/BMZ_WEEKLY\="$BMZ_WEEKLY"/ "$BMZ_STATUSFILE"
-  sed -i s/^BMZ_MONTHLY\=.*/BMZ_MONTHLY\="$BMZ_MONTHLY"/ "$BMZ_STATUSFILE"
-}
-
-bmzbackup() {
-  if [ ! -d "$BMZ_TARGET" ] ; then
-    die "please mount \"$BMZ_TARGET\" first"
-  fi
-
-  if [ ! -d "$BMZ_SOURCE" ] ; then
-    die "please mount \"$BMZ_SOURCE\" first"
-  fi
-
-  create_statusfile
-  source "$BMZ_STATUSFILE"
-
-  backitup "$BMZ_CONFIGFILE" "WeeksAgo" || return 1  # 0 = true, 1 = false
-  ((++BMZ_WEEKLY))
-
-  if [[ "$BMZ_WEEKLY" == "$BMZ_WEEKLY_LIMIT" ]] ; then
-    backitup "$BMZ_CONFIGFILE" "MonthsAgo" || return 1  # 0 = true, 1 = false
-    ((++BMZ_MONTHLY))
-    BMZ_WEEKLY=0
-  fi
-
-  if [[ "$BMZ_MONTHLY" == "$BMZ_MONTHLY_LIMIT" ]] ; then
-    backitup "$BMZ_CONFIGFILE" "YearsAgo" || return 1  # 0 = true, 1 = false
-    BMZ_MONTHLY=0
-  fi
-
-  update_statusfile
-}
-
-
-# main -----------------------------------
-echo "Enter backup option:"
-echo -e "1\tprivate\n2\tbmz"
-
-read number
-
-case "$number" in
-  "1")
-    privatebackup
-    exit 0
-    ;;
-  "2")
-    bmzbackup
-    exit 0
-    ;;
-  *)
-    die "unknown parameter '$number'"
-    ;;
-esac
+rsnapshot -c "$CONFIGS/rsnapshot_local.conf" "alpha"
