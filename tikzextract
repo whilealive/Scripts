@@ -9,7 +9,7 @@
 #          To include all .tex files in some folder structure, just do:
 #          "find -name "*.tex" | tikzextract
 #
-# DATE     07.08.2018
+# DATE     26.04.2022
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -51,13 +51,26 @@ beginOutputfile() {
 \usepackage{siunitx}
 \sisetup{per-mode=symbol}
 
-\usepackage{basicMacrosLT}
-\usepackage{tikzStyle,tikzCollection}
-\usetikzlibrary{matrix,shapes.geometric,patterns}
-\usepackage{pgfplotsStyle,pgfplotsCollection}
+\usepackage{myMacrosMath}
+\usepackage{myMacrosMisc}
+\usepackage{tikzStyle}
+\usepackage{tikzCollection}
+\usepackage{tikz3dStyle}
+\usepackage{pgfplotsStyle}
+\usepackage{pgfplotsCollection}
+\usetikzlibrary{matrix,shapes.geometric,patterns,decorations.pathreplacing}
 
 
 \begin{document}
+
+% ---------------------------------------------------------------------------------------------------------------
+
+% TODO: manually include all newcommands, \SetStdMainCoords, \pgfdeclarelayer{...}, \pgfplotsset{...} etc. here!
+% ...
+% ...
+
+% ---------------------------------------------------------------------------------------------------------------
+
 
 EOF
 }
