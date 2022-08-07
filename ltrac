@@ -1,0 +1,16 @@
+#!/bin/bash
+# ==================================================================
+# FILE     ltrac
+# MACHINE  desktop
+# INFO     settings for x-keys l-trac
+#
+# DATE     07.08.2022
+# OWNER    Bischofberger
+# ==================================================================
+
+# use track ball to scroll while pressing scroll wheel button (middle mouse button)
+xinput set-prop "pointer:Clearly Superior Technologies. CST Laser Trackball" "libinput Scroll Method Enabled" 0 0 1
+
+# set middle mouse button to browser history backwards
+xinput set-button-map "Clearly Superior Technologies. CST Laser Trackball" 1 8 3 4 5 6 7 8 9
+
