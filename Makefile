@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     07.08.2022
+# DATE     16.12.2022
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -19,7 +19,6 @@ SCRIPTS = pcsync \
 		  pdfpextr\
 		  beamer\
 		  screenshot\
-		  notesd\
 		  backup\
 		  texsessioninit\
 		  texlogfilefilter\
