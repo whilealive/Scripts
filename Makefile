@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     16.12.2022
+# DATE     26.01.2023
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -26,6 +26,7 @@ SCRIPTS = pcsync \
 		  extract\
 		  photosort\
 		  ltrac\
+		  mxergo\
 		  skriptsplit\
 		  vol\
 
