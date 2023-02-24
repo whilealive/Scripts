@@ -1,12 +1,19 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # ==================================================================
 # FILE     backup
 # MACHINE  desktop
 # INFO     rsnapshot wrapper
 #
-# DATE     18.04.2022
+# DATE     07.11.2022
 # OWNER    Bischofberger
 # ==================================================================
+
+set -o errexit
+set -o nounset
+set -o pipefail
+if [[ "${TRACE-0}" == "1" ]]; then
+    set -o xtrace
+fi
 
 CONFIGS="/home/desktop/Scripts/data"
 
