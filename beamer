@@ -4,8 +4,9 @@
 # MACHINE  all
 # INFO     handles resolution in multi-monitor setup with dwm-type
 #					 window managers when mirroring is involved
+#          depends on: bc
 #
-# DATE     27.08.2021
+# DATE     24.02.2023
 # OWNER    Bischofberger
 # ==================================================================
 
