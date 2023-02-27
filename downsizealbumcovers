@@ -1,13 +1,10 @@
 #!/bin/bash
 # ==================================================================
-# FILE     downsizeAlbumCovers
+# FILE     downsizealbumcovers
 # MACHINE  all
 # INFO     Resize all .jpg/.jpeg/.png to max 1024 pixels width.
 #
-#          Copy this script into Music/ folder in order to downsize
-#          all cover.jpg files to a reasonable filesize.
-#
-# DATE     26.11.2017
+# DATE     27.02.2023
 # OWNER    Bischofberger
 # ==================================================================
 
