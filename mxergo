@@ -1,15 +1,19 @@
 #!/bin/bash
 # ==================================================================
 # FILE     mxergo
-# MACHINE  desktop
+# MACHINE  laptop3
 # INFO     set mx ergo mouse pointer speed etc.
 #
-# DATE     08.06.2022
+# DATE     10.05.2023
 # OWNER    Bischofberger
 # ==================================================================
 
 # Logitech MX Ergo settings
 # slow pointer / high acceleration
-xinput set-prop "pointer:Logitech MX Ergo" "Coordinate Transformation Matrix" 1 0 0 0 1 0 0 0 3  # last entry is pointer speed (higher values lead to slower pointer)
-xinput set-prop "pointer:Logitech MX Ergo" "libinput Accel Speed" 1                              # full acceleration speed
-xinput set-prop "pointer:Logitech MX Ergo" "libinput Scroll Method Enabled" 0 0 1                # use track ball to scroll while pressing scroll wheel button
+#xinput set-prop "pointer:Logitech MX Ergo" "Coordinate Transformation Matrix" 1 0 0 0 1 0 0 0 3  # last entry is pointer speed (higher values lead to slower pointer)
+#xinput set-prop "pointer:Logitech MX Ergo" "libinput Accel Speed" 1                              # full acceleration speed
+#xinput set-prop "pointer:Logitech MX Ergo" "libinput Scroll Method Enabled" 0 0 1                # use track ball to scroll while pressing scroll wheel button
+
+xinput set-prop pointer:Logitech\ $'\327'$'\023'8$'\036' "Coordinate Transformation Matrix" 1 0 0 0 1 0 0 0 3  # last entry is pointer speed (higher values lead to slower pointer)
+xinput set-prop pointer:Logitech\ $'\327'$'\023'8$'\036' "libinput Accel Speed" 1                              # full acceleration speed
+xinput set-prop pointer:Logitech\ $'\327'$'\023'8$'\036' "libinput Scroll Method Enabled" 0 0 1                # use track ball to scroll while pressing scroll wheel button

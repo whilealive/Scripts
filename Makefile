@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     27.02.2023
+# DATE     10.05.2023
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -23,7 +23,7 @@ SCRIPTS = pcsync \
 		  texsessioninit\
 		  texlogfilefilter\
 		  musicsync\
-		  downsizeAlbumCovers\
+		  downsizealbumcovers\
 		  extract\
 		  photosort\
 		  ltrac\
