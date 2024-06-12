@@ -1,10 +1,11 @@
 #!/bin/bash
 # ==================================================================
-# FILE     snippy
-# MACHINE  all  (wayland)
+# FILE     xsnippy
+# MACHINE  all (X11)
 # INFO     mostly taken from: https://bbs.archlinux.org/viewtopic.php?id=71938&p=2
 #          https://bbs.archlinux.org/viewtopic.php?id=71938
-#          depends on: wmenu, wl-clipboard
+#          depends on: dmenu, xclip
+#          old X11-Version!
 #
 # DATE     12.06.2024
 # OWNER    Bischofberger
@@ -14,10 +15,11 @@ DIR=${HOME}/.snippy
 
 cd "${DIR}" || exit 1
 
-FILE=$(find . -type f | grep -v '^\.$' | sed 's!\.\/!!' | sort | /usr/bin/wmenu -b)
+FILE=$(find . -type f | grep -v '^\.$' | sed 's!\.\/!!' | sort | /usr/bin/dmenu -b)
 
 if [ -f "${DIR}/${FILE}" ]; then
-	wl-copy < "${DIR}/${FILE}"
+	xclip -i -selection primary < "${DIR}/${FILE}"
+	xclip -i -selection clipboard < "${DIR}/${FILE}"
   exit 0  # 0 = success
 fi
 
