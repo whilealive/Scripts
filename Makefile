@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     10.05.2023
+# DATE     01.07.2024
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -12,12 +12,10 @@ PREFIX:=/usr/local
 
 SCRIPTS = pcsync \
 		  snippy \
-		  clipswap \
 		  pushemall \
 		  statemall \
 		  pdfpsize \
 		  pdfpextr\
-		  beamer\
 		  screenshot\
 		  backup\
 		  texsessioninit\
@@ -26,10 +24,7 @@ SCRIPTS = pcsync \
 		  downsizealbumcovers\
 		  extract\
 		  photosort\
-		  ltrac\
-		  mxergo\
 		  skriptsplit\
-		  vol\
 
 all:
 	@echo "Scripts installation"
