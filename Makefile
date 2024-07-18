@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     01.07.2024
+# DATE     18.07.2024
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -25,6 +25,8 @@ SCRIPTS = pcsync \
 		  extract\
 		  photosort\
 		  skriptsplit\
+		  swayrenameworkspace\
+		  bbtop\
 
 all:
 	@echo "Scripts installation"

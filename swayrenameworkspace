@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# ==================================================================
+# FILE     swayrenameworkspace
+# MACHINE  all
+# INFO     rename workspaces in sway
+#
+# DATE     04.07.2024
+# OWNER    Bischofberger
+# ==================================================================
+
+wl-copy $(swaymsg -p -t get_workspaces | awk '/(focused)/ {print $2}') 
+
+echo "" | wmenu -S 000000 -M 000000 -p "rename workspace to" | xargs -r swaymsg rename workspace to

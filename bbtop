@@ -1,0 +1,12 @@
+#!/bin/bash
+# ==================================================================
+# FILE     bbtop
+# MACHINE  all
+# INFO     launch btop in a foot terminal with app-id "btop"
+#          for sway to move it to a separate workspace
+#
+# DATE     18.07.2024
+# OWNER    Bischofberger
+# ==================================================================
+
+foot --app-id=btop btop
