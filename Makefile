@@ -4,7 +4,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     18.07.2024
+# DATE     03.09.2024
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -26,6 +26,7 @@ SCRIPTS = pcsync \
 		  photosort\
 		  skriptsplit\
 		  swayrenameworkspace\
+		  swaybmzws\
 		  bbtop\
 
 all:

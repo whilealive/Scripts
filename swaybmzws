@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# ==================================================================
+# FILE     swaybmzws
+# MACHINE  all
+# INFO     create a set of workspaces for my BMZ classes
+#
+# DATE     03.09.2024
+# OWNER    Bischofberger
+# ==================================================================
+
+term="foot tmux"
+
+swaymsg workspace "1:BGS22c"
+swaymsg exec $term
+
+swaymsg workspace "2:EVT24e"
+swaymsg exec $term
+
+swaymsg workspace "3:BZI24a"
+swaymsg exec $term
+
+swaymsg workspace "4:BIN21e"
+swaymsg exec $term
+
+swaymsg workspace "5:BEL22a"
+swaymsg exec $term
+
+swaymsg workspace "6:ETS24b"
+swaymsg exec $term
+
+swaymsg workspace 7
+swaymsg rename workspace to "work"
+swaymsg exec $term
