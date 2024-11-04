@@ -1,0 +1,12 @@
+#!/bin/bash
+# ==================================================================
+# FILE     WAV2mp3
+# MACHINE  all
+# INFO     - copy script to directory with .WAV files in it
+#            before running it
+#
+# DATE     30.09.2024
+# OWNER    Bischofberger
+# ==================================================================
+
+for i in *.WAV ; do ffmpeg -i "$i" "`basename "$i" .WAV`.mp3"; done
