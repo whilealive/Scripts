@@ -19,7 +19,6 @@ SCRIPTS = pcsync \
 		  pdfpextr\
 		  screenshot\
 		  backup\
-		  texsessioninit\
 		  texlogfilefilter\
 		  downsizealbumcovers\
 		  extract\
