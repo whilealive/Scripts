@@ -3,7 +3,7 @@
 # INFO     Scripts/TODO.txt
 #          A list of TODOs, Bugfixes etc. for my bash scripts
 #
-# DATE     08.12.2021
+# DATE     26.03.2025
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -12,6 +12,7 @@ TODO
 ----
 - add a general options/arguments handler to the helper scripts
 - f_diskscan: check if path really exists!
+- proper linux/macOS separation
 
 
 

@@ -1,10 +1,11 @@
 # vim: set ai noet sw=4 ts=4:
 # ==================================================================
 # FILE     Makefile
+# OS	   linux
 # MACHINE  all
 # INFO     -
 #
-# DATE     03.09.2024
+# DATE     26.03.2025
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -20,7 +21,6 @@ SCRIPTS = pcsync \
 		  backup\
 		  texsessioninit\
 		  texlogfilefilter\
-		  musicsync\
 		  downsizealbumcovers\
 		  extract\
 		  photosort\
