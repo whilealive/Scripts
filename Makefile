@@ -10,23 +10,26 @@
 # ==================================================================
 
 PREFIX:=/usr/local
+LINUXDIR:=linux/
 
-SCRIPTS = pcsync \
-		  snippy \
-		  pushemall \
-		  statemall \
-		  pdfpsize \
-		  pdfpextr\
-		  screenshot\
-		  backup\
-		  texlogfilefilter\
-		  downsizealbumcovers\
-		  extract\
-		  photosort\
-		  skriptsplit\
-		  swayrenameworkspace\
-		  swaybmzws\
-		  bbtop\
+LINUX_SCRIPTS = pcsync \
+				snippy \
+				pushemall \
+				pullemall \
+				statemall \
+				pdfpsize \
+				pdfpextr\
+				backup\
+				texlogfilefilter\
+				downsizealbumcovers\
+				extract\
+				photosort\
+				skriptsplit\
+				swayrenameworkspace\
+				swaybmzws\
+				bbtop\
+
+#UNIVERSAL_SCRIPTS = \
 
 all:
 	@echo "Scripts installation"
@@ -34,12 +37,13 @@ all:
 install: all
 	@echo "installing scripts to ${DESTDIR}${PREFIX}/bin"
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
-	@cp -f -t ${DESTDIR}${PREFIX}/bin/ ${SCRIPTS}
-	@cd ${DESTDIR}${PREFIX}/bin && chmod 0755 ${SCRIPTS}
+	#@cp -f -t ${DESTDIR}${PREFIX}/bin/ ${UNIVERSAL_SCRIPTS}
+	@cd ${LINUXDIR} && cp -f -t ${DESTDIR}${PREFIX}/bin/ ${LINUX_SCRIPTS}
+	@cd ${DESTDIR}${PREFIX}/bin && chmod 0755 ${LINUX_SCRIPTS} ${UNIVERSAL_SCRIPTS}
 	@echo "done"
 
 uninstall:
 	@echo "removing scripts from ${DESTDIR}${PREFIX}/bin"
-	@cd ${DESTDIR}${PREFIX}/bin && rm -f ${SCRIPTS}
+	@cd ${DESTDIR}${PREFIX}/bin && rm -f ${LINUX_SCRIPTS} ${UNIVERSAL_SCRIPTS}
 
 .PHONY: all install uninstall
