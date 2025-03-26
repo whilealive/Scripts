@@ -1,0 +1,24 @@
+#!/bin/bash
+# ==================================================================
+# FILE     pullemall
+# OS       linux
+# MACHINE  all
+# INFO     pulls all my git repositories at once
+#
+# DATE     26.03.2025
+# OWNER    Bischofberger
+# ==================================================================
+
+GitHubReposFile="$HOME/Scripts/data/GitOnGitHub.txt"
+
+# my github repositories
+mapfile -t Repos <$GitHubReposFile
+
+for path in "${Repos[@]}" ; do
+	eval cd $path
+	pwd
+	git pull --all
+	echo ""
+done
+
+exit 0
