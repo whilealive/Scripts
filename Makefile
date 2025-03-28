@@ -5,7 +5,7 @@
 # MACHINE  all
 # INFO     -
 #
-# DATE     26.03.2025
+# DATE     28.03.2025
 # OWNER    Bischofberger
 # ==================================================================
 
@@ -14,9 +14,7 @@ LINUXDIR:=linux/
 
 LINUX_SCRIPTS = pcsync \
 				snippy \
-				pushemall \
-				pullemall \
-				statemall \
+				gitrepwrap\
 				pdfpsize \
 				pdfpextr\
 				backup\

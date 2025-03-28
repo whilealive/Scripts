@@ -1,0 +1,120 @@
+#!/bin/bash
+# ==================================================================
+# FILE     gitrepwrap
+# OS       linux
+# MACHINE  all
+# INFO     perform git commands on all my git repositories at once
+#
+# DATE     28.03.2025
+# OWNER    Bischofberger
+# ==================================================================
+
+GitPathLists="$HOME/Scripts/data/"
+GitOnGitHubFile="GitOnGitHub.txt"
+GitOnLocalFile="GitOnLocal.txt"
+GitInactiveFile="GitInactive.txt"
+COLOR1='\033[1;31m'
+COLOR2='\033[1;35m'
+COLOR3='\033[1;30m'
+NC='\033[0m'  # No Color
+
+
+die() {
+	echo -e "$0: Error: $1" >&2
+	exit 1
+}
+
+
+# push to origin on github (all branches)
+pushemall() {
+  mapfile -t ReposOnGitHub <"$GitPathLists$GitOnGitHubFile"
+  for path in "${ReposOnGitHub[@]}" ; do
+    eval cd $path
+    pwd
+    git push --all
+    echo ""
+  done
+}
+
+
+# pull from origin on github (all branches)
+pullemall() {
+  mapfile -t ReposOnGitHub <"$GitPathLists$GitOnGitHubFile"
+  for path in "${ReposOnGitHub[@]}" ; do
+    eval cd $path
+    pwd
+    git pull --all
+    echo ""
+  done
+}
+
+
+# print command for "statemall()"
+# arg1: ReposFile
+# arg2: Color
+printRepoStats() {
+  mapfile -t RepositoryList <$1
+
+  echo -e "${2}--------------------------------------------${NC}"
+  for path in "${RepositoryList[@]}" ; do
+    eval cd $path
+    echo -e ${2}`pwd`${NC}
+    echo "---------"
+    git branch
+    echo "---------"
+    git status
+    echo -e "${2}--------------------------------------------${NC}"
+  done
+}
+
+
+statemall() {
+  echo -e "${COLOR1}====================${NC}"
+  echo -e "${COLOR1}GitHub repositories:${NC}"
+  echo -e "${COLOR1}====================${NC}"
+  printRepoStats "$GitPathLists$GitOnGitHubFile" "$COLOR1"
+
+  echo -e "\n"
+
+  echo -e "${COLOR2}===================${NC}"
+  echo -e "${COLOR2}Local repositories:${NC}"
+  echo -e "${COLOR2}===================${NC}"
+  printRepoStats "$GitPathLists$GitOnLocalFile" "$COLOR2"
+}
+
+
+statallinactive() {
+  echo -e "${COLOR3}===============${NC}"
+  echo -e "${COLOR3}Inactive repos:${NC}"
+  echo -e "${COLOR3}===============${NC}"
+  printRepoStats "$GitPathLists$GitInactiveFile" "$COLOR3"
+}
+
+
+# ------ main routine ------
+# no argument given
+if [ -z "$1" ] ; then
+  statemall
+  exit 0
+fi
+
+# various options
+case "$1" in
+  "push")
+    pushemall
+    ;;
+  "pull")
+    pullemall
+    ;;
+  "stat")
+    statemall
+    ;;
+  "inactive")
+    statallinactive
+    ;;
+  *)
+    die "invalid argument"
+    ;;
+esac
+
+exit 0
