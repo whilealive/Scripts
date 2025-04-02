@@ -13,12 +13,12 @@
 #            members of the group "users", otherwhise rsync's --delete 
 #            option doesn't work properly.
 #
-# DATE     25.03.2022
+# DATE     28.03.2025
 # OWNER    Bischofberger
 # ==================================================================
 # TODO: check if last action was "up" from same machine as now "down"... (accidently overwrite with old version)
 
-source "$HOME/Scripts/f_diskscan"
+source "$HOME/Scripts/linux/f_diskscan"
 
 DEFAULT_DISK="transfer"
 DATA_FOLDER="pcsync_data"
