@@ -4,30 +4,27 @@
 # MACHINE  all
 # INFO     create a set of workspaces for my BMZ classes
 #
-# DATE     03.09.2024
+# DATE     25.08.2025
 # OWNER    Bischofberger
 # ==================================================================
 
 term="foot tmux"
 
-swaymsg workspace "1:BGS22c"
+swaymsg workspace "1:EVT25e"
 swaymsg exec $term
 
-swaymsg workspace "2:EVT24e"
+swaymsg workspace "2:EVD25b"
 swaymsg exec $term
 
 swaymsg workspace "3:BZI24a"
 swaymsg exec $term
 
-swaymsg workspace "4:BIN21e"
+swaymsg workspace "4:BEL22a"
 swaymsg exec $term
 
-swaymsg workspace "5:BEL22a"
+swaymsg workspace "5:ETS24b"
 swaymsg exec $term
 
-swaymsg workspace "6:ETS24b"
-swaymsg exec $term
-
-swaymsg workspace 7
+swaymsg workspace 6
 swaymsg rename workspace to "work"
 swaymsg exec $term
